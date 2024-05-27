@@ -41,9 +41,8 @@ class BotController extends BaseController
         return response()->json(['message' => 'Bot deleted successfully']);
     }
 
-    public function create(Request $request): BotResource
+    public function create(Request $request)
     {
-        // Валидация входных данных
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'type_id' => 'nullable|exists:bot_types,id',
@@ -54,18 +53,16 @@ class BotController extends BaseController
             'message_image' => 'nullable|image',
         ]);
 
-        // Обработка загрузки изображения, если файл предоставлен
         if ($request->hasFile('message_image')) {
             $imagePath = $request->file('message_image')->store('public/bots');
             $data['message_image'] = Storage::url($imagePath);
         }
 
-        // Создание нового бота с валидированными данными
         $bot = Bot::create($data);
 
-        // Возвращение созданного бота через BotResource
-        return new BotResource($bot);
+        return response()->json(['id' => $bot->id]);
     }
+
 
     public function update(Request $request, Bot $bot): BotResource
     {

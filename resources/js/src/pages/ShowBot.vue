@@ -18,9 +18,14 @@ const formConfig = computed(() => {
 
 function handleEvent(payload) {
     if (payload.key && payload.value !== undefined) {
-        localBotData.value[payload.key] = payload.value;
-        if (Array.isArray(localBotData.value.bot_types)) {
-            localBotData.value.bot_types = localBotData.value.bot_types.map((botType) => ({
+        if (payload.key === 'message_image' && payload.value instanceof File) {
+            localBotData.value.image = payload.value;
+        } else {
+            localBotData.value[payload.key] = payload.value;
+        }
+
+        if (payload.key === 'type_id' && Array.isArray(localBotData.value.bot_types)) {
+            localBotData.value.bot_types = localBotData.value.bot_types.map(botType => ({
                 ...botType,
                 active: botType.id === payload.value
             }));
@@ -43,7 +48,10 @@ function handleEvent(payload) {
 }
 
 function saveBot() {
-    store.dispatch(actionTypes.updateBot, localBotData.value);
+    console.log('saveBot')
+    store.dispatch(actionTypes.updateBot, localBotData.value).then(() => {
+        localBotData.value = {...botData.value};
+    });
 }
 
 function deleteBot() {
@@ -73,7 +81,7 @@ onMounted(() => {
                     Добавить бота
                 </div>
                 <bots-form
-                    :data="botData"
+                    :data="localBotData"
                     :rows="formConfig"
                     @handle="handleEvent"/>
             </div>

@@ -5,6 +5,7 @@ import {computed, onMounted, ref} from "vue";
 import {actionTypes} from "@/store/modules/bots.js";
 import store from "@/store/store.js";
 import {rows, rows_approval} from "@/ComponentConfigs/FormConfigs.js";
+import router from "@/router/router.js";
 
 const formConfig = computed(() => {
     return localBotData.value.type_id === 1 ? rows : localBotData.value.type_id === 2 ? rows_approval : [];
@@ -12,14 +13,20 @@ const formConfig = computed(() => {
 const localBotData = ref({});
 
 function createBot() {
-    store.dispatch(actionTypes.createBot, localBotData.value);
+    store.dispatch(actionTypes.createBot, localBotData.value).then((id) => {
+        router.push(`/showBots/${id}`);
+    });
 }
 
 function handleEvent(payload) {
     if (payload.key && payload.value !== undefined) {
-        localBotData.value[payload.key] = payload.value;
-        if (Array.isArray(localBotData.value.bot_types)) {
-            localBotData.value.bot_types = localBotData.value.bot_types.map((botType) => ({
+        if (payload.key === 'message_image' && payload.value instanceof File) {
+            localBotData.value.image = payload.value;
+        } else {
+            localBotData.value[payload.key] = payload.value;
+        }
+        if (payload.key === 'type_id' && Array.isArray(localBotData.value.bot_types)) {
+            localBotData.value.bot_types = localBotData.value.bot_types.map(botType => ({
                 ...botType,
                 active: botType.id === payload.value
             }));
@@ -40,6 +47,7 @@ function handleEvent(payload) {
         }
     }
 }
+
 
 onMounted(() => {
     store.dispatch(actionTypes.getBotTypes).then((bot_types) => {

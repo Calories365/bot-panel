@@ -96,6 +96,16 @@ const mutations = {
         state.errors = payload;
         state.isSubmitting = false;
     },
+    [mutationTypes.createBotStart](state) {
+        state.isSubmitting = true;
+        state.errors = null;
+    }, [mutationTypes.createBotSuccess](state, payload) {
+        state.isSubmitting = false;
+        state.bot = payload;
+    }, [mutationTypes.createBotFailure](state, payload) {
+        state.errors = payload;
+        state.isSubmitting = false;
+    },
 };
 
 export const actionTypes = {
@@ -157,6 +167,7 @@ const actions = {
     },
     async [actionTypes.updateBot]({commit, state}, botData) {
         commit(mutationTypes.updateBotStart);
+        botData.message_image = botData.image;
         const formData = new FormData();
 
         for (const key in botData) {
@@ -193,7 +204,7 @@ const actions = {
     },
     async [actionTypes.createBot]({commit, state}, botData) {
         commit(mutationTypes.createBotStart);
-
+        botData.message_image = botData.image;
         const formData = new FormData();
 
         for (const key in botData) {
@@ -209,9 +220,9 @@ const actions = {
         }
 
         try {
-            const response = await botsApi.updateBot(formData);
+            const response = await botsApi.createBot(formData);
             commit(mutationTypes.createBotSuccess, response.data);
-            return response.data;
+            return response.data.id;
         } catch (error) {
             commit(mutationTypes.createBotFailure, error.response ? error.response.data : error);
             throw error;
