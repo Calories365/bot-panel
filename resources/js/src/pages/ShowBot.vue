@@ -9,26 +9,29 @@ import {rows, rows_approval} from "@/ComponentConfigs/FormConfigs.js";
 
 const store = useStore();
 const route = useRoute();
+
 const botData = computed(() => store.getters[getterTypes.bot]);
 const localBotData = ref({});
 
 const formConfig = computed(() => {
-    return localBotData.value.type_id === 1 ? rows : localBotData.value.type_id === 2 ? rows_approval : [];
+    if (Object.keys(localBotData.value).length > 0 && localBotData.value.type_id) {
+        const typeId = localBotData.value.type_id.type_id;
+        switch (typeId) {
+            case 1:
+                return rows;
+            case 2:
+                return rows_approval;
+            default:
+                return [];
+        }
+    }
+    return [];
 });
+
 
 function handleEvent(payload) {
     if (payload.key && payload.value !== undefined) {
-        if (payload.key === 'message_image' && payload.value instanceof File) {
-            localBotData.value.image = payload.value;
-        } else {
-            localBotData.value[payload.key] = payload.value;
-        }
-        if (payload.key === 'type_id' && Array.isArray(localBotData.value.bot_types)) {
-            localBotData.value.bot_types = localBotData.value.bot_types.map(botType => ({
-                ...botType,
-                active: botType.id === payload.value
-            }));
-        }
+        localBotData.value[payload.key] = payload.value;
     } else if (payload.action) {
         switch (payload.action) {
             case 'save':
@@ -47,7 +50,6 @@ function handleEvent(payload) {
 }
 
 function saveBot() {
-    console.log('saveBot')
     store.dispatch(actionTypes.updateBot, localBotData.value).then(() => {
         localBotData.value = {...botData.value};
     });

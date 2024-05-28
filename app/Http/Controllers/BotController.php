@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BotResource;
-use App\Http\Resources\BotTypesResource;
+use App\Http\Resources\BotTypesCollection;
 use App\Models\Bot;
 use App\Models\BotType;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -13,7 +13,6 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Telegram\Bot\Api;
 
 class BotController extends BaseController
 {
@@ -45,6 +44,7 @@ class BotController extends BaseController
 
     public function create(Request $request)
     {
+        Log::info(print_r($request->all(), true));
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'type_id' => 'nullable|exists:bot_types,id',
@@ -52,7 +52,7 @@ class BotController extends BaseController
             'token' => 'required|string|max:255',
             'message' => 'nullable|string',
             'active' => 'required|boolean',
-            'message_image' => 'nullable|image',
+//            'message_image' => 'nullable|image',
         ]);
 
         if ($request->hasFile('message_image')) {
@@ -70,6 +70,7 @@ class BotController extends BaseController
 
     public function update(Request $request, Bot $bot): BotResource
     {
+        Log::info(print_r($request->all(), true));
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'type_id' => 'nullable|exists:bot_types,id',
@@ -77,7 +78,7 @@ class BotController extends BaseController
             'token' => 'required|string|max:255',
             'message' => 'nullable|string',
             'active' => 'required|boolean',
-            'message_image' => 'nullable|image',
+//            'message_image' => 'nullable|image',
         ]);
 
         if ($request->hasFile('message_image')) {
@@ -93,7 +94,7 @@ class BotController extends BaseController
     public function getTypes()
     {
         $botTypes = BotType::all();
-        return BotTypesResource::collection($botTypes);
+        return new BotTypesCollection($botTypes);
     }
 
     public function updateWebhook(Bot $bot)

@@ -1,9 +1,14 @@
 import botsApi from "@/api/bots.js";
 
 const state = {
-    bots: [], bot: {}, pagination: {
-        currentPage: 1, perPage: 10, totalPages: 100,
-    }, isSubmitting: false, errors: null,
+    bots: [],
+    bot: {},
+    pagination: {
+        currentPage: 1,
+        perPage: 10,
+        totalPages: 100,
+    },
+    isSubmitting: false, errors: null,
 };
 
 export const getterTypes = {
@@ -49,6 +54,10 @@ export const mutationTypes = {
     createBotStart: '[bots] createBotStart',
     createBotSuccess: '[bots] createBotSuccess',
     createBotFailure: '[bots] createBotFailure',
+
+    upsertBotStart: '[bots] upsertBotStart',
+    upsertBotSuccess: '[bots] upsertBotSuccess',
+    upsertBotFailure: '[bots] upsertBotFailure',
 
     updateWebhookStart: '[bots] updateWebhookStart',
     updateWebhookSuccess: '[bots] updateWebhookSuccess',
@@ -96,13 +105,24 @@ const mutations = {
     }, [mutationTypes.getBotTypesFailure](state, payload) {
         state.errors = payload;
         state.isSubmitting = false;
-    }, [mutationTypes.updateBotStart](state) {
+    },
+    [mutationTypes.updateBotStart](state) {
         state.isSubmitting = true;
         state.errors = null;
     }, [mutationTypes.updateBotSuccess](state, payload) {
         state.isSubmitting = false;
         state.bot = payload;
     }, [mutationTypes.updateBotFailure](state, payload) {
+        state.errors = payload;
+        state.isSubmitting = false;
+    },
+    [mutationTypes.upsertBotStart](state) {
+        state.isSubmitting = true;
+        state.errors = null;
+    }, [mutationTypes.upsertBotSuccess](state, payload) {
+        state.isSubmitting = false;
+        state.bot = payload;
+    }, [mutationTypes.upsertBotFailure](state, payload) {
         state.errors = payload;
         state.isSubmitting = false;
     },
@@ -188,32 +208,6 @@ const actions = {
             throw error;
         }
     },
-    async [actionTypes.updateBot]({commit, state}, botData) {
-        commit(mutationTypes.updateBotStart);
-        botData.message_image = botData.image;
-        const formData = new FormData();
-
-        for (const key in botData) {
-            if (botData.hasOwnProperty(key)) {
-                if (key === 'message_image') {
-                    if (botData[key] instanceof File) {
-                        formData.append(key, botData[key], botData[key].name);
-                    }
-                } else {
-                    formData.append(key, botData[key]);
-                }
-            }
-        }
-
-        try {
-            const response = await botsApi.updateBot(state.bot.id, formData);
-            commit(mutationTypes.updateBotSuccess, response.data);
-            return response.data;
-        } catch (error) {
-            commit(mutationTypes.updateBotFailure, error.response ? error.response.data : error);
-            throw error;
-        }
-    },
     async [actionTypes.getBotTypes]({commit}) {
         commit(mutationTypes.getBotTypesStart);
         try {
@@ -225,31 +219,11 @@ const actions = {
             throw error;
         }
     },
-    async [actionTypes.createBot]({commit, state}, botData) {
-        commit(mutationTypes.createBotStart);
-        botData.message_image = botData.image;
-        const formData = new FormData();
-
-        for (const key in botData) {
-            if (botData.hasOwnProperty(key)) {
-                if (key === 'message_image') {
-                    if (botData[key] instanceof File) {
-                        formData.append(key, botData[key], botData[key].name);
-                    }
-                } else {
-                    formData.append(key, botData[key]);
-                }
-            }
-        }
-
-        try {
-            const response = await botsApi.createBot(formData);
-            commit(mutationTypes.createBotSuccess, response.data);
-            return response.data.id;
-        } catch (error) {
-            commit(mutationTypes.createBotFailure, error.response ? error.response.data : error);
-            throw error;
-        }
+    async [actionTypes.updateBot]({commit, state}, data) {
+        return handleBotData(commit, botsApi.updateBot, data, state.bot.id);
+    },
+    async [actionTypes.createBot]({commit}, data) {
+        return handleBotData(commit, botsApi.createBot, data);
     },
     async [actionTypes.updateWebhook]({commit, state}) {
         commit(mutationTypes.updateWebhookStart);
@@ -264,6 +238,32 @@ const actions = {
         }
     },
 };
+async function handleBotData(commit, botApiFunction, botData, botId = null) {
+    commit(mutationTypes.upsertBotStart);
+
+    botData.message_image = botData.message_image.image_file;
+    botData.type_id = botData.type_id.type_id;
+
+    const formData = new FormData();
+    for (const key in botData) {
+        if (botData.hasOwnProperty(key)) {
+            if (key === 'message_image' && botData[key] instanceof File) {
+                formData.append(key, botData[key], botData[key].name);
+            } else {
+                formData.append(key, botData[key]);
+            }
+        }
+    }
+
+    try {
+        const response = await botApiFunction(botId ? botId : formData, formData);
+        commit(mutationTypes.upsertBotSuccess, response.data);
+        return response.data;
+    } catch (error) {
+        commit(mutationTypes.upsertBotFailure, error.response ? error.response.data : error);
+        throw error;
+    }
+}
 
 export default {
     state, getters, mutations, actions,

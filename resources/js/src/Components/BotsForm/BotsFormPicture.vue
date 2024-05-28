@@ -1,8 +1,8 @@
 <script setup>
-import {defineEmits, defineProps, ref, watch} from 'vue';
+import { defineEmits, defineProps, ref, watch } from 'vue';
 
 const props = defineProps({
-    data: String,
+    data: Object,
     name: String
 });
 const emit = defineEmits(['handle']);
@@ -10,8 +10,8 @@ const emit = defineEmits(['handle']);
 const imageUrl = ref('');
 const file = ref(null);
 
-if (props.data) {
-    imageUrl.value = props.data;
+if (props.data && props.data.image_url) {
+    imageUrl.value = props.data.image_url;
 }
 
 function onFileChange(event) {
@@ -19,13 +19,14 @@ function onFileChange(event) {
     if (uploadedFile && uploadedFile.type.startsWith('image')) {
         imageUrl.value = URL.createObjectURL(uploadedFile);
         file.value = uploadedFile;
-        emit('handle', {key: props.name, value: uploadedFile});
+        emit('handle', { key: props.name, value: { image_url: imageUrl.value, image_file: uploadedFile } });
     }
 }
 
 watch(() => props.data, (newVal) => {
     if (newVal) {
-        imageUrl.value = newVal;
+        imageUrl.value = newVal.image_url;
+        file.value = newVal.image_file;
     }
 });
 

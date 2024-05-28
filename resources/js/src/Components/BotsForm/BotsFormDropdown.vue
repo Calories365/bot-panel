@@ -4,30 +4,39 @@ import {computed, defineEmits, defineProps} from 'vue';
 const props = defineProps({
     placeholder: String,
     data: {
-        type: Array,
-        default: [{id: 1, name: 'Default', active: true}]
+        type: Object,
+        default: () => ({
+            type_id: 2,
+            types: [
+                {
+                    id: 1,
+                    name: "Default"
+                },
+            ]
+        })
     },
     name: String,
-    emit_name: String,
 });
 
 const emit = defineEmits(['handle']);
 
 const selectedType = computed({
-    get: () => {
-        const active = props.data.find(type => type.active);
-        return active ? active.id : (props.data.length > 0 ? props.data[0].id : undefined);
-    },
+    get: () => props.data.type_id,
     set: (newValue) => {
-        emit('handle', {key: props.emit_name, value: newValue});
+        const payload = {
+            type_id: newValue,
+            types: props.data.types
+        };
+        emit('handle', {key: props.name, value: payload});
     }
 });
 </script>
 
 <template>
     <div class="form-group">
+        <label v-if="props.placeholder" :for="name">{{ props.placeholder }}</label>
         <select id="botTypeDropdown" class="form-control" v-model="selectedType">
-            <option v-for="type in props.data" :key="type.id" :value="type.id">
+            <option v-for="type in props.data.types" :key="type.id" :value="type.id">
                 {{ type.name }}
             </option>
         </select>

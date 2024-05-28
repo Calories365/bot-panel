@@ -15,24 +15,32 @@ class BotResource extends JsonResource
      */
     public function toArray($request)
     {
-        $botTypes = BotType::all()->map(function ($type) {
+        $allBotTypes = BotType::all()->map(function ($type) {
             return [
                 'id' => $type->id,
                 'name' => $type->name,
-                'active' => (int)$this->type_id === (int)$type->id
             ];
         });
+
+        $typeInfo = [
+            'type_id' => (int)$this->type_id,
+            'types' => $allBotTypes,
+        ];
+
+        $imageInfo = [
+            'image_url' => $this->message_image,
+            'image_file' => null,
+        ];
 
         return [
             'id' => $this->id,
             'name' => $this->name,
             'token' => $this->token,
-            'type_id' => (int)$this->type_id,
             'message' => $this->message,
-            'message_image' => $this->message_image,
+            'message_image' => $imageInfo,
             'active' => (int)$this->active,
             'web_hook' => $this->web_hook,
-            'bot_types' => $botTypes
+            'type_id' => $typeInfo,
         ];
     }
 }
