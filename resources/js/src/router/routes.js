@@ -6,6 +6,7 @@ import ShowAdmins from "@/pages/ShowAdmins.vue";
 import AddAdmin from "@/pages/AddAdmin.vue";
 import ShowBot from "@/pages/ShowBot.vue";
 import ShowUsers from "@/pages/ShowUsers.vue";
+import showAdmin from "@/pages/ShowAdmin.vue";
 
 const routes = [
     {
@@ -61,6 +62,14 @@ const routes = [
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Все Админы',
+                },
+            }, {
+                path: '/showAdmins/:id',
+                name: 'showAdmin',
+                component: showAdmin,
+                meta: {
+                    needAuth: true,
+                    breadcrumb: 'Бот',
                 },
             },
 

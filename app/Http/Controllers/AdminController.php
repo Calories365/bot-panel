@@ -9,7 +9,6 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Log;
 
 class AdminController extends BaseController
 {
@@ -31,13 +30,26 @@ class AdminController extends BaseController
 
     public function show(BotAdmin $botAdmin)
     {
-        return response()->json($botAdmin);
+        return new BotAdminResource($botAdmin);
+    }
+
+    public function createAdmin(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->all();
+        $botAdmin = BotAdmin::create($data);
+        return response()->json(['id' => $botAdmin->id]);
+    }
+
+    public function updateAdmin(Request $request, BotAdmin $botAdmin): BotAdminResource
+    {
+        $botAdmin->update($request->only(['name', 'telegram_id']));
+        return new BotAdminResource($botAdmin);
     }
 
 
     public function destroy(BotAdmin $botAdmin): \Illuminate\Http\JsonResponse
     {
         $botAdmin->delete();
-        return response()->json(['message' => 'Bot deleted successfully']);
+        return response()->json(['message' => 'BotAdmin deleted successfully']);
     }
 }

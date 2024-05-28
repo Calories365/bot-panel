@@ -2,6 +2,7 @@ import adminsApi from "@/api/admins.js";
 
 const state = {
     admins: [],
+    admin: {},
     pagination: {
         currentPage: 1,
         perPage: 10,
@@ -15,10 +16,12 @@ export const getterTypes = {
     admins: '[admins] allAdmins',
     pagination: '[admins] pagination',
     isSubmitting: '[admins] isSubmitting',
+    admin: '[admins] admin',
 };
 
 const getters = {
     [getterTypes.admins]: state => state.admins,
+    [getterTypes.admin]: state => state.admin,
     [getterTypes.pagination]: state => state.pagination,
     [getterTypes.isSubmitting]: state => state.isSubmitting,
 };
@@ -27,11 +30,25 @@ export const mutationTypes = {
     getAllAdminsStart: '[admins] getAllAdminsStart',
     getAllAdminsSuccess: '[admins] getAllAdminsSuccess',
     getAllAdminsFailure: '[admins] getAllAdminsFailure',
+
     setCurrentPage: '[admins] setCurrentPage',
     setPerPage: '[admins] setPerPage',
+
     deleteAdminStart: '[admins] deleteAdminStart',
     deleteAdminSuccess: '[admins] deleteAdminSuccess',
     deleteAdminFailure: '[admins] deleteAdminFailure',
+
+    getAdminStart: '[admins] getAdminStart',
+    getAdminSuccess: '[admins] getAdminSuccess',
+    getAdminFailure: '[admins] getAdminFailure',
+
+    updateAdminStart: '[admins] updateAdminStart',
+    updateAdminSuccess: '[admins] updateAdminSuccess',
+    updateAdminFailure: '[admins] updateAdminFailure',
+
+    createAdminStart: '[admins] createAdminStart',
+    createAdminSuccess: '[admins] createAdminSuccess',
+    createAdminFailure: '[admins] createAdminFailure',
 };
 
 const mutations = {
@@ -65,6 +82,41 @@ const mutations = {
         state.errors = payload;
         state.isSubmitting = false;
     },
+    [mutationTypes.getAdminStart](state) {
+        state.isSubmitting = true;
+        state.errors = null;
+    },
+    [mutationTypes.getAdminSuccess](state, payload) {
+        state.isSubmitting = false;
+        state.admin = payload;
+    },
+    [mutationTypes.getAdminFailure](state, payload) {
+        state.errors = payload;
+        state.isSubmitting = false;
+    },
+    [mutationTypes.updateAdminStart](state) {
+        state.isSubmitting = true;
+        state.errors = null;
+    },
+    [mutationTypes.updateAdminSuccess](state, payload) {
+        state.isSubmitting = false;
+        state.admin = payload;
+    },
+    [mutationTypes.updateAdminFailure](state, payload) {
+        state.errors = payload;
+        state.isSubmitting = false;
+    },
+    [mutationTypes.createAdminStart](state) {
+        state.isSubmitting = true;
+        state.errors = null;
+    },
+    [mutationTypes.createAdminSuccess](state) {
+        state.isSubmitting = false;
+    },
+    [mutationTypes.createAdminFailure](state, payload) {
+        state.errors = payload;
+        state.isSubmitting = false;
+    },
 };
 
 export const actionTypes = {
@@ -72,6 +124,9 @@ export const actionTypes = {
     changePage: '[admins] changePage',
     setPageSize: '[admins] setPageSize',
     deleteAdmin: '[admins] deleteAdmin',
+    getAdmin: '[admins] getAdmin',
+    updateAdmin: '[admins] updateAdmin',
+    createAdmin: '[admins] createAdmin',
 };
 
 const actions = {
@@ -107,6 +162,40 @@ const actions = {
             });
         } catch (error) {
             commit(mutationTypes.deleteAdminFailure, error.response ? error.response.data : error);
+            throw error;
+        }
+    },
+    async [actionTypes.getAdmin]({commit}, adminId) {
+        commit(mutationTypes.getAdminStart);
+        try {
+            const response = await adminsApi.getAdminById(adminId);
+            commit(mutationTypes.getAdminSuccess, response.data);
+            return response.data;
+        } catch (error) {
+            commit(mutationTypes.getAdminFailure, error.response ? error.response.data : error);
+            throw error;
+        }
+    },
+    async [actionTypes.updateAdmin]({commit, state}, adminData) {
+        commit(mutationTypes.updateAdminStart);
+        try {
+            console.log('adminData:', adminData);
+            const response = await adminsApi.updateAdmin(state.admin.id, adminData);
+            commit(mutationTypes.updateAdminSuccess, response.data);
+            return response.data;
+        } catch (error) {
+            commit(mutationTypes.updateAdminFailure, error.response ? error.response.data : error);
+            throw error;
+        }
+    },
+    async [actionTypes.createAdmin]({commit, state}, adminData) {
+        commit(mutationTypes.createAdminStart);
+        try {
+            const response = await adminsApi.createAdmin(adminData);
+            commit(mutationTypes.createAdminSuccess, response.data);
+            return response.data.id;
+        } catch (error) {
+            commit(mutationTypes.createAdminFailure, error.response ? error.response.data : error);
             throw error;
         }
     },

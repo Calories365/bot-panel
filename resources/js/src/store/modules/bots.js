@@ -26,23 +26,33 @@ export const mutationTypes = {
     getAllBotsStart: '[bots] getAllBotsStart',
     getAllBotsSuccess: '[bots] getAllBotsSuccess',
     getAllBotsFailure: '[bots] getAllBotsFailure',
+
     setCurrentPage: '[bots] setCurrentPage',
     setPerPage: '[bots] setPerPage',
+
     deleteBotStart: '[bots] deleteBotStart',
     deleteBotSuccess: '[bots] deleteBotSuccess',
     deleteBotFailure: '[bots] deleteBotFailure',
+
     getBotStart: '[bots] getBotStart',
     getBotSuccess: '[bots] getBotSuccess',
     getBotFailure: '[bots] getBotFailure',
+
     getBotTypesStart: '[bots] getBotTypesStart',
     getBotTypesSuccess: '[bots] getBotTypesSuccess',
     getBotTypesFailure: '[bots] getBotTypesFailure',
+
     updateBotStart: '[bots] updateBotStart',
     updateBotSuccess: '[bots] updateBotSuccess',
     updateBotFailure: '[bots] updateBotFailure',
+
     createBotStart: '[bots] createBotStart',
     createBotSuccess: '[bots] createBotSuccess',
     createBotFailure: '[bots] createBotFailure',
+
+    updateWebhookStart: '[bots] updateWebhookStart',
+    updateWebhookSuccess: '[bots] updateWebhookSuccess',
+    updateWebhookFailure: '[bots] updateWebhookFailure',
 };
 
 const mutations = {
@@ -96,6 +106,7 @@ const mutations = {
         state.errors = payload;
         state.isSubmitting = false;
     },
+
     [mutationTypes.createBotStart](state) {
         state.isSubmitting = true;
         state.errors = null;
@@ -103,6 +114,17 @@ const mutations = {
         state.isSubmitting = false;
         state.bot = payload;
     }, [mutationTypes.createBotFailure](state, payload) {
+        state.errors = payload;
+        state.isSubmitting = false;
+    },
+
+    [mutationTypes.updateWebhookStart](state) {
+        state.isSubmitting = true;
+        state.errors = null;
+    }, [mutationTypes.updateWebhookSuccess](state, payload) {
+        state.isSubmitting = false;
+        state.bot = payload;
+    }, [mutationTypes.updateWebhookFailure](state, payload) {
         state.errors = payload;
         state.isSubmitting = false;
     },
@@ -117,6 +139,7 @@ export const actionTypes = {
     getBotTypes: '[bots] getBotTypes',
     updateBot: '[bots] updateBot',
     createBot: '[bots] createBot',
+    updateWebhook: '[bots] updateWebhook',
 };
 
 const actions = {
@@ -228,7 +251,18 @@ const actions = {
             throw error;
         }
     },
+    async [actionTypes.updateWebhook]({commit, state}) {
+        commit(mutationTypes.updateWebhookStart);
 
+        try {
+            const response = await botsApi.updateWebhook(state.bot.id);
+            commit(mutationTypes.updateWebhookSuccess, response.data);
+            return response.data.id;
+        } catch (error) {
+            commit(mutationTypes.updateWebhookFailure, error.response ? error.response.data : error);
+            throw error;
+        }
+    },
 };
 
 export default {

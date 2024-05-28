@@ -4,6 +4,7 @@ import {computed, defineEmits, onMounted, ref} from 'vue';
 import {useStore} from "vuex";
 import {actionTypes, getterTypes} from "@/store/modules/admins.js";
 import {adminsTableConfig} from "@/ComponentConfigs/TableConfigs.js";
+import router from "@/router/router.js";
 
 const store = useStore();
 const bots = computed(() => store.getters[getterTypes.admins]);
@@ -47,6 +48,9 @@ onMounted(() => {
 function handleEvent(event) {
     if (event.action === 'delete') {
         store.dispatch(actionTypes.deleteAdmin, {id: event.id});
+    }
+    if (event.action === 'show') {
+        router.push(`/showAdmins/${event.id}`);
     }
 }
 </script>

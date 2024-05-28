@@ -11,7 +11,9 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Telegram\Bot\Api;
 
 class BotController extends BaseController
 {
@@ -60,6 +62,8 @@ class BotController extends BaseController
 
         $bot = Bot::create($data);
 
+        $this->updateWebhook($bot);
+
         return response()->json(['id' => $bot->id]);
     }
 
@@ -90,5 +94,16 @@ class BotController extends BaseController
     {
         $botTypes = BotType::all();
         return BotTypesResource::collection($botTypes);
+    }
+
+    public function updateWebhook(Bot $bot)
+    {
+        Log::info('updateWebhook for: ' . $bot->name);
+
+//        $telegram = new Api($bot->token);
+
+//        $webHook = 'https://120c-93-127-105-235.ngrok-free.app/webhook/bot/';
+
+//        $telegram->setWebhook(['url' => $webHook . $bot->name]);
     }
 }

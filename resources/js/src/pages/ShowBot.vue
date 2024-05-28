@@ -23,7 +23,6 @@ function handleEvent(payload) {
         } else {
             localBotData.value[payload.key] = payload.value;
         }
-
         if (payload.key === 'type_id' && Array.isArray(localBotData.value.bot_types)) {
             localBotData.value.bot_types = localBotData.value.bot_types.map(botType => ({
                 ...botType,
@@ -61,8 +60,7 @@ function deleteBot() {
 }
 
 function updateWebhook() {
-    console.log('updateWebhook');
-    // store.dispatch(actionTypes.updateBotWebhook, botData.value.id);
+    store.dispatch(actionTypes.updateWebhook);
 }
 
 onMounted(() => {

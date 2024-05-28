@@ -5,7 +5,7 @@ export const rows = [
         label: 'Тип бота',
         key: 'bot_types',
         type: 'dropdown',
-        emit_name: 'type_id',
+        emit_name: null,
         placeholder: 'выберите тип',
         action: null
     },
@@ -47,6 +47,23 @@ export const rows_approval = [
             {text: 'Сохранить', button_type: 'default', action: 'save'},
             {text: 'Удалить', button_type: 'danger', action: 'delete'},
             {text: 'Обновить вебхук', button_type: 'warning', action: 'updateWebhook'}
+        ]
+    }
+];
+export const admin_Rows = [
+    {label: 'Имя', key: 'name', type: 'default', emit_name: null, placeholder: 'введите имя', action: null},
+    {
+        label: 'Telegram id',
+        key: 'telegram_id',
+        type: 'default',
+        placeholder: 'введите telegram_id',
+        action: null
+    },
+    {
+        label: 'Действия', key: 'actions', type: 'buttons', emit_name: null, placeholder: null,
+        options: [
+            {text: 'Сохранить', button_type: 'default', action: 'save'},
+            {text: 'Удалить', button_type: 'danger', action: 'delete'},
         ]
     }
 ];

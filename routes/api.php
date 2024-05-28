@@ -32,6 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/bots/create', [BotController::class, 'create'])->name('bot.create');
 
+        Route::get('/update-webhook/{bot}', [BotController::class, 'updateWebhook'])->name('bot.webhook');
+
         Route::delete('/bots/{bot}', [BotController::class, 'destroy'])->name('bots.destroy');
 
         Route::get('/users', [UsersController::class, 'index'])->name('user.index');
@@ -42,9 +44,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/admins', [AdminController::class, 'index'])->name('admin.index');
 
-        Route::get('/admins/{admin}', [AdminController::class, 'show'])->name('admin.show');
+        Route::get('/admins/{botAdmin}', [AdminController::class, 'show'])->name('admin.show');
 
         Route::delete('/admins/{botAdmin}', [AdminController::class, 'destroy'])->name('admin.destroy');
+
+        Route::post('/admins', [AdminController::class, 'createAdmin'])->name('admin.create');
+
+        Route::put('/admins/{botAdmin}', [AdminController::class, 'updateAdmin'])->name('admin.update');
     });
 });
 
