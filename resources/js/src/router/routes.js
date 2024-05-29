@@ -47,7 +47,8 @@ const routes = [
                     needAuth: true,
                     breadcrumb: 'Все пользователи',
                 },
-            }, {
+            },
+            {
                 path: '/addAdmin',
                 name: 'addAdmin',
                 component: AddAdmin,
@@ -69,7 +70,7 @@ const routes = [
                 component: showAdmin,
                 meta: {
                     needAuth: true,
-                    breadcrumb: 'Бот',
+                    breadcrumb: 'Админ',
                 },
             },
 

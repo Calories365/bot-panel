@@ -35,6 +35,9 @@ const createBot = (formData) => {
 const updateWebhook = (botId) => {
     return axios.get(`/api/update-webhook/${botId}`);
 }
+const getBotUserData = (botId) => {
+    return axios.get(`/api/get-bot-user-data/${botId}`);
+}
 
 export default {
     getAllBots,
@@ -43,5 +46,6 @@ export default {
     getBotTypes,
     updateBot,
     createBot,
-    updateWebhook
+    updateWebhook,
+    getBotUserData
 }

@@ -9,7 +9,6 @@ import router from "@/router/router.js";
 
 const store = useStore();
 const route = useRoute();
-const adminData = computed(() => store.getters[getterTypes.admin]);
 const localAdminData = ref({});
 
 function handleEvent(payload) {

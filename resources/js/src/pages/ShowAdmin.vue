@@ -18,13 +18,10 @@ function handleEvent(payload) {
     } else if (payload.action) {
         switch (payload.action) {
             case 'save':
-                saveBot();
+                saveAdmin();
                 break;
             case 'delete':
-                deleteBot();
-                break;
-            case 'updateWebhook':
-                updateWebhook();
+                deleteAdmin();
                 break;
             default:
                 console.log("Неизвестное действие");
@@ -32,13 +29,13 @@ function handleEvent(payload) {
     }
 }
 
-function saveBot() {
+function saveAdmin() {
     store.dispatch(actionTypes.updateAdmin, localAdminData.value).then(() => {
         localAdminData.value = {...adminData.value};
     });
 }
 
-function deleteBot() {
+function deleteAdmin() {
     store.dispatch(actionTypes.deleteAdmin, {id: adminData.value.id}).then(() => {
         router.push({name: 'showAdmins'});
     });

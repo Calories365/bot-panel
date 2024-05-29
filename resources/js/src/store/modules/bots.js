@@ -9,6 +9,7 @@ const state = {
         totalPages: 100,
     },
     isSubmitting: false, errors: null,
+    botUserData: {},
 };
 
 export const getterTypes = {
@@ -17,6 +18,7 @@ export const getterTypes = {
     isSubmitting: '[bots] isSubmitting',
     bot: '[bots] bot',
     bot_types: '[bots] bot_types',
+    botUserData: '[bots] botUserData'
 };
 
 const getters = {
@@ -25,6 +27,7 @@ const getters = {
     [getterTypes.isSubmitting]: state => state.isSubmitting,
     [getterTypes.bot]: state => state.bot,
     [getterTypes.bot_types]: state => state.bot_types,
+    [getterTypes.botUserData]: state => state.botUserData,
 };
 
 export const mutationTypes = {
@@ -62,6 +65,14 @@ export const mutationTypes = {
     updateWebhookStart: '[bots] updateWebhookStart',
     updateWebhookSuccess: '[bots] updateWebhookSuccess',
     updateWebhookFailure: '[bots] updateWebhookFailure',
+
+    getBotUserDataStart: '[bots] getBotUserDataStart',
+    getBotUserDataSuccess: '[bots] getBotUserDataSuccess',
+    getBotUserDataFailure: '[bots] getBotUserDataFailure',
+
+    destroyBot: '[bots] destroyBot',
+
+
 };
 
 const mutations = {
@@ -148,6 +159,22 @@ const mutations = {
         state.errors = payload;
         state.isSubmitting = false;
     },
+
+    [mutationTypes.getBotUserDataStart](state) {
+        state.isSubmitting = true;
+        state.errors = null;
+    }, [mutationTypes.getBotUserDataSuccess](state, payload) {
+        state.isSubmitting = false;
+        state.botUserData = payload;
+    }, [mutationTypes.getBotUserDataFailure](state, payload) {
+        state.errors = payload;
+        state.isSubmitting = false;
+    },
+
+    [mutationTypes.destroyBot](state) {
+        state.bot = {};
+        state.botUserData = {};
+    }
 };
 
 export const actionTypes = {
@@ -160,6 +187,8 @@ export const actionTypes = {
     updateBot: '[bots] updateBot',
     createBot: '[bots] createBot',
     updateWebhook: '[bots] updateWebhook',
+    getBotUserData: '[bots] getBotUserData',
+    destroyBot: '[bots] destroyBot',
 };
 
 const actions = {
@@ -236,6 +265,21 @@ const actions = {
             commit(mutationTypes.updateWebhookFailure, error.response ? error.response.data : error);
             throw error;
         }
+    },
+    async [actionTypes.getBotUserData]({commit, state}) {
+        commit(mutationTypes.getBotUserDataStart);
+
+        try {
+            const response = await botsApi.getBotUserData(state.bot.id);
+            commit(mutationTypes.getBotUserDataSuccess, response.data);
+            return response.data;
+        } catch (error) {
+            commit(mutationTypes.getBotUserDataFailure, error.response ? error.response.data : error);
+            throw error;
+        }
+    },
+    async [actionTypes.destroyBot]({commit}) {
+        commit(mutationTypes.destroyBot);
     },
 };
 async function handleBotData(commit, botApiFunction, botData, botId = null) {

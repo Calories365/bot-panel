@@ -38,13 +38,6 @@ const handlePageSizeChange = (size) => {
     });
 };
 
-onMounted(() => {
-    store.dispatch(actionTypes.getAllBots).then(allBots => {
-    }).catch(error => {
-        console.error('Failed to load bots:', error);
-    });
-});
-
 function handleEvent(event) {
     if (event.action === 'delete') {
         store.dispatch(actionTypes.deleteBot, {id: event.id});
@@ -53,6 +46,15 @@ function handleEvent(event) {
         router.push({name: 'showBot', params: {id: event.id}});
     }
 }
+
+onMounted(() => {
+    store.dispatch(actionTypes.getAllBots).then(allBots => {
+    }).catch(error => {
+        console.error('Failed to load bots:', error);
+    });
+});
+
+
 </script>
 
 <template>

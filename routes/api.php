@@ -26,6 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/bots/{bot}', [BotController::class, 'show'])->name('bots.show');
 
+        Route::get('/get-bot-user-data/{bot}', [BotController::class, 'getBotUserData'])->name('bots.getBotUserData');
+
         Route::get('/bot-types', [BotController::class, 'getTypes'])->name('bot.types');
 
         Route::post('/bots/update/{bot}', [BotController::class, 'update'])->name('bot.update');

@@ -1,17 +1,22 @@
 <script setup>
-import {computed, onMounted, ref} from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import BotsForm from "@/Components/BotsForm.vue";
 import {actionTypes, getterTypes} from '@/store/modules/bots';
 import {useStore} from "vuex";
 import {useRoute} from "vue-router";
 import router from "@/router/router.js";
 import {rows, rows_approval} from "@/ComponentConfigs/FormConfigs.js";
+import BotsStats from "@/Components/BotsStats.vue";
 
 const store = useStore();
 const route = useRoute();
 
 const botData = computed(() => store.getters[getterTypes.bot]);
+const botUserData = computed(() => store.getters[getterTypes.botUserData]);
 const localBotData = ref({});
+const isBotUserDataNotEmpty = computed(() => {
+    return Object.keys(botUserData.value).length > 0;
+});
 
 const formConfig = computed(() => {
     if (Object.keys(localBotData.value).length > 0 && localBotData.value.type_id) {
@@ -69,8 +74,15 @@ onMounted(() => {
     const botId = route.params.id;
     store.dispatch(actionTypes.getBot, botId).then(() => {
         localBotData.value = {...botData.value};
+        store.dispatch(actionTypes.getBotUserData);
     });
 });
+
+onUnmounted(() => {
+    store.dispatch(actionTypes.destroyBot)
+});
+
+
 </script>
 
 <template>
@@ -78,7 +90,20 @@ onMounted(() => {
         <div class="col-md-12">
             <div class="card card-primary">
                 <div class="card-header">
-                    Добавить бота
+                    <h3 class="card-title">
+                        Статистика Бота
+                    </h3>
+                </div>
+                <div v-if="isBotUserDataNotEmpty"
+                     class="card-body">
+                    <BotsStats
+                        :data="botUserData"
+                    />
+                </div>
+            </div>
+            <div class="card card-primary">
+                <div class="card-header">
+                    Бот
                 </div>
                 <bots-form
                     :data="localBotData"

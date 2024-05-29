@@ -12,7 +12,6 @@ const users = computed(() => store.getters[getterTypes.users]);
 const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const pagination = computed(() => store.getters[getterTypes.pagination]);
 const route = useRoute();
-
 const sizeOptions = [10, 20, 30, 40, 50];
 
 const prePageText = 'Количество пользователей на странице';
