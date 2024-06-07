@@ -5,6 +5,7 @@ const props = defineProps({
     placeholder: String,
     data: String,
     name: String,
+    required: Boolean,
 });
 
 const emit = defineEmits(['handle']);
@@ -23,7 +24,8 @@ const textValue = computed({
         <textarea id="emailTextarea" class="form-control"
                   :placeholder="placeholder"
                   v-model="textValue"
-                  rows="4">
+                  rows="4"
+                  :required="required">
         </textarea>
     </div>
 </template>

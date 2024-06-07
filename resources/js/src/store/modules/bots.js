@@ -8,11 +8,13 @@ const state = {
         perPage: 10,
         totalPages: 100,
     },
-    isSubmitting: false, errors: null,
+    isSubmitting: false,
+    errors: null,
     botUserData: {},
 };
 
 export const getterTypes = {
+    errors: '[bots] errors',
     bots: '[bots] allBots',
     pagination: '[bots] pagination',
     isSubmitting: '[bots] isSubmitting',
@@ -248,11 +250,14 @@ const actions = {
             throw error;
         }
     },
-    async [actionTypes.updateBot]({commit, state}, data) {
-        return handleBotData(commit, botsApi.updateBot, data, state.bot.id);
+    async [actionTypes.updateBot]({commit, dispatch, state}, data) {
+        return handleBotData(commit, dispatch, botsApi.updateBot, data, state.bot.id);
     },
-    async [actionTypes.createBot]({commit}, data) {
-        return handleBotData(commit, botsApi.createBot, data);
+    async [actionTypes.createBot]({commit, dispatch}, data) {
+        try {
+            return await handleBotData(commit, dispatch, botsApi.createBot, data);
+        } catch (errors) {
+        }
     },
     async [actionTypes.updateWebhook]({commit, state}) {
         commit(mutationTypes.updateWebhookStart);
@@ -282,29 +287,38 @@ const actions = {
         commit(mutationTypes.destroyBot);
     },
 };
-async function handleBotData(commit, botApiFunction, botData, botId = null) {
+
+async function handleBotData(commit, dispatch, botApiFunction, botData, botId = null) {
     commit(mutationTypes.upsertBotStart);
 
-    botData.message_image = botData.message_image.image_file;
-    botData.type_id = botData.type_id.type_id;
+    try {
 
-    const formData = new FormData();
-    for (const key in botData) {
-        if (botData.hasOwnProperty(key)) {
-            if (key === 'message_image' && botData[key] instanceof File) {
-                formData.append(key, botData[key], botData[key].name);
-            } else {
-                formData.append(key, botData[key]);
+        if (botData.message_image?.image_file) {
+            botData.message_image = botData.message_image?.image_file;
+        } else {
+            delete botData.message_image;
+        }
+
+        botData.type_id = botData.type_id.type_id;
+
+        const formData = new FormData();
+        for (const key in botData) {
+            if (botData.hasOwnProperty(key)) {
+                if (key === 'message_image' && botData[key] instanceof File) {
+                    formData.append(key, botData[key], botData[key].name);
+                } else {
+                    formData.append(key, botData[key]);
+                }
             }
         }
-    }
 
-    try {
         const response = await botApiFunction(botId ? botId : formData, formData);
         commit(mutationTypes.upsertBotSuccess, response.data);
         return response.data;
     } catch (error) {
-        commit(mutationTypes.upsertBotFailure, error.response ? error.response.data : error);
+        commit(mutationTypes.upsertBotFailure, error);
+        const errorMessage = error.response ? error.response.data : error;
+        commit(mutationTypes.upsertBotFailure, errorMessage);
         throw error;
     }
 }

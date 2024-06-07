@@ -6,17 +6,19 @@ import {useRoute} from "vue-router";
 import {admin_Rows} from "@/ComponentConfigs/FormConfigs.js";
 import BotsForm from "@/Components/BotsForm.vue";
 import router from "@/router/router.js";
+import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 
 const store = useStore();
 const route = useRoute();
 const localAdminData = ref({});
+const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 
 function handleEvent(payload) {
     if (payload.key && payload.value !== undefined) {
         localAdminData.value[payload.key] = payload.value;
     } else if (payload.action) {
         switch (payload.action) {
-            case 'save':
+            case 'submit':
                 createAdmin();
                 break;
             default:
@@ -34,7 +36,9 @@ function createAdmin() {
 </script>
 
 <template>
-    <div class="row">
+    <swastika-loader v-if="isSubmitting"/>
+
+    <div :class="{'loading': isSubmitting}" class="row">
         <div class="col-md-12">
             <div class="card card-primary">
                 <div class="card-header">
@@ -50,5 +54,8 @@ function createAdmin() {
 </template>
 
 <style scoped lang="scss">
-
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
 </style>

@@ -4,8 +4,10 @@ import {useRoute, useRouter} from 'vue-router';
 import TablePerPageSelect from "@/Components/BotsTable/TablePerPageSelect.vue";
 import TableMainPart from "@/Components/BotsTable/TableMainPart.vue";
 import TablePagination from "@/Components/BotsTable/TablePagination.vue";
+import BotsButtonWarning from "@/Components/UI/BotsButtonWarning.vue";
 
 const props = defineProps({
+    users: Boolean,
     columns: Array,
     data: Array,
     totalPages: Number,
@@ -31,7 +33,6 @@ const currentPage = ref(props.currentPage || 1);
 const router = useRouter();
 const route = useRoute();
 
-// Загрузка параметров из URL при инициализации компонента
 onMounted(() => {
     const query = route.query;
     if (query.page && query.page !== currentPage.value) {
@@ -63,6 +64,9 @@ const handlePageChange = page => {
     currentPage.value = page;
     emit('update:page-change', page);
 };
+const handleExport = () => {
+    emit('update:export');
+};
 
 </script>
 
@@ -76,6 +80,7 @@ const handlePageChange = page => {
                     :value="pageSize"
                     @update:page-size="handlePageSizeChange"/>
             </div>
+
             <div class="row">
                 <table-main-part
                     :columns="columns"

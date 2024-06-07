@@ -42,10 +42,10 @@ function handle(action) {
 }
 
 .button-item {
-    margin-right: 10px; /* Отступ между кнопками */
+    margin-right: 10px;
 }
 
 .button-item:last-child {
-    margin-right: 0; /* Удаление отступа у последней кнопки */
+    margin-right: 0;
 }
 </style>

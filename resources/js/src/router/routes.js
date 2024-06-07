@@ -7,6 +7,7 @@ import AddAdmin from "@/pages/AddAdmin.vue";
 import ShowBot from "@/pages/ShowBot.vue";
 import ShowUsers from "@/pages/ShowUsers.vue";
 import showAdmin from "@/pages/ShowAdmin.vue";
+import Home from "@/pages/Home.vue";
 
 const routes = [
     {
@@ -20,6 +21,14 @@ const routes = [
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Все боты',
+                },
+            }, {
+                path: '/',
+                name: 'home',
+                component: Home,
+                meta: {
+                    needAuth: true,
+                    breadcrumb: 'Home',
                 },
             },
             {
@@ -40,7 +49,7 @@ const routes = [
                     breadcrumb: 'Добавить бота',
                 },
             }, {
-                path: '/showUsers',
+                path: '/showUsers/:id?',
                 name: 'showUsers',
                 component: ShowUsers,
                 meta: {

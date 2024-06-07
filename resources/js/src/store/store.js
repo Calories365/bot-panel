@@ -1,4 +1,4 @@
-import {createStore} from 'vuex';
+import { createStore } from 'vuex';
 
 import auth from '@/store/modules/auth';
 import calculation from "@/store/modules/calculation.js";
@@ -10,50 +10,39 @@ import admins from "@/store/modules/admins.js";
 
 export default createStore({
     state: {
-        isSuccess: null,
-        isError: null,
+        successMessages: [],
+        errorMessages: [],
     },
     getters: {
-        isSuccess: (state) => state.isSuccess,
-        isError: (state) => state.isError,
+        successMessages: (state) => state.successMessages,
+        errorMessages: (state) => state.errorMessages,
     },
     mutations: {
-        SET_SUCCESS(state, value) {
-            state.isSuccess = value;
+        ADD_SUCCESS(state, message) {
+            state.successMessages.push(message);
         },
-        SET_ERROR(state, value) {
-            state.isError = value;
-        },
-        RESET_NOTIFICATION(state) {
-            state.isSuccess = null;
-            state.isError = null;
-        },
-        RESET_ERROR(state) {
-            state.isError = null;
+        ADD_ERROR(state, message) {
+            state.errorMessages.push(message);
         },
         RESET_SUCCESS(state) {
-            state.isSuccess = null;
+            state.successMessages = [];
+        },
+        RESET_ERROR(state) {
+            state.errorMessages = [];
         },
     },
     actions: {
-        setSuccess({commit}, payload) {
-            commit('SET_SUCCESS', payload);
-            commit('RESET_ERROR');
-
-            if (payload !== null) {
-                setTimeout(() => {
-                    commit('RESET_NOTIFICATION');
-                }, 3000);
-            }
+        addSuccess({ commit }, message) {
+            commit('ADD_SUCCESS', message);
+            setTimeout(() => {
+                commit('RESET_SUCCESS');
+            }, 3000);
         },
-        setError({commit}, payload) {
-            commit('SET_ERROR', payload);
-            commit('RESET_SUCCESS');
-            if (payload !== null) {
-                setTimeout(() => {
-                    commit('RESET_NOTIFICATION');
-                }, 3000);
-            }
+        addError({ commit }, message) {
+            commit('ADD_ERROR', message);
+            setTimeout(() => {
+                commit('RESET_ERROR');
+            }, 3000);
         },
     },
     modules: {

@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreUsersFoodConsumptionsRequest extends FormRequest
+class BotDataRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,14 +23,13 @@ class StoreUsersFoodConsumptionsRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'calories' => 'required|integer|min:0',
-            'carbohydrates' => 'required|integer|min:0',
-            'fats' => 'required|integer|min:0',
-            'fibers' => 'required|integer|min:0',
-            'proteins' => 'required|integer|min:0',
-            'quantity' => 'required|integer|min:0',
-            'consumed_at' => 'required|date',
-            'part_of_day' => 'required|in:morning,dinner,supper',
+            'type_id' => 'nullable|exists:bot_types,id',
+            'wordpress_endpoint' => 'nullable|string',
+            'token' => 'required|string|max:255',
+            'message' => 'nullable|string',
+            'active' => 'boolean',
+            'message_image' => 'nullable|image',
+            'web_hook' => 'required'
         ];
     }
 }

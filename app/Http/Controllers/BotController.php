@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BotDataRequest;
 use App\Http\Resources\BotResource;
 use App\Http\Resources\BotTypesCollection;
 use App\Models\Bot;
 use App\Models\BotType;
+use App\Services\TelegramServices\TelegramHandler;
 use DateInterval;
 use DatePeriod;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -45,17 +47,9 @@ class BotController extends BaseController
         return response()->json(['message' => 'Bot deleted successfully']);
     }
 
-    public function create(Request $request)
+    public function create(BotDataRequest $request): \Illuminate\Http\JsonResponse
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'type_id' => 'nullable|exists:bot_types,id',
-            'web_hook' => 'nullable|string',
-            'token' => 'required|string|max:255',
-            'message' => 'nullable|string',
-            'active' => 'required|boolean',
-//            'message_image' => 'nullable|image',
-        ]);
+        $data = $request->validated();
 
         if ($request->hasFile('message_image')) {
             $imagePath = $request->file('message_image')->store('public/bots');
@@ -64,23 +58,13 @@ class BotController extends BaseController
 
         $bot = Bot::create($data);
 
-        $this->updateWebhook($bot);
-
         return response()->json(['id' => $bot->id]);
     }
 
 
-    public function update(Request $request, Bot $bot): BotResource
+    public function update(BotDataRequest $request, Bot $bot): BotResource
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'type_id' => 'nullable|exists:bot_types,id',
-            'web_hook' => 'string',
-            'token' => 'required|string|max:255',
-            'message' => 'nullable|string',
-            'active' => 'required|boolean',
-//            'message_image' => 'nullable|image',
-        ]);
+        $data = $request->validated();
 
         if ($request->hasFile('message_image')) {
             $imagePath = $request->file('message_image')->store('public/bots');
@@ -88,25 +72,15 @@ class BotController extends BaseController
         }
 
         $bot->update($data);
+        $bot->updateWeebHook();
 
         return new BotResource($bot);
     }
 
-    public function getTypes()
+    public function getTypes(): BotTypesCollection
     {
         $botTypes = BotType::all();
         return new BotTypesCollection($botTypes);
-    }
-
-    public function updateWebhook(Bot $bot)
-    {
-        Log::info('updateWebhook for: ' . $bot->name);
-
-//        $telegram = new Api($bot->token);
-
-//        $webHook = 'https://120c-93-127-105-235.ngrok-free.app/webhook/bot/';
-
-//        $telegram->setWebhook(['url' => $webHook . $bot->name]);
     }
 
     public function getBotUserData(Bot $bot)
@@ -133,7 +107,7 @@ class BotController extends BaseController
         $newUsersStats = $dates;
         $bannedUsersStats = $dates;
         $premiumUsersStats = $dates;
-        $botId = $bot->id; // Получаем ID бота из модели
+        $botId = $bot->id;
 
         $newUsersData = DB::table('bot_bot_user')
             ->where('bot_id', $botId)
@@ -146,7 +120,7 @@ class BotController extends BaseController
             $newUsersStats[$data->date] = $data->count;
         }
 
-        $bannedUsersData = DB::table('banned_bot_user_relations')
+        $bannedUsersData = DB::table('banned_bot_user')
             ->where('bot_id', $botId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
@@ -184,5 +158,21 @@ class BotController extends BaseController
             'total_premium_users' => $totalPremiumUsers,
             'total_default_users' => $totalDefaultUsers,
         ]);
+    }
+//    public function getBotUserData(Bot $bot, BotUserService $botUserService)
+//    {
+//        $endDate = now();
+//        $startDate = now()->subDays(7);
+//
+//        $statistics = $botUserService->getBotUserStatistics($bot, $startDate, $endDate);
+//
+//        return response()->json($statistics);
+//    }
+
+    public function handle(TelegramHandler $telegramHandler, $bot, Request $request): \Illuminate\Http\JsonResponse
+    {
+        Log::info('start');
+        $telegramHandler->handle($bot, $request);
+        return response()->json(['status' => 'success']);
     }
 }

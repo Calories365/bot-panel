@@ -7,12 +7,15 @@ import {useRoute} from "vue-router";
 import router from "@/router/router.js";
 import {rows, rows_approval} from "@/ComponentConfigs/FormConfigs.js";
 import BotsStats from "@/Components/BotsStats.vue";
+import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
+import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 
 const store = useStore();
 const route = useRoute();
 
 const botData = computed(() => store.getters[getterTypes.bot]);
 const botUserData = computed(() => store.getters[getterTypes.botUserData]);
+const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const localBotData = ref({});
 const isBotUserDataNotEmpty = computed(() => {
     return Object.keys(botUserData.value).length > 0;
@@ -33,17 +36,18 @@ const formConfig = computed(() => {
     return [];
 });
 
+const showModal = ref(false);
 
 function handleEvent(payload) {
     if (payload.key && payload.value !== undefined) {
         localBotData.value[payload.key] = payload.value;
     } else if (payload.action) {
         switch (payload.action) {
-            case 'save':
+            case 'submit':
                 saveBot();
                 break;
             case 'delete':
-                deleteBot();
+                showModal.value = true;
                 break;
             case 'updateWebhook':
                 updateWebhook();
@@ -66,6 +70,11 @@ function deleteBot() {
     });
 }
 
+function confirmDelete() {
+    deleteBot();
+    showModal.value = false;
+}
+
 function updateWebhook() {
     store.dispatch(actionTypes.updateWebhook);
 }
@@ -81,12 +90,12 @@ onMounted(() => {
 onUnmounted(() => {
     store.dispatch(actionTypes.destroyBot)
 });
-
-
 </script>
 
 <template>
-    <div class="row">
+    <swastika-loader v-if="isSubmitting"/>
+
+    <div :class="{'loading': isSubmitting}" class="row">
         <div class="col-md-12">
             <div class="card card-primary">
                 <div class="card-header">
@@ -97,6 +106,7 @@ onUnmounted(() => {
                 <div v-if="isBotUserDataNotEmpty"
                      class="card-body">
                     <BotsStats
+                        :botId="botData.id"
                         :data="botUserData"
                     />
                 </div>
@@ -112,8 +122,19 @@ onUnmounted(() => {
             </div>
         </div>
     </div>
+
+    <BotsConfirmatiomModal
+        title="Подтверждение действия"
+        message="Вы уверены, что хотите удалить этого бота?"
+        :showModal="showModal"
+        @update:showModal="showModal = $event"
+        @confirm="confirmDelete"
+    />
 </template>
 
 <style scoped lang="scss">
-
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
 </style>

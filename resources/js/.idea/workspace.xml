@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="419c6b2a-624f-46b7-a50d-f924e5c247c1" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../../app/Interfaces/BotHandlerStrategy.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Services/TelegramServices/ApprovalHandlerParts/ContactMessageHandler.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Services/TelegramServices/ApprovalHandlerParts/TextMessageHandler.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Services/TelegramServices/ApprovalService.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Services/TelegramServices/BaseService.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Services/TelegramServices/DefaultHandlerParts/TextMessageHandler.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Services/TelegramServices/DefaultService.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Services/TelegramServices/TelegramHandler.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Traits/BasicDataExtractor.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Traits/ContactDataExtractor.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Traits/TextMessageData.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../app/Utilities/Utilities.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Components/UI/BotsToastError.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Components/UI/BotsToastSuccess.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../app/Http/Controllers/BotController.php" beforeDir="false" afterPath="$PROJECT_DIR$/../../app/Http/Controllers/BotController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../app/Http/Controllers/UsersController.php" beforeDir="false" afterPath="$PROJECT_DIR$/../../app/Http/Controllers/UsersController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../app/Services/ProductService.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../app/Services/SearchService.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../app/Services/UserResultService.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../app/Traits/DoubleMetaphoneTrait.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/js.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Components/BotsForm.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/BotsForm.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Components/BotsStats.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/BotsStats.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Components/BotsTable.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/BotsTable.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Layouts/MainLayout.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/Layouts/MainLayout.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/users.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/users.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/AddAdmin.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/AddAdmin.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/AddBot.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/AddBot.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Login.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Login.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ShowAdmin.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ShowAdmin.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ShowAdmins.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ShowAdmins.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ShowBot.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ShowBot.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ShowBotUsers.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ShowBots.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ShowBots.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ShowUser.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/UI/BotsConfirmatiomModal.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ShowUsers.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ShowUsers.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/router/routes.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/routes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/store/modules/bots.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/store/modules/bots.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/store/modules/users.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/store/modules/users.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/store/store.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/store/store.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/../../routes/api.php" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="PHP 8.3" />
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 1
+}]]></component>
+  <component name="ProjectId" id="2grYue31wjuXjpPEOMKXuq3mmre" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Applications/sites/bot-panel/resources/js",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "ts.external.directory.path": "/Applications/PhpStorm.app/Contents/plugins/javascript-impl/jsLanguageServicesImpl/external",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="419c6b2a-624f-46b7-a50d-f924e5c247c1" name="Changes" comment="" />
+      <created>1716457387971</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1716457387971</updated>
+      <workItem from="1716457389084" duration="2601000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

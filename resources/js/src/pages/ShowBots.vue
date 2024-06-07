@@ -5,18 +5,22 @@ import {useStore} from "vuex";
 import {actionTypes, getterTypes} from "@/store/modules/bots.js";
 import router from "@/router/router.js";
 import {botsTableConfig} from "@/ComponentConfigs/TableConfigs.js";
+import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
+import SwastikaLoader from "@/Components/UI/Swastika-loader.vue"; // Импортируем компонент загрузки
 
 const store = useStore();
 const bots = computed(() => store.getters[getterTypes.bots]);
 const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
-const pagination = computed(() => store.getters[getterTypes.pagination])
+const pagination = computed(() => store.getters[getterTypes.pagination]);
 
 const sizeOptions = [10, 20, 30, 40, 50];
 
-const prePageText = 'Количество ботов на странице'
+const prePageText = 'Количество ботов на странице';
 const currentPage = ref(1);
 const pageSize = ref(10);
 const emit = defineEmits(['handle']);
+const showModal = ref(false);
+const selectedBotId = ref(null);
 
 const handlePageChange = (page) => {
     currentPage.value = page;
@@ -40,12 +44,18 @@ const handlePageSizeChange = (size) => {
 
 function handleEvent(event) {
     if (event.action === 'delete') {
-        store.dispatch(actionTypes.deleteBot, {id: event.id});
+        selectedBotId.value = event.id;
+        showModal.value = true;
     }
     if (event.action === 'show') {
         router.push({name: 'showBot', params: {id: event.id}});
     }
 }
+
+const confirmDelete = () => {
+    store.dispatch(actionTypes.deleteBot, {id: selectedBotId.value});
+    selectedBotId.value = null;
+};
 
 onMounted(() => {
     store.dispatch(actionTypes.getAllBots).then(allBots => {
@@ -53,12 +63,12 @@ onMounted(() => {
         console.error('Failed to load bots:', error);
     });
 });
-
-
 </script>
 
 <template>
-    <div class="col-12">
+    <swastika-loader v-if="isSubmitting"/>
+
+    <div :class="{'loading': isSubmitting}" class="col-12">
         <div class="card">
             <BotsTable
                 :per-page-text="prePageText"
@@ -73,9 +83,21 @@ onMounted(() => {
                 @handle="handleEvent"/>
         </div>
     </div>
+
+    <BotsConfirmatiomModal
+        title="Подтверждение действия"
+        message="Вы уверены, что хотите удалить этого бота?"
+        :showModal="showModal"
+        @update:showModal="showModal = $event"
+        @confirm="confirmDelete"
+    />
 </template>
 
 <style scoped lang="scss">
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
 .table-wrapper {
     overflow-x: auto;
 }

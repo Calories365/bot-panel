@@ -1,8 +1,9 @@
+
 <script>
-import CaloriesErrorNotification from "@/Components/CaloriesErrorNotification.vue";
-import CaloriesSuccessNotification from "@/Components/CaloriesSuccessNotification.vue";
 import BotsContentHeader from "@/Components/BotsContentHeader.vue";
 import BotsLeftMenu from "@/Components/MainLayout/BotsLeftMenu.vue";
+import BotsToastSuccess from "@/Components/UI/BotsToastSuccess.vue";
+import BotsToastError from "@/Components/UI/BotsToastError.vue";
 
 export default {
     data() {
@@ -14,53 +15,42 @@ export default {
     components: {
         BotsLeftMenu,
         BotsContentHeader,
-        CaloriesSuccessNotification, CaloriesErrorNotification,
+        BotsToastSuccess,
+        BotsToastError,
     },
     computed: {
-        successMessage() {
-            return this.$store.getters.isSuccess;
+        successMessages() {
+            return this.$store.getters.successMessages;
         },
-        errorMessage() {
-            return this.$store.getters.isError;
+        errorMessages() {
+            return this.$store.getters.errorMessages;
         }
     },
 }
 </script>
-
 <template>
     <body class="hold-transition sidebar-mini sidebar-collapse">
-
-    <div class="wrapper">
-
-        <bots-left-menu/>
-        <!--        <div class="content-wrapper" style="min-height: 757px">-->
-        <div class="content-wrapper">
-
-            <BotsContentHeader/>
-
-            <!--            <section class="content">-->
-            <!--                <div class="row">-->
-            <!--                </div>-->
-            <!--            </section>-->
-
-            <section class="content">
-
-                <router-view/>
-
-            </section>
-
-
+    <div v-if="successMessages.length">
+        <div v-for="message in successMessages" :key="message">
+            <BotsToastSuccess :message="message"/>
         </div>
-
-
     </div>
-
-
+    <div v-if="errorMessages.length">
+        <BotsToastError :messages="errorMessages"/>
+    </div>
+    <div class="wrapper">
+        <BotsLeftMenu/>
+        <div class="content-wrapper">
+            <BotsContentHeader/>
+            <section class="content">
+                <router-view/>
+            </section>
+        </div>
+    </div>
     </body>
-
 </template>
 
-<style lang="scss">
 
+<style scoped>
 
 </style>

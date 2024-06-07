@@ -5,6 +5,7 @@ const props = defineProps({
     placeholder: String,
     data: String,
     name: String,
+    required: Boolean,
 });
 
 const emit = defineEmits(['handle']);
@@ -20,7 +21,8 @@ const emailValue = computed({
 <template>
     <div class="form-group">
         <input class="form-control" id="exampleInputEmail1"
-               :placeholder="placeholder" v-model="emailValue">
+               :placeholder="placeholder" v-model="emailValue" :required="required"
+        >
     </div>
 </template>
 

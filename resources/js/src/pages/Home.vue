@@ -1,15 +1,15 @@
 <script>
-import CaloriesSucces from "@/Components/CaloriesSucces.vue";
-// import CaloriesCard from "@/Components/CaloriesCard.vue";
 
 export default {
     name: "Home",
-    components: {CaloriesSucces},
+    beforeRouteEnter(to, from, next) {
+        next({name: 'showBots'});
+    },
 }
 </script>
 
 <template>
-
+    <h1>Home</h1>
 </template>
 
 

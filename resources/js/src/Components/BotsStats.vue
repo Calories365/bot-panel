@@ -1,11 +1,15 @@
 <script setup>
 import {computed, defineProps, onMounted, ref} from 'vue';
 import {Chart, registerables} from 'chart.js';
+import BotsButton from "@/Components/UI/BotsButton.vue";
+import {useRouter} from "vue-router";
 
 Chart.register(...registerables);
+const router = useRouter();
 
 const props = defineProps({
     data: Object,
+    botId: Number,
 });
 
 const chartRef = ref(null);
@@ -42,6 +46,9 @@ const chartData = computed(() => {
     return {labels: [], datasets: []};
 });
 
+const navigateToUsers = () => {
+    router.push({ name: 'showUsers', params: { id: props.botId } });
+}
 onMounted(() => {
     const ctx = chartRef.value.getContext('2d');
     new Chart(ctx, {
@@ -85,7 +92,9 @@ onMounted(() => {
                     </tr>
                     </tbody>
                 </table>
-                <a href="http://app.test/showBotUsers/36" class="btn btn-primary">Список пользователей</a>
+                <BotsButton @click="navigateToUsers">
+                    Список пользователей
+                </BotsButton>
             </div>
         </div>
     </div>

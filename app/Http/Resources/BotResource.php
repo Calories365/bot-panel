@@ -39,6 +39,7 @@ class BotResource extends JsonResource
             'message' => $this->message,
             'message_image' => $imageInfo,
             'active' => (int)$this->active,
+            'wordpress_endpoint' => $this->wordpress_endpoint,
             'web_hook' => $this->web_hook,
             'type_id' => $typeInfo,
         ];

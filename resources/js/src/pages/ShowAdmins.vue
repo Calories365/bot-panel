@@ -5,18 +5,22 @@ import {useStore} from "vuex";
 import {actionTypes, getterTypes} from "@/store/modules/admins.js";
 import {adminsTableConfig} from "@/ComponentConfigs/TableConfigs.js";
 import router from "@/router/router.js";
+import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
+import SwastikaLoader from "@/Components/UI/Swastika-loader.vue"; // Импортируем компонент загрузки
 
 const store = useStore();
 const bots = computed(() => store.getters[getterTypes.admins]);
-const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
-const pagination = computed(() => store.getters[getterTypes.pagination])
+const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]); // Добавлено для отслеживания состояния загрузки
+const pagination = computed(() => store.getters[getterTypes.pagination]);
 
 const sizeOptions = [10, 20, 30, 40, 50];
 
-const prePageText = 'Количество админов на странице'
+const prePageText = 'Количество админов на странице';
 const currentPage = ref(1);
 const pageSize = ref(10);
 const emit = defineEmits(['handle']);
+const showModal = ref(false);
+const selectedAdminId = ref(null);
 
 const handlePageChange = (page) => {
     currentPage.value = page;
@@ -41,22 +45,30 @@ const handlePageSizeChange = (size) => {
 onMounted(() => {
     store.dispatch(actionTypes.getAllAdmins).then(allAdmins => {
     }).catch(error => {
-        console.error('Failed to load bots:', error);
+        console.error('Failed to load admins:', error);
     });
 });
 
 function handleEvent(event) {
     if (event.action === 'delete') {
-        store.dispatch(actionTypes.deleteAdmin, {id: event.id});
+        selectedAdminId.value = event.id;
+        showModal.value = true;
     }
     if (event.action === 'show') {
         router.push(`/showAdmins/${event.id}`);
     }
 }
+
+const confirmDelete = () => {
+    store.dispatch(actionTypes.deleteAdmin, {id: selectedAdminId.value});
+    selectedAdminId.value = null;
+};
 </script>
 
 <template>
-    <div class="col-12">
+    <swastika-loader v-if="isSubmitting"/>
+
+    <div :class="{'loading': isSubmitting}" class="col-12">
         <div class="card">
             <BotsTable
                 :per-page-text="prePageText"
@@ -71,9 +83,21 @@ function handleEvent(event) {
                 @handle="handleEvent"/>
         </div>
     </div>
+
+    <BotsConfirmatiomModal
+        title="Подтверждение действия"
+        message="Вы уверены, что хотите удалить этого админа?"
+        :showModal="showModal"
+        @update:showModal="showModal = $event"
+        @confirm="confirmDelete"
+    />
 </template>
 
 <style scoped lang="scss">
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
 .table-wrapper {
     overflow-x: auto;
 }
