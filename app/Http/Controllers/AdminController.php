@@ -45,7 +45,6 @@ class AdminController extends BaseController
         return new BotAdminResource($botAdmin);
     }
 
-
     public function destroy(BotAdmin $botAdmin): \Illuminate\Http\JsonResponse
     {
         $botAdmin->delete();

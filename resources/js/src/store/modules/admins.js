@@ -155,12 +155,14 @@ const actions = {
         commit(mutationTypes.deleteAdminStart);
         try {
             await adminsApi.deleteAdmin(id);
+            dispatch('addSuccess', 'Адмиин удален!', {root: true});
             commit(mutationTypes.deleteAdminSuccess);
             return await dispatch(actionTypes.getAllAdmins, {
                 page: state.pagination.currentPage,
                 perPage: state.pagination.perPage
             });
         } catch (error) {
+            dispatch('addError', 'Ошибка удаления!', {root: true});
             commit(mutationTypes.deleteAdminFailure, error.response ? error.response.data : error);
             throw error;
         }
@@ -176,26 +178,29 @@ const actions = {
             throw error;
         }
     },
-    async [actionTypes.updateAdmin]({commit, state}, adminData) {
+    async [actionTypes.updateAdmin]({commit, state, dispatch}, adminData) {
         commit(mutationTypes.updateAdminStart);
         try {
-            console.log('adminData:', adminData);
             const response = await adminsApi.updateAdmin(state.admin.id, adminData);
             commit(mutationTypes.updateAdminSuccess, response.data);
+            dispatch('addSuccess', 'Админ обновлен!', {root: true});
             return response.data;
         } catch (error) {
             commit(mutationTypes.updateAdminFailure, error.response ? error.response.data : error);
+            dispatch('addError', 'Ошибка обновления!', {root: true});
             throw error;
         }
     },
-    async [actionTypes.createAdmin]({commit, state}, adminData) {
+    async [actionTypes.createAdmin]({commit, state, dispatch}, adminData) {
         commit(mutationTypes.createAdminStart);
         try {
             const response = await adminsApi.createAdmin(adminData);
             commit(mutationTypes.createAdminSuccess, response.data);
+            dispatch('addSuccess', 'Админ создан!', {root: true});
             return response.data.id;
         } catch (error) {
             commit(mutationTypes.createAdminFailure, error.response ? error.response.data : error);
+            dispatch('addError', 'Ошибка создания!', {root: true});
             throw error;
         }
     },

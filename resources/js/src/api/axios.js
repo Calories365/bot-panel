@@ -16,7 +16,7 @@ axios.interceptors.request.use(config => {
 });
 
 axios.interceptors.request.use(config => {
-    const locale = localStorage.getItem('locale') || 'en';
+    const locale = localStorage.getItem('locale') || 'ru';
 
     config.headers['Accept-Language'] = locale;
 

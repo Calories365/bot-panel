@@ -220,10 +220,12 @@ const actions = {
         try {
             await botsApi.deleteBot(id);
             commit(mutationTypes.deleteBotSuccess);
+            dispatch('addSuccess', 'Бот Удален!', {root: true});
             return await dispatch(actionTypes.getAllBots, {
                 page: state.pagination.currentPage, perPage: state.pagination.perPage
             });
         } catch (error) {
+            dispatch('addError', 'Ошибка удаления!', {root: true});
             commit(mutationTypes.deleteBotFailure, error.response ? error.response.data : error);
             throw error;
         }
@@ -251,12 +253,21 @@ const actions = {
         }
     },
     async [actionTypes.updateBot]({commit, dispatch, state}, data) {
-        return handleBotData(commit, dispatch, botsApi.updateBot, data, state.bot.id);
+        try {
+            const response = handleBotData(commit, dispatch, botsApi.updateBot, data, state.bot.id);
+            dispatch('addSuccess', 'Бот обновлен!', {root: true});
+            return response;
+        } catch (errors) {
+            dispatch('addError', 'Ошибка обновления!', {root: true});
+        }
     },
     async [actionTypes.createBot]({commit, dispatch}, data) {
         try {
-            return await handleBotData(commit, dispatch, botsApi.createBot, data);
+            const response = await handleBotData(commit, dispatch, botsApi.createBot, data);
+            dispatch('addSuccess', 'Бот создан!', {root: true});
+            return response;
         } catch (errors) {
+            dispatch('addError', 'Ошибка создания!', {root: true});
         }
     },
     async [actionTypes.updateWebhook]({commit, state}) {

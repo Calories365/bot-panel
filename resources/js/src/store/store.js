@@ -1,10 +1,7 @@
-import { createStore } from 'vuex';
+import {createStore} from 'vuex';
 
 import auth from '@/store/modules/auth';
-import calculation from "@/store/modules/calculation.js";
 import bots from "@/store/modules/bots.js";
-import changeLocale from "@/store/modules/changeLocale.js";
-import stats from "@/store/modules/stats.js";
 import users from "@/store/modules/users.js";
 import admins from "@/store/modules/admins.js";
 
@@ -46,6 +43,6 @@ export default createStore({
         },
     },
     modules: {
-        auth, calculation, bots, changeLocale, stats, users, admins
+        auth, bots, users, admins
     }
 });

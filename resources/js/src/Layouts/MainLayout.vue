@@ -31,10 +31,9 @@ export default {
 <template>
     <body class="hold-transition sidebar-mini sidebar-collapse">
     <div v-if="successMessages.length">
-        <div v-for="message in successMessages" :key="message">
-            <BotsToastSuccess :message="message"/>
-        </div>
+        <BotsToastSuccess :messages="successMessages"/>
     </div>
+
     <div v-if="errorMessages.length">
         <BotsToastError :messages="errorMessages"/>
     </div>
