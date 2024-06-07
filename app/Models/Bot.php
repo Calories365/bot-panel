@@ -22,20 +22,19 @@ class Bot extends Model
         'web_hook'
     ];
 
-    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function users()
     {
-        return $this->belongsToMany(BotUser::class, 'bot_bot_users', 'bot_id', 'bot_user_id');
+        return $this->belongsToMany(BotUser::class, 'bot_user_bot')->withTimestamps();
     }
 
-    public function type(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function type()
     {
         return $this->belongsTo(BotType::class, 'type_id');
     }
 
-    public function banned_users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function banned_users()
     {
-        return $this->belongsToMany(BotUser::class, 'banned_bot_user_relations')
-            ->using(BannedBotUser::class);
+        return $this->belongsToMany(BotUser::class, 'bot_user_bans')->withTimestamps();
     }
 
     public function updateWeebHook(): bool
@@ -57,7 +56,7 @@ class Bot extends Model
         foreach ($admins as $admin) {
             dispatch(function () use ($admin, $message) {
                 Log::info('Sent message: ' . $message);
-                $telegram = new Api($this->token); // Используйте токен этого бота
+                $telegram = new Api($this->token);
                 $telegram->sendMessage([
                     'chat_id' => $admin->telegram_id,
                     'text' => $message,

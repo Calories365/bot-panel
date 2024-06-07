@@ -20,13 +20,12 @@ class BotUser extends Model
 
     public function bots()
     {
-        return $this->belongsToMany(Bot::class, 'bot_bot_users', 'bot_user_id', 'bot_id');
+        return $this->belongsToMany(Bot::class, 'bot_user_bot')->withTimestamps();
     }
 
     public function banned_bots()
     {
-        return $this->belongsToMany(Bot::class, 'banned_bot_user')
-            ->using(BannedBotUser::class);
+        return $this->belongsToMany(Bot::class, 'bot_user_bans')->withTimestamps();
     }
 
     public static function getPaginatedUsers($perPage, $botId = null)
@@ -44,20 +43,22 @@ class BotUser extends Model
 
     public static function addOrUpdateUser($chatId, $firstName, $lastName, $username, $botId, $premium)
     {
+        $fullName = $firstName . ($lastName ? " {$lastName}" : '');
+
         $botUser = self::firstOrCreate(
             ['telegram_id' => $chatId],
             [
-                'name' => $firstName . ($lastName ? " {$lastName}" : ''),
+                'name' => $fullName,
                 'username' => $username,
                 'premium' => $premium ? 1 : 0,
                 'is_banned' => 0
             ]
         );
 
-        $botUser->load('banned_bots');
+        $botUser->loadMissing('bots');
 
-        if ($botUser->banned_bots->contains('bot_id', $botId)) {
-            $botUser->banned_bots()->detach($botId);
+        if ($botUser->bots->contains($botId)) {
+            $botUser->bots()->detach($botId);
         }
 
         $botUser->bots()->syncWithoutDetaching([$botId]);

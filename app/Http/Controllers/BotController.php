@@ -109,7 +109,7 @@ class BotController extends BaseController
         $premiumUsersStats = $dates;
         $botId = $bot->id;
 
-        $newUsersData = DB::table('bot_bot_user')
+        $newUsersData = DB::table('bot_user_bot')
             ->where('bot_id', $botId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
@@ -120,7 +120,7 @@ class BotController extends BaseController
             $newUsersStats[$data->date] = $data->count;
         }
 
-        $bannedUsersData = DB::table('banned_bot_user')
+        $bannedUsersData = DB::table('bot_user_bans')
             ->where('bot_id', $botId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
@@ -131,12 +131,12 @@ class BotController extends BaseController
             $bannedUsersStats[$data->date] = $data->count;
         }
 
-        $premiumUsersData = DB::table('bot_bot_user')
-            ->join('bot_users', 'bot_bot_user.bot_user_id', '=', 'bot_users.id')
-            ->where('bot_bot_user.bot_id', $botId)
+        $premiumUsersData = DB::table('bot_user_bot')
+            ->join('bot_users', 'bot_user_bot.bot_user_id', '=', 'bot_users.id')
+            ->where('bot_user_bot.bot_id', $botId)
             ->where('bot_users.premium', 1)
-            ->whereBetween('bot_bot_user.created_at', [$startDate, $endDate])
-            ->select(DB::raw('DATE(bot_bot_user.created_at) as date'), DB::raw('count(*) as count'))
+            ->whereBetween('bot_user_bot.created_at', [$startDate, $endDate])
+            ->select(DB::raw('DATE(bot_user_bot.created_at) as date'), DB::raw('count(*) as count'))
             ->groupBy('date')
             ->get();
 
