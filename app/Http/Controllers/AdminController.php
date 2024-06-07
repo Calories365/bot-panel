@@ -27,8 +27,7 @@ class AdminController extends BaseController
         return BotAdminResource::collection($bots);
     }
 
-
-    public function show(BotAdmin $botAdmin)
+    public function show(BotAdmin $botAdmin): BotAdminResource
     {
         return new BotAdminResource($botAdmin);
     }

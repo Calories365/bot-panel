@@ -20,7 +20,7 @@ class BotUser extends Model
 
     public function bots()
     {
-        return $this->belongsToMany(Bot::class, 'bot_user_bot')->withTimestamps();
+        return $this->belongsToMany(Bot::class, 'bot_user_bots')->withTimestamps();
     }
 
     public function banned_bots()

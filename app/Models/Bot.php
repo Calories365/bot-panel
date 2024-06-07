@@ -24,7 +24,7 @@ class Bot extends Model
 
     public function users()
     {
-        return $this->belongsToMany(BotUser::class, 'bot_user_bot')->withTimestamps();
+        return $this->belongsToMany(BotUser::class, 'bot_user_bots')->withTimestamps();
     }
 
     public function type()
