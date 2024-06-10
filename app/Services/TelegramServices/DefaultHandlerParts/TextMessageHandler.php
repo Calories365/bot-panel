@@ -21,26 +21,31 @@ class TextMessageHandler
         if (str_contains($text, 'start')) {
             $commonData = self::extractCommonData($message);
             $imagePath = $bot->message_image;
+
             $messageText = $bot->message;
-
             if ($imagePath) {
-                $absoluteImagePath = Storage::path($imagePath);
-                $photo = InputFile::create($absoluteImagePath, basename($absoluteImagePath));
+                $relativeImagePath = str_replace('/storage', 'public', parse_url($imagePath, PHP_URL_PATH));
+                if (Storage::exists($relativeImagePath)) {
+                    $absoluteImagePath = Storage::path($relativeImagePath);
+                    $photo = InputFile::create($absoluteImagePath, basename($absoluteImagePath));
 
-                try {
-                    $telegram->sendPhoto([
-                        'chat_id' => $commonData['chatId'],
-                        'photo' => $photo,
-                        'caption' => $messageText
-                    ]);
-                } catch (Telegram\Bot\Exceptions\TelegramOtherException $e) {
-                    if ($e->getMessage() === 'Forbidden: bot was blocked by the user') {
-                        $userModel = BotUser::where('telegram_id', $commonData['chatId'])->firstOrFail();
-                        $userModel->is_banned = 1;
-                        $userModel->save();
-                    } else {
-                        Log::info($e->getMessage());
+                    try {
+                        $telegram->sendPhoto([
+                            'chat_id' => $commonData['chatId'],
+                            'photo' => $photo,
+                            'caption' => $messageText
+                        ]);
+                    } catch (Telegram\Bot\Exceptions\TelegramOtherException $e) {
+                        if ($e->getMessage() === 'Forbidden: bot was blocked by the user') {
+                            $userModel = BotUser::where('telegram_id', $commonData['chatId'])->firstOrFail();
+                            $userModel->is_banned = 1;
+                            $userModel->save();
+                        } else {
+                            Log::info($e->getMessage());
+                        }
                     }
+                } else {
+                    Log::error("Image file not found: " . $relativeImagePath);
                 }
             } else {
                 $telegram->sendMessage([

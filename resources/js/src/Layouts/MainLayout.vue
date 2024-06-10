@@ -41,7 +41,7 @@ export default {
         <BotsLeftMenu/>
         <div class="content-wrapper">
             <BotsContentHeader/>
-            <section class="content">
+            <section class="content" style="min-height: 700px">
                 <router-view/>
             </section>
         </div>

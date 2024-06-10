@@ -11,11 +11,12 @@ class TelegramHandler
 {
     protected array $strategies;
 
-    public function __construct(ApprovalService $approvalService, DefaultService $defaultService)
+    public function __construct(ApprovalService $approvalService, DefaultService $defaultService, RequestService $requestService)
     {
         $this->strategies = [
             'Approval' => $approvalService,
             'Default' => $defaultService,
+            'Request' => $requestService,
         ];
     }
 

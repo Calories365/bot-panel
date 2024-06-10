@@ -6,6 +6,7 @@ import BotsFormTextarea from "@/Components/BotsForm/BotsFormTextarea.vue";
 import BotsFormPicture from "@/Components/BotsForm/BotsFormPicture.vue";
 import BotsFormCheckbox from "@/Components/BotsForm/BotsFormCheckbox.vue";
 import BotsFormButtons from "@/Components/BotsForm/BotsFormButtons.vue";
+import BotsFormMultipleDropdown from "@/Components/BotsForm/BotsFormMultipleDropdown.vue";
 
 const props = defineProps({
     rows: Array,
@@ -20,6 +21,7 @@ const componentMap = {
     picture: BotsFormPicture,
     checkbox: BotsFormCheckbox,
     buttons: BotsFormButtons,
+    multiple_dropdown: BotsFormMultipleDropdown,
 };
 const formRef = ref(null);
 function getComponentType(type) {
@@ -46,6 +48,7 @@ const errors = ref({});
     <form ref="formRef" action="#" class="card-body">
         <div v-for="(row, index) in props.rows" :key="index" class="form-group">
             <label :for="row.key">{{ row.label }}</label>
+            <!--            {{ data[row.key]}}-->
             <component
                 :emit_name="row.emit_name"
                 :name="row.key"

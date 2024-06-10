@@ -52,6 +52,10 @@ export const mutationTypes = {
     getBotTypesSuccess: '[bots] getBotTypesSuccess',
     getBotTypesFailure: '[bots] getBotTypesFailure',
 
+    getBotManagersStart: '[bots] getBotManagersStart',
+    getBotManagersSuccess: '[bots] getBotManagersSuccess',
+    getBotManagersFailure: '[bots] getBotManagersFailure',
+
     updateBotStart: '[bots] updateBotStart',
     updateBotSuccess: '[bots] updateBotSuccess',
     updateBotFailure: '[bots] updateBotFailure',
@@ -109,7 +113,8 @@ const mutations = {
     }, [mutationTypes.getBotFailure](state, payload) {
         state.errors = payload;
         state.isSubmitting = false;
-    }, [mutationTypes.getBotTypesStart](state) {
+    },
+    [mutationTypes.getBotTypesStart](state) {
         state.isSubmitting = true;
         state.errors = null;
     }, [mutationTypes.getBotTypesSuccess](state, payload) {
@@ -119,6 +124,18 @@ const mutations = {
         state.errors = payload;
         state.isSubmitting = false;
     },
+    [mutationTypes.getBotManagersStart](state) {
+        state.isSubmitting = true;
+        state.errors = null;
+    }, [mutationTypes.getBotManagersSuccess](state, payload) {
+        state.isSubmitting = false;
+        state.bot.bot_types = payload;
+    }, [mutationTypes.getBotManagersFailure](state, payload) {
+        state.errors = payload;
+        state.isSubmitting = false;
+    },
+
+
     [mutationTypes.updateBotStart](state) {
         state.isSubmitting = true;
         state.errors = null;
@@ -186,6 +203,7 @@ export const actionTypes = {
     deleteBot: '[bots] deleteBot',
     getBot: '[bots] getBot',
     getBotTypes: '[bots] getBotTypes',
+    getBotManagers: '[bots] getBotManagers',
     updateBot: '[bots] updateBot',
     createBot: '[bots] createBot',
     updateWebhook: '[bots] updateWebhook',
@@ -252,6 +270,17 @@ const actions = {
             throw error;
         }
     },
+    async [actionTypes.getBotManagers]({commit}) {
+        commit(mutationTypes.getBotManagersStart);
+        try {
+            const response = await botsApi.getBotManagers();
+            commit(mutationTypes.getBotManagersSuccess, response.data);
+            return response.data;
+        } catch (error) {
+            commit(mutationTypes.getBotManagersFailure, error.response ? error.response.data : error);
+            throw error;
+        }
+    },
     async [actionTypes.updateBot]({commit, dispatch, state}, data) {
         try {
             const response = handleBotData(commit, dispatch, botsApi.updateBot, data, state.bot.id);
@@ -311,11 +340,15 @@ async function handleBotData(commit, dispatch, botApiFunction, botData, botId = 
         }
 
         botData.type_id = botData.type_id.type_id;
+        botData.managers = botData.managers.managers;
+        // console.log(botData.managers)
 
         const formData = new FormData();
         for (const key in botData) {
             if (botData.hasOwnProperty(key)) {
-                if (key === 'message_image' && botData[key] instanceof File) {
+                if (key === 'managers' && botData.managers && botData.managers.length > 0) {
+                    formData.append('managers', JSON.stringify(botData.managers));
+                } else if (key === 'message_image' && botData[key] instanceof File) {
                     formData.append(key, botData[key], botData[key].name);
                 } else {
                     formData.append(key, botData[key]);

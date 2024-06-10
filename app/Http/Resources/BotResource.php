@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\BotType;
+use App\Models\Manager;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class BotResource extends JsonResource
@@ -15,6 +16,20 @@ class BotResource extends JsonResource
      */
     public function toArray($request)
     {
+        $botManagers = $this->managers->map(function ($manager) {
+            return [
+                'id' => $manager->id,
+                'name' => $manager->name,
+            ];
+        });
+
+        $allManagers = Manager::all()->map(function ($manager) {
+            return [
+                'id' => $manager->id,
+                'name' => $manager->name,
+            ];
+        });
+
         $allBotTypes = BotType::all()->map(function ($type) {
             return [
                 'id' => $type->id,
@@ -42,6 +57,10 @@ class BotResource extends JsonResource
             'wordpress_endpoint' => $this->wordpress_endpoint,
             'web_hook' => $this->web_hook,
             'type_id' => $typeInfo,
+            'managers' => [
+                'managers' => $botManagers,
+                'allManagers' => $allManagers
+            ]
         ];
     }
 }

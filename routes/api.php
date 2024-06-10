@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BotController;
+use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
@@ -52,9 +53,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::delete('/admins/{botAdmin}', [AdminController::class, 'destroy'])->name('admin.destroy');
 
-        Route::post('/admins', [AdminController::class, 'createAdmin'])->name('admin.create');
+        Route::post('/admins', [AdminController::class, 'create'])->name('admin.create');
 
-        Route::put('/admins/{botAdmin}', [AdminController::class, 'updateAdmin'])->name('admin.update');
+        Route::put('/admins/{botAdmin}', [AdminController::class, 'update'])->name('admin.update');
+
+        Route::get('/managers', [ManagerController::class, 'index'])->name('manager.index');
+
+        Route::get('/managers/{manager}', [ManagerController::class, 'show'])->name('manager.show');
+
+        Route::delete('/managers/{manager}', [ManagerController::class, 'destroy'])->name('manager.destroy');
+
+        Route::post('/managers', [ManagerController::class, 'create'])->name('manager.create');
+
+        Route::put('/managers/{manager}', [ManagerController::class, 'update'])->name('manager.update');
+
+        Route::get('/bot-managers', [BotController::class, 'getManagers'])->name('bot.managers');
     });
 });
 Route::group(['namespace' => 'App\Http\Controllers'], function () {

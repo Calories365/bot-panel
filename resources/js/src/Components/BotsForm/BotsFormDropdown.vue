@@ -5,15 +5,6 @@ const props = defineProps({
     placeholder: String,
     data: {
         type: Object,
-        default: () => ({
-            type_id: 2,
-            types: [
-                {
-                    id: 1,
-                    name: "Default"
-                },
-            ]
-        })
     },
     name: String,
 });

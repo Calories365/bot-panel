@@ -14,6 +14,9 @@ const getBotById = (id) => {
 const getBotTypes = () => {
     return axios.get(`/api/bot-types`);
 }
+const getBotManagers = () => {
+    return axios.get(`/api/bot-managers`);
+}
 
 const deleteBot = (id) => {
     return axios.delete(`/api/bots/${id}`);
@@ -47,5 +50,6 @@ export default {
     updateBot,
     createBot,
     updateWebhook,
-    getBotUserData
+    getBotUserData,
+    getBotManagers
 }

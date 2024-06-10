@@ -32,14 +32,14 @@ class AdminController extends BaseController
         return new BotAdminResource($botAdmin);
     }
 
-    public function createAdmin(Request $request): \Illuminate\Http\JsonResponse
+    public function create(Request $request): \Illuminate\Http\JsonResponse
     {
         $data = $request->all();
         $botAdmin = BotAdmin::create($data);
         return response()->json(['id' => $botAdmin->id]);
     }
 
-    public function updateAdmin(Request $request, BotAdmin $botAdmin): BotAdminResource
+    public function update(Request $request, BotAdmin $botAdmin): BotAdminResource
     {
         $botAdmin->update($request->only(['name', 'telegram_id']));
         return new BotAdminResource($botAdmin);

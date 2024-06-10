@@ -9,8 +9,10 @@ const menuItems = [
   {text: "Боты", icon: ['fas', 'robot'], path: '/showBots'},
   {text: "Добавить бота", icon: ['fas', 'plus-circle'], path: '/addBot'},
   {text: "Пользователи", icon: ['fas', 'users'], path: '/showUsers'},
-  {text: "Админы", icon: ['fas', 'user-shield'], path: '/showAdmins'},
-  {text: "Добавить админа", icon: ['fas', 'user-plus'], path: '/addAdmin'},
+    {text: "Админы", icon: ['fas', 'user-shield'], path: '/showAdmins'},
+    {text: "Добавить админа", icon: ['fas', 'user-plus'], path: '/addAdmin'},
+    {text: "Менеджеры", icon: ['fas', 'phone'], path: '/showManagers'},
+    {text: "Добавить менеджера", icon: ['fas', 'user-plus'], path: '/addManager'}
 ];
 const currentUser = computed(() => store.getters[getterTypes.currentUser]);
 

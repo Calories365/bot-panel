@@ -13,7 +13,6 @@ class BotTypesCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        // Получаем ID первого типа бота или null, если коллекция пуста
         $firstTypeId = $this->collection->first() ? $this->collection->first()->id : null;
 
         return [

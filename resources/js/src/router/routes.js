@@ -8,6 +8,9 @@ import ShowBot from "@/pages/ShowBot.vue";
 import ShowUsers from "@/pages/ShowUsers.vue";
 import showAdmin from "@/pages/ShowAdmin.vue";
 import Home from "@/pages/Home.vue";
+import AddManager from "@/pages/AddManager.vue";
+import ShowManagers from "@/pages/ShowManagers.vue";
+import showManager from "@/pages/ShowManager.vue";
 
 const routes = [
     {
@@ -80,6 +83,18 @@ const routes = [
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Админ',
+                },
+            }, {
+                path: '/addManager', name: 'addManager', component: AddManager, meta: {
+                    needAuth: true, breadcrumb: 'Добавить Менеджара',
+                },
+            }, {
+                path: '/showManagers', name: 'showManagers', component: ShowManagers, meta: {
+                    needAuth: true, breadcrumb: 'Все Менеджеры',
+                },
+            }, {
+                path: '/showManagers/:id', name: 'showManager', component: showManager, meta: {
+                    needAuth: true, breadcrumb: 'Менеджер',
                 },
             },
 

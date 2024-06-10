@@ -3,7 +3,7 @@ import BotsForm from "@/Components/BotsForm.vue";
 import {computed, onMounted, ref} from "vue";
 import {actionTypes, getterTypes} from "@/store/modules/bots.js";
 import store from "@/store/store.js";
-import {create_rows, create_rows_approval} from "@/ComponentConfigs/FormConfigs.js";
+import {create_rows, create_rows_approval, create_rows_request} from "@/ComponentConfigs/FormConfigs.js";
 import router from "@/router/router.js";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 
@@ -11,12 +11,12 @@ const formConfig = computed(() => {
     if (Object.keys(localBotData.value).length > 0 && localBotData.value.type_id) {
         const typeId = localBotData.value.type_id.type_id;
         switch (typeId) {
-            case 1:
-                return create_rows;
             case 2:
                 return create_rows_approval;
+            case 3:
+                return create_rows_request;
             default:
-                return [];
+                return create_rows;
         }
     }
     return [];
@@ -52,6 +52,9 @@ function handleEvent(payload) {
 onMounted(() => {
     store.dispatch(actionTypes.getBotTypes).then((data) => {
         localBotData.value.type_id = data;
+    });
+    store.dispatch(actionTypes.getBotManagers).then((data) => {
+        localBotData.value.managers = data;
     });
 });
 </script>

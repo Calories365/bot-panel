@@ -13,6 +13,11 @@ export const adminsTableConfig = [
     {label: 'Удаление', key: 'delete', type: 'button', action: 'delete', limit: 40},
 ];
 
+export const managersTableConfig = [
+    {label: 'ID', key: 'id', type: 'default', action: null, limit: 40},
+    {label: 'Юзернейм', key: 'name', type: 'link', action: 'show', limit: 40},
+    {label: 'Удаление', key: 'delete', type: 'button', action: 'delete', limit: 40},
+];
 export const usersTableConfig = [
     {label: 'ID', key: 'id', type: 'default', action: null, limit: 40},
     {label: 'Имя', key: 'name', type: 'link', action: 'show', limit: 40},

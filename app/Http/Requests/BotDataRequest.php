@@ -29,7 +29,8 @@ class BotDataRequest extends FormRequest
             'message' => 'nullable|string',
             'active' => 'boolean',
             'message_image' => 'nullable|image',
-            'web_hook' => 'required'
+            'web_hook' => 'required',
+            'managers' => 'nullable',
         ];
     }
 }

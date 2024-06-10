@@ -1,0 +1,92 @@
+<script setup>
+import {computed, onMounted, ref} from 'vue';
+import {actionTypes, getterTypes} from '@/store/modules/managers.js';
+import {useStore} from "vuex";
+import {useRoute} from "vue-router";
+import router from "@/router/router.js";
+import {manager_Rows} from "@/ComponentConfigs/FormConfigs.js";
+import BotsForm from "@/Components/BotsForm.vue";
+import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
+import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+
+const store = useStore();
+const route = useRoute();
+const managerData = computed(() => store.getters[getterTypes.manager]);
+const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
+const localManagerData = ref({});
+const showModal = ref(false);
+
+function handleEvent(payload) {
+    if (payload.key && payload.value !== undefined) {
+        localManagerData.value[payload.key] = payload.value;
+    } else if (payload.action) {
+        switch (payload.action) {
+            case 'submit':
+                saveManager();
+                break;
+            case 'delete':
+                showModal.value = true;
+                break;
+            default:
+                console.log("Неизвестное действие");
+        }
+    }
+}
+
+function saveManager() {
+    store.dispatch(actionTypes.updateManager, localManagerData.value).then(() => {
+        localManagerData.value = {...managerData.value};
+    });
+}
+
+function deleteManager() {
+    store.dispatch(actionTypes.deleteManager, {id: managerData.value.id}).then(() => {
+        router.push({name: 'showManagers'});
+    });
+}
+
+function confirmDelete() {
+    deleteManager();
+    showModal.value = false;
+}
+
+onMounted(() => {
+    const adminId = route.params.id;
+    store.dispatch(actionTypes.getManager, adminId).then(() => {
+        localManagerData.value = {...managerData.value};
+    });
+});
+</script>
+
+<template>
+    <swastika-loader v-if="isSubmitting"/>
+
+    <div :class="{'loading': isSubmitting}" class="row">
+        <div class="col-md-12">
+            <div class="card card-primary">
+                <div class="card-header">
+                    Менеджер
+                </div>
+                <bots-form
+                    :data="localManagerData"
+                    :rows="manager_Rows"
+                    @handle="handleEvent"/>
+            </div>
+        </div>
+    </div>
+
+    <BotsConfirmatiomModal
+        title="Подтверждение действия"
+        message="Вы уверены, что хотите удалить этого админа?"
+        :showModal="showModal"
+        @update:showModal="showModal = $event"
+        @confirm="confirmDelete"
+    />
+</template>
+
+<style scoped lang="scss">
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+</style>

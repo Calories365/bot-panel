@@ -10,10 +10,8 @@
     @vite('resources/css/admin.css')
     @vite('resources/js/app.js')
     @vite('resources/js/admin.js')
-{{--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.x/css/all.min.css">--}}
 
 
-{{--    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">--}}
     <link rel="icon" type="image/png" href="/images/icons8-calories-80.png">
 </head>
 <body>

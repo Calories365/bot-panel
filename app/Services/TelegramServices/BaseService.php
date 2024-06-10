@@ -37,12 +37,12 @@ class BaseService implements BotHandlerStrategy
                 break;
 
             case isset($message['text']):
-                Log::info('BaseService::getMessageType::$message[text]');
                 static::handleTextMessage($bot, $telegram, $update);
                 break;
 
             default:
-                throw new \Exception("Unknown message type");
+                Log::info("Unknown message type: " . json_encode($message));
+                break;
         }
     }
 
@@ -50,18 +50,20 @@ class BaseService implements BotHandlerStrategy
     {
         $myChatMember = $update->getMyChatMember();
         $newStatus = $myChatMember['new_chat_member']['status'];
+        $userId = $myChatMember['from']['id'];
 
-        if ($newStatus === 'kicked') {
 
-            $userId = $myChatMember['from']['id'];
+        $userModel = BotUser::where('telegram_id', $userId)->first();
 
-            Log::info("Bot was kicked or blocked by user: " . $userId);
-
-            $userModel = BotUser::where('telegram_id', $userId)->firstOrFail();
-
-            $userModel->banned_bots()->syncWithoutDetaching([$bot->id]);
+        if ($userModel) {
+            if ($newStatus === 'kicked') {
+                $userModel->banned_bots()->syncWithoutDetaching([$bot->id]);
+            } else {
+                $userModel->banned_bots()->detach($bot->id);
+            }
         }
     }
+
 
     public static function handleMessage($bot, $telegram, $update)
     {

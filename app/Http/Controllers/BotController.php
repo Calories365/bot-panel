@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\BotDataRequest;
+use App\Http\Resources\AllManagersResource;
 use App\Http\Resources\BotResource;
 use App\Http\Resources\BotTypesCollection;
 use App\Models\Bot;
 use App\Models\BotType;
+use App\Models\Manager;
+use App\Services\BotManagmentService;
 use App\Services\BotUsersService;
 use App\Services\TelegramServices\TelegramHandler;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -15,11 +18,17 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class BotController extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
+
+    protected BotManagmentService $botManagmentService;
+
+    public function __construct(BotManagmentService $botManagmentService)
+    {
+        $this->botManagmentService = $botManagmentService;
+    }
 
     public function index(Request $request)
     {
@@ -50,11 +59,11 @@ class BotController extends BaseController
         $data = $request->validated();
 
         if ($request->hasFile('message_image')) {
-            $imagePath = $request->file('message_image')->store('public/bots');
-            $data['message_image'] = Storage::url($imagePath);
+            $data['message_image'] = $this->botManagmentService->handleImageUpload($request);
         }
-
         $bot = Bot::create($data);
+        $this->botManagmentService->syncManagers($request, $bot);
+        $bot->updateWeebHook();
 
         return response()->json(['id' => $bot->id]);
     }
@@ -64,20 +73,26 @@ class BotController extends BaseController
         $data = $request->validated();
 
         if ($request->hasFile('message_image')) {
-            $imagePath = $request->file('message_image')->store('public/bots');
-            $data['message_image'] = Storage::url($imagePath);
+            $data['message_image'] = $this->botManagmentService->handleImageUpload($request);
         }
 
         $bot->update($data);
+        $this->botManagmentService->syncManagers($request, $bot);
         $bot->updateWeebHook();
 
         return new BotResource($bot);
     }
 
+
     public function getTypes(): BotTypesCollection
     {
         $botTypes = BotType::all();
         return new BotTypesCollection($botTypes);
+    }
+
+    public function getManagers(): AllManagersResource
+    {
+        return new AllManagersResource(new Manager);
     }
 
     public function getBotUserData(Bot $bot, BotUsersService $botUsersService): \Illuminate\Http\JsonResponse
@@ -88,8 +103,13 @@ class BotController extends BaseController
 
     public function handle(TelegramHandler $telegramHandler, $bot, Request $request): \Illuminate\Http\JsonResponse
     {
-        Log::info('start');
-        $telegramHandler->handle($bot, $request);
-        return response()->json(['status' => 'success']);
+        try {
+            $telegramHandler->handle($bot, $request);
+            return response()->json(['status' => 'success']);
+        } catch
+        (\Exception $e) {
+            Log::error('Error in handle: ' . $e->getMessage());
+            return response()->json(['status' => 'success']);
+        }
     }
 }

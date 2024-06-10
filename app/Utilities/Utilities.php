@@ -16,6 +16,18 @@ class Utilities
         return true;
     }
 
+    public static function saveAndNotifyManagers($chatId, $first_name, $lastName, $username, $bot, $premium, $text): bool
+    {
+        BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium);
+
+        $userMention = "[{$first_name}](tg://user?id=$chatId)";
+        $adminMessage = $text;
+        $messageText = "Сообщение: {$adminMessage} пользователь: {$userMention}";
+
+        $bot->notifyManagers($bot, $messageText);
+        return true;
+    }
+
     public static function getParam($update): string
     {
         if (isset($update['message']['text'])) {

@@ -5,7 +5,7 @@ import {actionTypes, getterTypes} from '@/store/modules/bots';
 import {useStore} from "vuex";
 import {useRoute} from "vue-router";
 import router from "@/router/router.js";
-import {rows, rows_approval} from "@/ComponentConfigs/FormConfigs.js";
+import {rows, rows_approval, rows_request} from "@/ComponentConfigs/FormConfigs.js";
 import BotsStats from "@/Components/BotsStats.vue";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
@@ -25,12 +25,12 @@ const formConfig = computed(() => {
     if (Object.keys(localBotData.value).length > 0 && localBotData.value.type_id) {
         const typeId = localBotData.value.type_id.type_id;
         switch (typeId) {
-            case 1:
-                return rows;
             case 2:
                 return rows_approval;
+            case 3:
+                return rows_request;
             default:
-                return [];
+                return rows;
         }
     }
     return [];
@@ -115,7 +115,8 @@ onUnmounted(() => {
                 <div class="card-header">
                     Бот
                 </div>
-                <bots-form
+
+                <bots-form v-if="localBotData"
                     :data="localBotData"
                     :rows="formConfig"
                     @handle="handleEvent"/>
