@@ -96,7 +96,7 @@ class Bot extends Model
                 ['bot_id' => $bot->id],
                 ['manager_id' => $nextManager->id]
             );
-
+            Log::info('trying to send msg: ' . $message . 'to manager' . $nextManager);
             dispatch(function () use ($nextManager, $message, $delaySeconds) {
                 try {
                     $telegram = new Api($this->token);
@@ -105,6 +105,7 @@ class Bot extends Model
                         'chat_id' => $nextManager->telegram_id,
                         'text' => $message,
                     ]);
+                    Log::info('sent successfully!');
                 } catch (\Exception $e) {
                     Log::error('Error sending Req-message(' . $message . ') to ' . $nextManager->telegram_id . ': ' . $e->getMessage());
                 }
