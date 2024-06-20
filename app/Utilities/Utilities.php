@@ -3,6 +3,7 @@
 namespace App\Utilities;
 
 use App\Models\BotUser;
+use Illuminate\Support\Facades\Log;
 
 class Utilities
 {
@@ -22,9 +23,21 @@ class Utilities
 
         $userMention = "[{$first_name}](tg://user?id=$chatId)";
         $adminMessage = $text;
-        $messageText = "Сообщение: {$adminMessage} пользователь: {$userMention}";
+        $messageText = "{$adminMessage} пользователь: {$userMention}";
 
         $bot->notifyManagers($bot, $messageText);
+        return true;
+    }
+
+    public static function saveAndNotifyAllManagers($chatId, $first_name, $lastName, $username, $bot, $premium, $text): bool
+    {
+        BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium);
+
+        $userMention = "[{$first_name}](tg://user?id=$chatId)";
+        $adminMessage = $text;
+        $messageText = "Сообщение: {$adminMessage} пользователь: {$userMention}";
+
+        $bot->notifyAllManagers($bot, $messageText);
         return true;
     }
 

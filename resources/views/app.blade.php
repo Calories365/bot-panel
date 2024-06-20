@@ -9,10 +9,10 @@
     @vite('resources/css/app.css')
     @vite('resources/css/admin.css')
     @vite('resources/js/app.js')
-    @vite('resources/js/admin.js')
+{{--    @vite('resources/js/admin.js')--}}
 
 
-    <link rel="icon" type="image/png" href="/images/icons8-calories-80.png">
+    <link rel="icon" type="image/png" href="/images/botik.png">
 </head>
 <body>
 <div id="app"></div>

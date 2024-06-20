@@ -1,5 +1,5 @@
 <script setup>
-import { defineEmits, defineProps, ref, watch } from 'vue';
+import {defineEmits, defineProps, ref, watch} from 'vue';
 
 const props = defineProps({
     data: Object,

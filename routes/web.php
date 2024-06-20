@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\BotController;
+use App\Http\Controllers\ImageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,16 +13,17 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::group(['namespace' => 'App\Http\Controllers'], function () {
+    Route::get('/images/{filename}', [ImageController::class, 'show'])->name('image.show');
 
-Route::get('/{any?}', function () {
-    return view('app');
-})->where('any', '.*');
+    Route::get('/{any}', function () {
+        return view('app');
+    })->where('any', '^(?!api|images).*$');
 
-Route::any('/{any?}', function () {
-    return view('app');
-})->where('any', '.*')->name('login');
-
-
+    Route::get('/{any}', function () {
+        return view('app');
+    })->where('any', '^(?!api|images).*$')->name('login');
+});
 
 Route::get('/reset-password/{token}', function ($token) {
     return view('auth.password-reset', ['token' => $token]);

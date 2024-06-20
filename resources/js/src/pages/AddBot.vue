@@ -3,7 +3,12 @@ import BotsForm from "@/Components/BotsForm.vue";
 import {computed, onMounted, ref} from "vue";
 import {actionTypes, getterTypes} from "@/store/modules/bots.js";
 import store from "@/store/store.js";
-import {create_rows, create_rows_approval, create_rows_request} from "@/ComponentConfigs/FormConfigs.js";
+import {
+    create_rows,
+    create_rows_approval,
+    create_rows_request,
+    create_rows_request2
+} from "@/ComponentConfigs/FormConfigs.js";
 import router from "@/router/router.js";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 
@@ -15,6 +20,8 @@ const formConfig = computed(() => {
                 return create_rows_approval;
             case 3:
                 return create_rows_request;
+            case 4:
+                return create_rows_request2;
             default:
                 return create_rows;
         }

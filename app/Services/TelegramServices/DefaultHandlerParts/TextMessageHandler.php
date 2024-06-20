@@ -21,10 +21,9 @@ class TextMessageHandler
         if (str_contains($text, 'start')) {
             $commonData = self::extractCommonData($message);
             $imagePath = $bot->message_image;
-
             $messageText = $bot->message;
             if ($imagePath) {
-                $relativeImagePath = str_replace('/storage', 'public', parse_url($imagePath, PHP_URL_PATH));
+                $relativeImagePath = str_replace('/images', 'public/bots', parse_url($imagePath, PHP_URL_PATH));
                 if (Storage::exists($relativeImagePath)) {
                     $absoluteImagePath = Storage::path($relativeImagePath);
                     $photo = InputFile::create($absoluteImagePath, basename($absoluteImagePath));

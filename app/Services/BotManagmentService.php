@@ -9,7 +9,8 @@ class BotManagmentService
     public function handleImageUpload($request): ?string
     {
         $imagePath = $request->file('message_image')->store('public/bots');
-        return Storage::url($imagePath);
+        $url = Storage::url($imagePath);
+        return str_replace('/storage/bots', '/images', $url);
     }
 
     public function syncManagers($request, $bot): void

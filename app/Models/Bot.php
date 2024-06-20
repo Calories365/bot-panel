@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Jobs\SendAdminNotification;
+use App\Jobs\SendManagerNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -51,6 +53,7 @@ class Bot extends Model
             $telegram->setWebhook(['url' => $url]);
             return true;
         } catch (\Exception $e) {
+            Log::info('error during updating webhook');
             return false;
         }
     }
@@ -58,24 +61,14 @@ class Bot extends Model
     public function notifyAdmins($message, $delaySeconds = 2)
     {
         $admins = BotAdmin::all();
+        $delaySeconds = (int)$delaySeconds;
         foreach ($admins as $admin) {
-            dispatch(function () use ($admin, $message) {
-                try {
-                    $telegram = new Api($this->token);
-                    $telegram->sendMessage([
-                        'chat_id' => $admin->telegram_id,
-                        'text' => $message,
-                    ]);
-                    Log::info('Sent message: ' . $message);
-                } catch (\Exception $e) {
-                    Log::error('Error sending message to ' . $admin->telegram_id . ': ' . $e->getMessage());
-                }
-            })->delay(now()->addSeconds($delaySeconds));
+            SendAdminNotification::dispatch($this, $admin, $message)->delay(now()->addSeconds($delaySeconds));
         }
     }
 
 
-    public function notifyManagers(Bot $bot, $message, $delaySeconds = 2): void
+    public function notifyManagers(Bot $bot, $message): void
     {
         $lastManagerLog = BotManagerLog::where('bot_id', $bot->id)->first();
         $lastManagerId = $lastManagerLog ? $lastManagerLog->manager_id : null;
@@ -96,24 +89,36 @@ class Bot extends Model
                 ['bot_id' => $bot->id],
                 ['manager_id' => $nextManager->id]
             );
-            Log::info('trying to send msg: ' . $message . 'to manager' . $nextManager);
-            dispatch(function () use ($nextManager, $message, $delaySeconds) {
-                try {
-                    $telegram = new Api($this->token);
-                    sleep($delaySeconds);
-                    $telegram->sendMessage([
-                        'chat_id' => $nextManager->telegram_id,
-                        'text' => $message,
-                    ]);
-                    Log::info('sent successfully!');
-                } catch (\Exception $e) {
-                    Log::error('Error sending Req-message(' . $message . ') to ' . $nextManager->telegram_id . ': ' . $e->getMessage());
-                }
-            });
+            Log::info('trying to send msg: ' . $message . ' to manager ' . $nextManager->name);
+            SendManagerNotification::dispatch($bot, $nextManager, $message);
         } else {
             Log::info('No managers available for bot ID ' . $bot->id);
         }
     }
+
+    public function notifyAllManagers($bot, $message): void
+    {
+        $currentManager = Manager::where('is_last', true)->first();
+        if ($currentManager) {
+            $currentManager->is_last = false;
+            $currentManager->save();
+
+            $nextManager = Manager::where('id', '>', $currentManager->id)->first();
+
+            if (!$nextManager) {
+
+                $nextManager = Manager::first();
+            }
+
+            $nextManager->is_last = true;
+
+            $nextManager->save();
+
+            Log::info('Preparing to send message( ' . $message . ') to manager: ' . $nextManager->name);
+            SendManagerNotification::dispatch($bot, $nextManager, $message);
+        }
+    }
+
 
     private function escapeMarkdown($text): array|string
     {

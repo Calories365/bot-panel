@@ -17,7 +17,8 @@ class TextMessageHandler
         $text = $message->getText();
         $commonData = self::extractCommonData($message);
         $chatId = $commonData['chatId'];
-        $cacheKey = "user_{$commonData['fromId']}_application";
+
+        $cacheKey = "bot_{$bot->id}_user_{$commonData['fromId']}_application";
 
         $userData = Cache::get($cacheKey, []);
 
@@ -27,10 +28,10 @@ class TextMessageHandler
                     'chat_id' => $chatId,
                     'text' => "Введите ваш возраст",
                 ]);
-                Cache::put($cacheKey, ['step' => 'age']);
+                Cache::put($cacheKey, ['step' => 'age'], now()->addMinutes(30));
             } else {
                 $telegram->sendMessage([
-                'chat_id' => $chatId,
+                    'chat_id' => $chatId,
                     'text' => "Для начала формирования заявки нажмите /start",
                 ]);
             }
@@ -43,7 +44,7 @@ class TextMessageHandler
                         'chat_id' => $chatId,
                         'text' => "Введите ваше имя",
                     ]);
-                    Cache::put($cacheKey, $userData);
+                    Cache::put($cacheKey, $userData, now()->addMinutes(30));
                     break;
                 case 'name':
                     $userData['name'] = $text;
@@ -52,7 +53,7 @@ class TextMessageHandler
                         'chat_id' => $chatId,
                         'text' => "Введите ваш контактный номер",
                     ]);
-                    Cache::put($cacheKey, $userData);
+                    Cache::put($cacheKey, $userData, now()->addMinutes(30));
                     break;
                 case 'contact':
                     $userData['contact'] = $text;
