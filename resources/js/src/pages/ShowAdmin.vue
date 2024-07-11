@@ -4,11 +4,11 @@ import {actionTypes, getterTypes} from '@/store/modules/admins.js';
 import {useStore} from "vuex";
 import {useRoute} from "vue-router";
 import router from "@/router/router.js";
-import {admin_Rows} from "@/ComponentConfigs/FormConfigs.js";
 import BotsForm from "@/Components/BotsForm.vue";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 import {useHandleEvent} from '@/composables/useHandleEvent.js';
+import {admin_rows} from "@/ComponentConfigs/Form/Admin/admin_rows.js";
 
 const store = useStore();
 const route = useRoute();
@@ -62,7 +62,7 @@ onMounted(() => {
                 </div>
                 <bots-form
                     :data="localAdminData"
-                    :rows="admin_Rows"
+                    :rows="admin_rows"
                     @handle="handleEvent"/>
             </div>
         </div>

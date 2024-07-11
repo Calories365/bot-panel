@@ -4,9 +4,9 @@ import {computed, defineEmits, onMounted, ref} from 'vue';
 import {useStore} from "vuex";
 import {actionTypes, getterTypes} from "@/store/modules/bots.js";
 import router from "@/router/router.js";
-import {botsTableConfig} from "@/ComponentConfigs/TableConfigs.js";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
-import SwastikaLoader from "@/Components/UI/Swastika-loader.vue"; // Импортируем компонент загрузки
+import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import {bots_table} from "@/ComponentConfigs/Table/bots_table.js"; // Импортируем компонент загрузки
 
 const store = useStore();
 const bots = computed(() => store.getters[getterTypes.bots]);
@@ -72,7 +72,7 @@ onMounted(() => {
         <div class="card">
             <BotsTable
                 :per-page-text="prePageText"
-                :columns="botsTableConfig"
+                :columns="bots_table"
                 :data="bots"
                 :total-pages="pagination.totalPages"
                 :current-page="pagination.currentPage"

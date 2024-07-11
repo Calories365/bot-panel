@@ -4,11 +4,11 @@ import {useStore} from "vuex";
 import router from "@/router/router.js";
 import {actionTypes, getterTypes} from "@/store/modules/users.js";
 import BotsTable from "@/Components/BotsTable.vue";
-import {usersTableConfig} from "@/ComponentConfigs/TableConfigs.js";
 import {useRoute} from "vue-router";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 import BotsButtonWarning from "@/Components/UI/BotsButtonWarning.vue";
+import {users_table} from "@/ComponentConfigs/Table/users_table.js";
 
 const store = useStore();
 const route = useRoute();
@@ -119,7 +119,7 @@ const confirmDelete = () => {
             <botsTable
                 :users=true
                 :per-page-text="prePageText"
-                :columns="usersTableConfig"
+                :columns="users_table"
                 :data="users"
                 :total-pages="pagination.totalPages"
                 :current-page="pagination.currentPage"

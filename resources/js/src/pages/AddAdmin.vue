@@ -3,11 +3,11 @@ import {computed, ref} from 'vue';
 import {actionTypes, getterTypes} from '@/store/modules/admins.js';
 import {useStore} from "vuex";
 import {useRoute} from "vue-router";
-import {admin_Rows} from "@/ComponentConfigs/FormConfigs.js";
 import BotsForm from "@/Components/BotsForm.vue";
 import router from "@/router/router.js";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 import {useHandleEvent} from "@/Composables/useHandleEvent.js";
+import {admin_rows} from "@/ComponentConfigs/Form/Admin/admin_rows.js";
 
 const store = useStore();
 const route = useRoute();
@@ -37,7 +37,7 @@ function createAdmin() {
                 </div>
                 <bots-form
                     :data="localAdminData"
-                    :rows="admin_Rows"
+                    :rows="admin_rows"
                     @handle="handleEvent"/>
             </div>
         </div>

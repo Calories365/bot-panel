@@ -5,11 +5,14 @@ import {actionTypes, getterTypes} from '@/store/modules/bots';
 import {useStore} from "vuex";
 import {useRoute} from "vue-router";
 import router from "@/router/router.js";
-import {rows, rows_approval, rows_request, rows_request2} from "@/ComponentConfigs/FormConfigs.js";
 import BotsStats from "@/Components/BotsStats.vue";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 import {useHandleEvent} from "@/Composables/useHandleEvent.js";
+import {rows_default} from "@/ComponentConfigs/Form/Bot/rows_default.js";
+import {rows_request2} from "@/ComponentConfigs/Form/Bot/rows_request2.js";
+import {rows_request} from "@/ComponentConfigs/Form/Bot/rows_request.js";
+import {rows_approval} from "@/ComponentConfigs/Form/Bot/rows_approval.js";
 
 const store = useStore();
 const route = useRoute();
@@ -33,7 +36,7 @@ const formConfig = computed(() => {
             case 4:
                 return rows_request2;
             default:
-                return rows;
+                return rows_default;
         }
     }
     return [];

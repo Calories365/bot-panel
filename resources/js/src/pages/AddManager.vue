@@ -3,11 +3,11 @@ import {computed, ref} from 'vue';
 import {actionTypes, getterTypes} from '@/store/modules/managers.js';
 import {useStore} from "vuex";
 import {useRoute} from "vue-router";
-import {manager_Rows} from "@/ComponentConfigs/FormConfigs.js";
 import BotsForm from "@/Components/BotsForm.vue";
 import router from "@/router/router.js";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 import {useHandleEvent} from "@/Composables/useHandleEvent.js";
+import {manager_rows} from "@/ComponentConfigs/Form/Manager/manager_rows.js";
 
 const store = useStore();
 const route = useRoute();
@@ -38,7 +38,7 @@ function createManager() {
                 </div>
                 <bots-form
                     :data="localManagerData"
-                    :rows="manager_Rows"
+                    :rows="manager_rows"
                     @handle="handleEvent"/>
             </div>
         </div>

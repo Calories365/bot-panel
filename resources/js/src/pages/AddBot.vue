@@ -3,15 +3,13 @@ import BotsForm from "@/Components/BotsForm.vue";
 import {computed, onMounted, ref} from "vue";
 import {actionTypes, getterTypes} from "@/store/modules/bots.js";
 import store from "@/store/store.js";
-import {
-    create_rows,
-    create_rows_approval,
-    create_rows_request,
-    create_rows_request2
-} from "@/ComponentConfigs/FormConfigs.js";
 import router from "@/router/router.js";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 import {useHandleEvent} from "@/Composables/useHandleEvent.js";
+import {create_rows_default} from "@/ComponentConfigs/Form/Bot/create_rows_default.js";
+import {create_rows_approval} from "@/ComponentConfigs/Form/Bot/create_rows_approval.js";
+import {create_rows_request} from "@/ComponentConfigs/Form/Bot/create_rows_request.js";
+import {create_rows_request2} from "@/ComponentConfigs/Form/Bot/create_rows_request2.js";
 
 const formConfig = computed(() => {
     if (Object.keys(localBotData.value).length > 0 && localBotData.value.type_id) {
@@ -24,7 +22,7 @@ const formConfig = computed(() => {
             case 4:
                 return create_rows_request2;
             default:
-                return create_rows;
+                return create_rows_default;
         }
     }
     return [];

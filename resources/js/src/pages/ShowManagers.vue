@@ -3,10 +3,10 @@ import BotsTable from "@/Components/BotsTable.vue";
 import {computed, defineEmits, onMounted, ref} from 'vue';
 import {useStore} from "vuex";
 import {actionTypes, getterTypes} from "@/store/modules/managers.js";
-import {managersTableConfig} from "@/ComponentConfigs/TableConfigs.js";
 import router from "@/router/router.js";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import {managers_table} from "@/ComponentConfigs/Table/managers_table.js";
 
 const store = useStore();
 const managers = computed(() => store.getters[getterTypes.managers]);
@@ -72,7 +72,7 @@ const confirmDelete = () => {
         <div class="card">
             <BotsTable
                 :per-page-text="prePageText"
-                :columns="managersTableConfig"
+                :columns="managers_table"
                 :data="managers"
                 :total-pages="pagination.totalPages"
                 :current-page="pagination.currentPage"
