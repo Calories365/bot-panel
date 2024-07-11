@@ -11,6 +11,7 @@ import {
 } from "@/ComponentConfigs/FormConfigs.js";
 import router from "@/router/router.js";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import {useHandleEvent} from "@/Composables/useHandleEvent.js";
 
 const formConfig = computed(() => {
     if (Object.keys(localBotData.value).length > 0 && localBotData.value.type_id) {
@@ -41,20 +42,11 @@ function createBot() {
         });
 }
 
+const { handleEvent } = useHandleEvent({
+    localData: localBotData,
+    actions: { submit: createBot }
+});
 
-function handleEvent(payload) {
-    if (payload.key && payload.value !== undefined) {
-        localBotData.value[payload.key] = payload.value;
-    } else if (payload.action) {
-        switch (payload.action) {
-            case 'submit':
-                createBot();
-                break;
-            default:
-                console.log("Неизвестное действие");
-        }
-    }
-}
 
 onMounted(() => {
     store.dispatch(actionTypes.getBotTypes).then((data) => {

@@ -9,6 +9,7 @@ import {rows, rows_approval, rows_request, rows_request2} from "@/ComponentConfi
 import BotsStats from "@/Components/BotsStats.vue";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import {useHandleEvent} from "@/Composables/useHandleEvent.js";
 
 const store = useStore();
 const route = useRoute();
@@ -40,25 +41,15 @@ const formConfig = computed(() => {
 
 const showModal = ref(false);
 
-function handleEvent(payload) {
-    if (payload.key && payload.value !== undefined) {
-        localBotData.value[payload.key] = payload.value;
-    } else if (payload.action) {
-        switch (payload.action) {
-            case 'submit':
-                saveBot();
-                break;
-            case 'delete':
-                showModal.value = true;
-                break;
-            case 'updateWebhook':
-                updateWebhook();
-                break;
-            default:
-                console.log("Неизвестное действие");
-        }
+const { handleEvent } = useHandleEvent({
+    localData: localBotData,
+    showModal: showModal,
+    actions: {
+        submit: saveBot,
+        delete: showDeleteModal,
+        updateWebhook: updateWebhook
     }
-}
+});
 
 function saveBot() {
     store.dispatch(actionTypes.updateBot, localBotData.value).then(() => {
@@ -72,9 +63,8 @@ function deleteBot() {
     });
 }
 
-function confirmDelete() {
-    deleteBot();
-    showModal.value = false;
+function showDeleteModal() {
+    showModal.value = true;
 }
 
 function updateWebhook() {
@@ -131,7 +121,7 @@ onUnmounted(() => {
         message="Вы уверены, что хотите удалить этого бота?"
         :showModal="showModal"
         @update:showModal="showModal = $event"
-        @confirm="confirmDelete"
+        @confirm="deleteBot"
     />
 </template>
 

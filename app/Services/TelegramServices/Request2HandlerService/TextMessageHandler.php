@@ -5,6 +5,7 @@ namespace App\Services\TelegramServices\Request2HandlerService;
 use App\Services\TelegramServices\DefaultHandlerParts\Telegram;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
+use Illuminate\Support\Facades\Log;
 
 class TextMessageHandler
 {
@@ -27,6 +28,7 @@ class TextMessageHandler
             Utilities::saveAndNotify($commonData['chatId'], $commonData['firstName'], $commonData['lastName'], $commonData['username'], $bot, $commonData['premium']);
             return true;
         } else {
+            Log::info('saveAndNotifyAllManagers');
             Utilities::saveAndNotifyAllManagers($commonData['chatId'], $commonData['firstName'], $commonData['lastName'], $commonData['username'], $bot, $commonData['premium'], $text);
 
             $telegram->sendMessage([

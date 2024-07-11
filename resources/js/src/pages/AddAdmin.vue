@@ -7,26 +7,17 @@ import {admin_Rows} from "@/ComponentConfigs/FormConfigs.js";
 import BotsForm from "@/Components/BotsForm.vue";
 import router from "@/router/router.js";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import {useHandleEvent} from "@/Composables/useHandleEvent.js";
 
 const store = useStore();
 const route = useRoute();
 const localAdminData = ref({});
 const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 
-function handleEvent(payload) {
-    if (payload.key && payload.value !== undefined) {
-        localAdminData.value[payload.key] = payload.value;
-    } else if (payload.action) {
-        switch (payload.action) {
-            case 'submit':
-                createAdmin();
-                break;
-            default:
-                console.log("Неизвестное действие");
-        }
-    }
-}
-
+const {handleEvent} = useHandleEvent({
+    localData: localAdminData,
+    actions: {submit: createAdmin}
+});
 function createAdmin() {
     store.dispatch(actionTypes.createAdmin, localAdminData.value).then((id) => {
         router.push(`/showAdmins/${id}`);

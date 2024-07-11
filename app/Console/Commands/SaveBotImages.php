@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Bot;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class SaveBotImages extends Command
@@ -11,35 +12,43 @@ class SaveBotImages extends Command
     protected $signature = 'bots:save-images';
     protected $description = 'Saves images from bots to the transfer directory with their original extensions.';
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     public function handle()
     {
         $bots = Bot::all();
         foreach ($bots as $bot) {
-            $imagePath = $bot->message_image;
-            if ($imagePath) {
-                $absoluteImagePath = Storage::path($imagePath);
+            // Попытка найти изображение в форматах jpg и png
+            $sourcePathJpg = 'public/transfer/' . $bot->name . '.jpg';
+            $sourcePathPng = 'public/transfer/' . $bot->name . '.png';
+            $sourcePath = Storage::exists($sourcePathJpg) ? $sourcePathJpg : (Storage::exists($sourcePathPng) ? $sourcePathPng : null);
 
-                if (Storage::exists($imagePath)) {
-                    $fileContents = Storage::get($imagePath);
-                    $fileExtension = pathinfo($absoluteImagePath, PATHINFO_EXTENSION);
-                    $fileName = $bot->name . '.' . $fileExtension;
-                    $targetPath = 'public/transfer/' . $fileName;
+            if ($sourcePath) {
+                $fileContents = Storage::get($sourcePath);
 
-                    Storage::put($targetPath, $fileContents);
+                // Загрузка файла в бота
+                $uploadedImageUrl = $this->uploadImageToBot($fileContents, $sourcePath);
 
-                    $url = Storage::url($targetPath);
-                    $this->info("Saved image for {$bot->name} with original extension: {$url}");
+                // Обновление URL изображения в базе данных
+                if ($uploadedImageUrl) {
+                    $bot->update(['message_image' => $uploadedImageUrl]);
+                    Log::info("Updated image for {$bot->name} with new URL: {$uploadedImageUrl}");
+                    $this->info("Updated image for {$bot->name} with new URL: {$uploadedImageUrl}");
                 } else {
-                    $this->error("File does not exist: {$imagePath}");
+                    $this->error("Failed to upload image for {$bot->name}");
                 }
+            } else {
+                $this->error("File does not exist for {$bot->name} in both JPG and PNG formats");
             }
         }
     }
 
+    protected function uploadImageToBot($fileContents, $sourcePath)
+    {
+        // Сохранение содержимого файла в новое место
+        $targetPath = 'public/bots/' . basename($sourcePath);
+        Storage::put($targetPath, $fileContents);
 
+        // Получение и возврат URL нового файла
+        $url = Storage::url($targetPath);
+        return str_replace('/storage/bots', '/images', $url);
+    }
 }

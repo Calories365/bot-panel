@@ -98,7 +98,11 @@ class Bot extends Model
 
     public function notifyAllManagers($bot, $message): void
     {
-        $currentManager = Manager::where('is_last', true)->first();
+        $currentManager = Manager::where('is_last', true)->firstOr(function () {
+            return Manager::first();
+        });
+
+
         if ($currentManager) {
             $currentManager->is_last = false;
             $currentManager->save();

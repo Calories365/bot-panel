@@ -8,6 +8,7 @@ import {admin_Rows} from "@/ComponentConfigs/FormConfigs.js";
 import BotsForm from "@/Components/BotsForm.vue";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import {useHandleEvent} from '@/composables/useHandleEvent.js';
 
 const store = useStore();
 const route = useRoute();
@@ -16,22 +17,14 @@ const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const localAdminData = ref({});
 const showModal = ref(false);
 
-function handleEvent(payload) {
-    if (payload.key && payload.value !== undefined) {
-        localAdminData.value[payload.key] = payload.value;
-    } else if (payload.action) {
-        switch (payload.action) {
-            case 'submit':
-                saveAdmin();
-                break;
-            case 'delete':
-                showModal.value = true;
-                break;
-            default:
-                console.log("Неизвестное действие");
-        }
+const { handleEvent } = useHandleEvent({
+    localData: localAdminData,
+    showModal: showModal,
+    actions: {
+        submit: saveAdmin,
+        delete: showDeleteModal
     }
-}
+});
 
 function saveAdmin() {
     store.dispatch(actionTypes.updateAdmin, localAdminData.value).then(() => {
@@ -40,14 +33,14 @@ function saveAdmin() {
 }
 
 function deleteAdmin() {
+    showModal.value = false;
     store.dispatch(actionTypes.deleteAdmin, {id: adminData.value.id}).then(() => {
         router.push({name: 'showAdmins'});
     });
 }
 
-function confirmDelete() {
-    deleteAdmin();
-    showModal.value = false;
+function showDeleteModal() {
+    showModal.value = true;
 }
 
 onMounted(() => {
@@ -80,7 +73,7 @@ onMounted(() => {
         message="Вы уверены, что хотите удалить этого админа?"
         :showModal="showModal"
         @update:showModal="showModal = $event"
-        @confirm="confirmDelete"
+        @confirm="deleteAdmin"
     />
 </template>
 

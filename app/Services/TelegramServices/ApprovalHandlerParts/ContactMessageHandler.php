@@ -57,7 +57,7 @@ class ContactMessageHandler
 //            $body = $response->body();
 //            Log::info(print_r($body, true));
 
-            $body = '/Success/';
+            $body = '/ID already exists/';
 
             $patterns = [
                 '/Wrong Query/' => 'Ошибка, попробуйте перейти по ссылке еще раз!',

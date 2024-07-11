@@ -8,6 +8,7 @@ import {manager_Rows} from "@/ComponentConfigs/FormConfigs.js";
 import BotsForm from "@/Components/BotsForm.vue";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import {useHandleEvent} from "@/Composables/useHandleEvent.js";
 
 const store = useStore();
 const route = useRoute();
@@ -16,23 +17,18 @@ const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const localManagerData = ref({});
 const showModal = ref(false);
 
-function handleEvent(payload) {
-    if (payload.key && payload.value !== undefined) {
-        localManagerData.value[payload.key] = payload.value;
-    } else if (payload.action) {
-        switch (payload.action) {
-            case 'submit':
-                saveManager();
-                break;
-            case 'delete':
-                showModal.value = true;
-                break;
-            default:
-                console.log("Неизвестное действие");
-        }
+const {handleEvent} = useHandleEvent({
+    localData: localManagerData,
+    showModal: showModal,
+    actions: {
+        submit: saveManager,
+        delete: showDeleteModal
     }
-}
+});
 
+function showDeleteModal() {
+    showModal.value = true;
+}
 function saveManager() {
     store.dispatch(actionTypes.updateManager, localManagerData.value).then(() => {
         localManagerData.value = {...managerData.value};
@@ -43,11 +39,6 @@ function deleteManager() {
     store.dispatch(actionTypes.deleteManager, {id: managerData.value.id}).then(() => {
         router.push({name: 'showManagers'});
     });
-}
-
-function confirmDelete() {
-    deleteManager();
-    showModal.value = false;
 }
 
 onMounted(() => {
@@ -80,7 +71,7 @@ onMounted(() => {
         message="Вы уверены, что хотите удалить этого админа?"
         :showModal="showModal"
         @update:showModal="showModal = $event"
-        @confirm="confirmDelete"
+        @confirm="deleteManager"
     />
 </template>
 

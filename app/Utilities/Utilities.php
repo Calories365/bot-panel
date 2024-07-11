@@ -37,6 +37,7 @@ class Utilities
         $adminMessage = $text;
         $messageText = "Сообщение: {$adminMessage} пользователь: {$userMention}";
 
+        Log::info('notifyAllManagers');
         $bot->notifyAllManagers($bot, $messageText);
         return true;
     }
