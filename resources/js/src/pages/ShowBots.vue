@@ -6,7 +6,8 @@ import {actionTypes, getterTypes} from "@/store/modules/bots.js";
 import router from "@/router/router.js";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
-import {bots_table} from "@/ComponentConfigs/Table/bots_table.js"; // Импортируем компонент загрузки
+import {bots_table} from "@/ComponentConfigs/Table/bots_table.js";
+import usePagination from "@/Composables/usePagination.js"; // Импортируем компонент загрузки
 
 const store = useStore();
 const bots = computed(() => store.getters[getterTypes.bots]);
@@ -14,33 +15,12 @@ const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const pagination = computed(() => store.getters[getterTypes.pagination]);
 
 const sizeOptions = [10, 20, 30, 40, 50];
-
 const prePageText = 'Количество ботов на странице';
-const currentPage = ref(1);
-const pageSize = ref(10);
 const emit = defineEmits(['handle']);
 const showModal = ref(false);
 const selectedBotId = ref(null);
+const {currentPage, pageSize, handlePageChange, handlePageSizeChange} = usePagination(store.dispatch);
 
-const handlePageChange = (page) => {
-    currentPage.value = page;
-    store.dispatch(actionTypes.changePage, {page});
-    window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: 'smooth'
-    });
-};
-
-const handlePageSizeChange = (size) => {
-    pageSize.value = size;
-    store.dispatch(actionTypes.setPageSize, {size});
-    window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: 'smooth'
-    });
-};
 
 function handleEvent(event) {
     if (event.action === 'delete') {

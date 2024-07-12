@@ -7,6 +7,7 @@ const state = {
         perPage: 10,
         totalPages: 100,
     },
+    botId: null,
     isSubmitting: false,
     errors: null,
 };

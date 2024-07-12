@@ -7,40 +7,19 @@ import router from "@/router/router.js";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 import {admins_table} from "@/ComponentConfigs/Table/admins_table.js";
+import usePagination from "@/Composables/usePagination.js";
 
 const store = useStore();
 const bots = computed(() => store.getters[getterTypes.admins]);
-const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]); // Добавлено для отслеживания состояния загрузки
+const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const pagination = computed(() => store.getters[getterTypes.pagination]);
 
 const sizeOptions = [10, 20, 30, 40, 50];
-
 const prePageText = 'Количество админов на странице';
-const currentPage = ref(1);
-const pageSize = ref(10);
 const emit = defineEmits(['handle']);
 const showModal = ref(false);
 const selectedAdminId = ref(null);
-
-const handlePageChange = (page) => {
-    currentPage.value = page;
-    store.dispatch(actionTypes.changePage, {page});
-    window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: 'smooth'
-    });
-};
-
-const handlePageSizeChange = (size) => {
-    pageSize.value = size;
-    store.dispatch(actionTypes.setPageSize, {size});
-    window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: 'smooth'
-    });
-};
+const {currentPage, pageSize, handlePageChange, handlePageSizeChange} = usePagination(store.dispatch);
 
 onMounted(() => {
     store.dispatch(actionTypes.getAllAdmins).then(allAdmins => {

@@ -9,6 +9,7 @@ import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
 import BotsButtonWarning from "@/Components/UI/BotsButtonWarning.vue";
 import {users_table} from "@/ComponentConfigs/Table/users_table.js";
+import usePagination from "@/Composables/usePagination.js";
 
 const store = useStore();
 const route = useRoute();
@@ -16,14 +17,13 @@ const users = computed(() => store.getters[getterTypes.users]);
 const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const pagination = computed(() => store.getters[getterTypes.pagination]);
 const downloadLink = ref('');
+
 const sizeOptions = [10, 20, 30, 40, 50];
 const prePageText = 'Количество пользователей на странице';
-const currentPage = ref(1);
-const pageSize = ref(10);
 const emit = defineEmits(['handle']);
 const showModal = ref(false);
 const selectedUserId = ref(null);
-
+const { currentPage, pageSize, handlePageChange, handlePageSizeChange } = usePagination(store.dispatch, fetchData, route.params.id);
 function fetchData(botId) {
     const params = {
         page: currentPage.value,
@@ -42,6 +42,7 @@ function fetchData(botId) {
 watch(() => route.params.id, (newId, oldId) => {
     if (newId !== oldId) {
         currentPage.value = 1;
+        console.log('id: ', newId);
         fetchData(newId);
     }
 });
@@ -53,18 +54,6 @@ onMounted(() => {
 onUnmounted(() => {
     store.dispatch(actionTypes.destroyUsers)
 });
-
-const handlePageChange = (page) => {
-    currentPage.value = page;
-    fetchData(route.params.id);
-    window.scrollTo({top: 0, left: 0, behavior: 'smooth'});
-};
-
-const handlePageSizeChange = (size) => {
-    pageSize.value = size;
-    fetchData(route.params.id);
-    window.scrollTo({top: 0, left: 0, behavior: 'smooth'});
-};
 
 const handleEvent = (event) => {
     if (event.action === 'delete') {
