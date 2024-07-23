@@ -9,7 +9,7 @@
 
 <script>
 export default {
-    name: "SwastikaLoader",
+    name: "Loader",
 };
 </script>
 

@@ -7,7 +7,7 @@ import {useRoute} from "vue-router";
 import router from "@/router/router.js";
 import BotsStats from "@/Components/BotsStats.vue";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
-import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import Loader from "@/Components/UI/Loader.vue";
 import {useHandleEvent} from "@/Composables/useHandleEvent.js";
 import {rows_default} from "@/ComponentConfigs/Form/Bot/rows_default.js";
 import {rows_request2} from "@/ComponentConfigs/Form/Bot/rows_request2.js";
@@ -88,7 +88,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <swastika-loader v-if="isSubmitting"/>
+    <loader v-if="isSubmitting"/>
 
     <div :class="{'loading': isSubmitting}" class="row">
         <div class="col-md-12">

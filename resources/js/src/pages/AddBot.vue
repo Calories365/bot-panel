@@ -4,7 +4,7 @@ import {computed, onMounted, ref} from "vue";
 import {actionTypes, getterTypes} from "@/store/modules/bots.js";
 import store from "@/store/store.js";
 import router from "@/router/router.js";
-import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import Loader from "@/Components/UI/Loader.vue";
 import {useHandleEvent} from "@/Composables/useHandleEvent.js";
 import {create_rows_default} from "@/ComponentConfigs/Form/Bot/create_rows_default.js";
 import {create_rows_approval} from "@/ComponentConfigs/Form/Bot/create_rows_approval.js";
@@ -57,7 +57,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <swastika-loader v-if="isSubmitting"/>
+    <loader v-if="isSubmitting"/>
 
     <div :class="{'loading': isSubmitting}" class="row">
         <div class="col-md-12">

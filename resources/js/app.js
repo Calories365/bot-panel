@@ -1,5 +1,4 @@
-// import './bootstrap';
-// import '../css/app.css';
+
 import {createApp} from 'vue';
 import App from './src/App.vue';
 import router from './src/router/router.js';
@@ -12,7 +11,6 @@ import {fas} from '@fortawesome/free-solid-svg-icons'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 
 library.add(fas);
-// Сначала выполняем запрос на получение CSRF-токена
 axios.get('/sanctum/csrf-cookie').then(() => {
     store.dispatch(actionTypes.getCurrentUser)
         .catch(error => {

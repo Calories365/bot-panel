@@ -341,7 +341,6 @@ async function handleBotData(commit, dispatch, botApiFunction, botData, botId = 
 
         botData.type_id = botData.type_id.type_id;
         botData.managers = botData.managers.managers;
-        // console.log(botData.managers)
 
         const formData = new FormData();
         for (const key in botData) {

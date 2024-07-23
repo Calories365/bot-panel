@@ -1,4 +1,48 @@
 {
+  "BotsConfirmatiomModal.css": {
+    "file": "assets/BotsConfirmatiomModal-2eb29bdf.css",
+    "src": "BotsConfirmatiomModal.css"
+  },
+  "_BotsButtonWarning-1aff3126.js": {
+    "file": "assets/BotsButtonWarning-1aff3126.js",
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "_BotsConfirmatiomModal-fe1c1418.js": {
+    "css": [
+      "assets/BotsConfirmatiomModal-2eb29bdf.css"
+    ],
+    "file": "assets/BotsConfirmatiomModal-fe1c1418.js",
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "_admin_rows-e1561ab5.js": {
+    "file": "assets/admin_rows-e1561ab5.js"
+  },
+  "_manager_rows-f136a19f.js": {
+    "file": "assets/manager_rows-f136a19f.js"
+  },
+  "_useHandleEvent-836b9e3b.js": {
+    "css": [
+      "assets/useHandleEvent-9cb19c7c.css"
+    ],
+    "file": "assets/useHandleEvent-836b9e3b.js",
+    "imports": [
+      "resources/js/app.js",
+      "_BotsButtonWarning-1aff3126.js"
+    ]
+  },
+  "_usePagination-647eb806.js": {
+    "css": [
+      "assets/usePagination-59a5c523.css"
+    ],
+    "file": "assets/usePagination-647eb806.js",
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
   "resources/css/admin.css": {
     "file": "assets/admin-86ad17ef.css",
     "isEntry": true,
@@ -15,15 +59,222 @@
     "src": "resources/js/admin.js"
   },
   "resources/js/app.css": {
-    "file": "assets/app-a3082830.css",
+    "file": "assets/app-57addeb0.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
     "css": [
-      "assets/app-a3082830.css"
+      "assets/app-57addeb0.css"
     ],
-    "file": "assets/app-cbc2ca33.js",
+    "dynamicImports": [
+      "resources/js/src/pages/ShowBots.vue",
+      "resources/js/src/pages/Home.vue",
+      "resources/js/src/pages/ShowBot.vue",
+      "resources/js/src/pages/AddBot.vue",
+      "resources/js/src/pages/ShowUsers.vue",
+      "resources/js/src/pages/AddAdmin.vue",
+      "resources/js/src/pages/ShowAdmins.vue",
+      "resources/js/src/pages/ShowAdmin.vue",
+      "resources/js/src/pages/AddManager.vue",
+      "resources/js/src/pages/ShowManagers.vue",
+      "resources/js/src/pages/ShowManager.vue"
+    ],
+    "file": "assets/app-0e5c4b28.js",
     "isEntry": true,
     "src": "resources/js/app.js"
+  },
+  "resources/js/src/pages/AddAdmin.css": {
+    "file": "assets/AddAdmin-7c923c51.css",
+    "src": "resources/js/src/pages/AddAdmin.css"
+  },
+  "resources/js/src/pages/AddAdmin.vue": {
+    "css": [
+      "assets/AddAdmin-7c923c51.css"
+    ],
+    "file": "assets/AddAdmin-ed74dee4.js",
+    "imports": [
+      "resources/js/app.js",
+      "_useHandleEvent-836b9e3b.js",
+      "_admin_rows-e1561ab5.js",
+      "_BotsButtonWarning-1aff3126.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/AddAdmin.vue"
+  },
+  "resources/js/src/pages/AddBot.css": {
+    "file": "assets/AddBot-a5b2ced9.css",
+    "src": "resources/js/src/pages/AddBot.css"
+  },
+  "resources/js/src/pages/AddBot.vue": {
+    "css": [
+      "assets/AddBot-a5b2ced9.css"
+    ],
+    "file": "assets/AddBot-2e4e5219.js",
+    "imports": [
+      "_useHandleEvent-836b9e3b.js",
+      "resources/js/app.js",
+      "_BotsButtonWarning-1aff3126.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/AddBot.vue"
+  },
+  "resources/js/src/pages/AddManager.css": {
+    "file": "assets/AddManager-35ebbf16.css",
+    "src": "resources/js/src/pages/AddManager.css"
+  },
+  "resources/js/src/pages/AddManager.vue": {
+    "css": [
+      "assets/AddManager-35ebbf16.css"
+    ],
+    "file": "assets/AddManager-cb5d871a.js",
+    "imports": [
+      "resources/js/app.js",
+      "_useHandleEvent-836b9e3b.js",
+      "_manager_rows-f136a19f.js",
+      "_BotsButtonWarning-1aff3126.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/AddManager.vue"
+  },
+  "resources/js/src/pages/Home.vue": {
+    "file": "assets/Home-672f6711.js",
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/Home.vue"
+  },
+  "resources/js/src/pages/ShowAdmin.css": {
+    "file": "assets/ShowAdmin-fff8d132.css",
+    "src": "resources/js/src/pages/ShowAdmin.css"
+  },
+  "resources/js/src/pages/ShowAdmin.vue": {
+    "css": [
+      "assets/ShowAdmin-fff8d132.css"
+    ],
+    "file": "assets/ShowAdmin-55a43f2d.js",
+    "imports": [
+      "resources/js/app.js",
+      "_useHandleEvent-836b9e3b.js",
+      "_BotsConfirmatiomModal-fe1c1418.js",
+      "_admin_rows-e1561ab5.js",
+      "_BotsButtonWarning-1aff3126.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/ShowAdmin.vue"
+  },
+  "resources/js/src/pages/ShowAdmins.css": {
+    "file": "assets/ShowAdmins-3cd8f55b.css",
+    "src": "resources/js/src/pages/ShowAdmins.css"
+  },
+  "resources/js/src/pages/ShowAdmins.vue": {
+    "css": [
+      "assets/ShowAdmins-3cd8f55b.css"
+    ],
+    "file": "assets/ShowAdmins-2a1834e8.js",
+    "imports": [
+      "_usePagination-647eb806.js",
+      "resources/js/app.js",
+      "_BotsConfirmatiomModal-fe1c1418.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/ShowAdmins.vue"
+  },
+  "resources/js/src/pages/ShowBot.css": {
+    "file": "assets/ShowBot-84be8538.css",
+    "src": "resources/js/src/pages/ShowBot.css"
+  },
+  "resources/js/src/pages/ShowBot.vue": {
+    "css": [
+      "assets/ShowBot-84be8538.css"
+    ],
+    "file": "assets/ShowBot-f9bcf4bf.js",
+    "imports": [
+      "_useHandleEvent-836b9e3b.js",
+      "resources/js/app.js",
+      "_BotsConfirmatiomModal-fe1c1418.js",
+      "_BotsButtonWarning-1aff3126.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/ShowBot.vue"
+  },
+  "resources/js/src/pages/ShowBots.css": {
+    "file": "assets/ShowBots-35516b48.css",
+    "src": "resources/js/src/pages/ShowBots.css"
+  },
+  "resources/js/src/pages/ShowBots.vue": {
+    "css": [
+      "assets/ShowBots-35516b48.css"
+    ],
+    "file": "assets/ShowBots-02d9ed9f.js",
+    "imports": [
+      "_usePagination-647eb806.js",
+      "resources/js/app.js",
+      "_BotsConfirmatiomModal-fe1c1418.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/ShowBots.vue"
+  },
+  "resources/js/src/pages/ShowManager.css": {
+    "file": "assets/ShowManager-16f18ad5.css",
+    "src": "resources/js/src/pages/ShowManager.css"
+  },
+  "resources/js/src/pages/ShowManager.vue": {
+    "css": [
+      "assets/ShowManager-16f18ad5.css"
+    ],
+    "file": "assets/ShowManager-99602f42.js",
+    "imports": [
+      "resources/js/app.js",
+      "_useHandleEvent-836b9e3b.js",
+      "_BotsConfirmatiomModal-fe1c1418.js",
+      "_manager_rows-f136a19f.js",
+      "_BotsButtonWarning-1aff3126.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/ShowManager.vue"
+  },
+  "resources/js/src/pages/ShowManagers.css": {
+    "file": "assets/ShowManagers-ba03dc87.css",
+    "src": "resources/js/src/pages/ShowManagers.css"
+  },
+  "resources/js/src/pages/ShowManagers.vue": {
+    "css": [
+      "assets/ShowManagers-ba03dc87.css"
+    ],
+    "file": "assets/ShowManagers-80165f7b.js",
+    "imports": [
+      "_usePagination-647eb806.js",
+      "resources/js/app.js",
+      "_BotsConfirmatiomModal-fe1c1418.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/ShowManagers.vue"
+  },
+  "resources/js/src/pages/ShowUsers.css": {
+    "file": "assets/ShowUsers-caa5fce5.css",
+    "src": "resources/js/src/pages/ShowUsers.css"
+  },
+  "resources/js/src/pages/ShowUsers.vue": {
+    "css": [
+      "assets/ShowUsers-caa5fce5.css"
+    ],
+    "file": "assets/ShowUsers-4e267f8e.js",
+    "imports": [
+      "resources/js/app.js",
+      "_usePagination-647eb806.js",
+      "_BotsConfirmatiomModal-fe1c1418.js",
+      "_BotsButtonWarning-1aff3126.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/src/pages/ShowUsers.vue"
+  },
+  "useHandleEvent.css": {
+    "file": "assets/useHandleEvent-9cb19c7c.css",
+    "src": "useHandleEvent.css"
+  },
+  "usePagination.css": {
+    "file": "assets/usePagination-59a5c523.css",
+    "src": "usePagination.css"
   }
 }

@@ -1,6 +1,5 @@
 export function useHandleEvent({localData, showModal = false, actions = {}}) {
     function handleEvent(payload) {
-        console.log(payload);
         if (payload.key && payload.value !== undefined) {
             localData.value[payload.key] = payload.value;
         } else if (payload.action) {

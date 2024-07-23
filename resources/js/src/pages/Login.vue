@@ -3,7 +3,7 @@ import {computed, onBeforeUnmount, reactive} from 'vue';
 import {useStore} from 'vuex';
 import {useRouter} from 'vue-router';
 import {actionTypes} from "@/store/modules/auth.js";
-import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import Loader from "@/Components/UI/Loader.vue";
 
 const store = useStore();
 const router = useRouter();
@@ -37,7 +37,7 @@ const onSubmit = () => {
 
 <template>
 
-    <swastika-loader v-if="isSubmitting"/>
+    <loader v-if="isSubmitting"/>
 
     <div :class="{'loading': isSubmitting}" class="login-page" style="min-height: 495.6px;">
         <div class="login-box">
@@ -51,7 +51,8 @@ const onSubmit = () => {
                     <p class="login-box-msg">Войдите чтобы начать</p>
                     <form @submit.prevent="onSubmit">
                         <div class="input-group mb-3">
-                            <input type="email" class="form-control" placeholder="Email" v-model="formState.email">
+                            <input type="email" class="form-control" placeholder="Email" autocomplete="email"
+                                   v-model="formState.email">
                             <div class="input-group-append">
                                 <div class="input-group-text"></div>
                             </div>

@@ -1,5 +1,4 @@
 import {createStore} from 'vuex';
-
 import auth from '@/store/modules/auth';
 import bots from "@/store/modules/bots.js";
 import users from "@/store/modules/users.js";

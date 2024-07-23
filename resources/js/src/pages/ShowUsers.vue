@@ -6,7 +6,7 @@ import {actionTypes, getterTypes} from "@/store/modules/users.js";
 import BotsTable from "@/Components/BotsTable.vue";
 import {useRoute} from "vue-router";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
-import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import Loader from "@/Components/UI/Loader.vue";
 import BotsButtonWarning from "@/Components/UI/BotsButtonWarning.vue";
 import {users_table} from "@/ComponentConfigs/Table/users_table.js";
 import usePagination from "@/Composables/usePagination.js";
@@ -84,7 +84,7 @@ const confirmDelete = () => {
 </script>
 
 <template>
-    <swastika-loader v-if="isSubmitting"/>
+    <loader v-if="isSubmitting"/>
 
     <div :class="{'loading': isSubmitting}" class="col-12">
         <div v-if="downloadLink">

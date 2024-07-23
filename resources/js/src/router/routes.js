@@ -1,16 +1,5 @@
 import MainLayout from "@/Layouts/MainLayout.vue";
 import Login from "@/pages/Login.vue";
-import ShowBots from "@/pages/ShowBots.vue";
-import AddBot from "@/pages/AddBot.vue";
-import ShowAdmins from "@/pages/ShowAdmins.vue";
-import AddAdmin from "@/pages/AddAdmin.vue";
-import ShowBot from "@/pages/ShowBot.vue";
-import ShowUsers from "@/pages/ShowUsers.vue";
-import showAdmin from "@/pages/ShowAdmin.vue";
-import Home from "@/pages/Home.vue";
-import AddManager from "@/pages/AddManager.vue";
-import ShowManagers from "@/pages/ShowManagers.vue";
-import showManager from "@/pages/ShowManager.vue";
 
 const routes = [
     {
@@ -20,7 +9,7 @@ const routes = [
             {
                 path: '/showBots',
                 name: 'showBots',
-                component: ShowBots,
+                component: () => import('@/pages/ShowBots.vue'),
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Все боты',
@@ -28,7 +17,7 @@ const routes = [
             }, {
                 path: '/',
                 name: 'home',
-                component: Home,
+                component: () => import('@/pages/Home.vue'),
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Home',
@@ -37,7 +26,7 @@ const routes = [
             {
                 path: '/showBots/:id',
                 name: 'showBot',
-                component: ShowBot,
+                component: () => import('@/pages/ShowBot.vue'),
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Бот',
@@ -46,7 +35,7 @@ const routes = [
             {
                 path: '/addBot',
                 name: 'addBot',
-                component: AddBot,
+                component: () => import('@/pages/AddBot.vue'),
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Добавить бота',
@@ -54,7 +43,7 @@ const routes = [
             }, {
                 path: '/showUsers/:id?',
                 name: 'showUsers',
-                component: ShowUsers,
+                component: () => import('@/pages/ShowUsers.vue'),
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Все пользователи',
@@ -63,7 +52,7 @@ const routes = [
             {
                 path: '/addAdmin',
                 name: 'addAdmin',
-                component: AddAdmin,
+                component: () => import('@/pages/AddAdmin.vue'),
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Добавить Админа',
@@ -71,7 +60,7 @@ const routes = [
             }, {
                 path: '/showAdmins',
                 name: 'showAdmins',
-                component: ShowAdmins,
+                component: () => import('@/pages/ShowAdmins.vue'),
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Все Админы',
@@ -79,25 +68,30 @@ const routes = [
             }, {
                 path: '/showAdmins/:id',
                 name: 'showAdmin',
-                component: showAdmin,
+                component: () => import('@/pages/ShowAdmin.vue'),
                 meta: {
                     needAuth: true,
                     breadcrumb: 'Админ',
                 },
             }, {
-                path: '/addManager', name: 'addManager', component: AddManager, meta: {
+                path: '/addManager', name: 'addManager', component: () => import('@/pages/AddManager.vue'), meta: {
                     needAuth: true, breadcrumb: 'Добавить Менеджара',
                 },
             }, {
-                path: '/showManagers', name: 'showManagers', component: ShowManagers, meta: {
+                path: '/showManagers',
+                name: 'showManagers',
+                component: () => import('@/pages/ShowManagers.vue'),
+                meta: {
                     needAuth: true, breadcrumb: 'Все Менеджеры',
                 },
             }, {
-                path: '/showManagers/:id', name: 'showManager', component: showManager, meta: {
+                path: '/showManagers/:id',
+                name: 'showManager',
+                component: () => import('@/pages/ShowManager.vue'),
+                meta: {
                     needAuth: true, breadcrumb: 'Менеджер',
                 },
             },
-
         ]
     }, {
         path: '/login',

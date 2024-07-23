@@ -48,7 +48,6 @@ const errors = ref({});
     <form ref="formRef" action="#" class="card-body">
         <div v-for="(row, index) in props.rows" :key="index" class="form-group">
             <label :for="row.key">{{ row.label }}</label>
-            <!--            {{ data[row.key]}}-->
             <component
                 :emit_name="row.emit_name"
                 :name="row.key"

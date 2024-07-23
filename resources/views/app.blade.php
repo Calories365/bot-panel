@@ -9,7 +9,6 @@
     @vite('resources/css/app.css')
     @vite('resources/css/admin.css')
     @vite('resources/js/app.js')
-{{--    @vite('resources/js/admin.js')--}}
 
 
     <link rel="icon" type="image/png" href="/images/botik.png">
@@ -17,6 +16,5 @@
 <body>
 <div id="app"></div>
 
-{{--<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>--}}
 </body>
 </html>

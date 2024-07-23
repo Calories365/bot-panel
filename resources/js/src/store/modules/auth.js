@@ -1,6 +1,5 @@
 import authApi from "@/api/auth";
 import i18n from "@/i18n.js";
-// import {setItem} from "@/helpers/persistanceStorage";
 
 const state = {
     isSybmiting: false,
@@ -16,7 +15,6 @@ export const getterTypes = {
     isAnonymouse: '[auth] isAnonymouse',
 }
 
-//геттеры глобальные, но в данном случае они получают локальное состояние
 const getters = {
     [getterTypes.currentUser]: state => {
         return state.currentUser
@@ -202,7 +200,6 @@ const actions = {
     [actionTypes.register](context, credentials) {
         return new Promise(resolve => {
             context.commit(mutationTypes.registerStart)
-            console.log(111);
             authApi.register(credentials)
                 .then(response => {
                     context.commit(mutationTypes.registerSuccess, response.data.user);
@@ -223,7 +220,7 @@ const actions = {
                     context.dispatch(actionTypes.getCurrentUser);
 
                     console.log(response.data);
-                    
+
                     resolve(response.data)
                 })
                 .catch(result => {

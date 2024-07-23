@@ -6,7 +6,7 @@ import {useRoute} from "vue-router";
 import router from "@/router/router.js";
 import BotsForm from "@/Components/BotsForm.vue";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
-import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import Loader from "@/Components/UI/Loader.vue";
 import {useHandleEvent} from "@/Composables/useHandleEvent.js";
 import {manager_rows} from "@/ComponentConfigs/Form/Manager/manager_rows.js";
 
@@ -50,7 +50,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <swastika-loader v-if="isSubmitting"/>
+    <loader v-if="isSubmitting"/>
 
     <div :class="{'loading': isSubmitting}" class="row">
         <div class="col-md-12">

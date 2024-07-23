@@ -5,9 +5,9 @@ import {useStore} from "vuex";
 import {actionTypes, getterTypes} from "@/store/modules/bots.js";
 import router from "@/router/router.js";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
-import SwastikaLoader from "@/Components/UI/Swastika-loader.vue";
+import Loader from "@/Components/UI/Loader.vue";
 import {bots_table} from "@/ComponentConfigs/Table/bots_table.js";
-import usePagination from "@/Composables/usePagination.js"; // Импортируем компонент загрузки
+import usePagination from "@/Composables/usePagination.js";
 
 const store = useStore();
 const bots = computed(() => store.getters[getterTypes.bots]);
@@ -46,7 +46,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <swastika-loader v-if="isSubmitting"/>
+    <loader v-if="isSubmitting"/>
 
     <div :class="{'loading': isSubmitting}" class="col-12">
         <div class="card">
