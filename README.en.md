@@ -3,6 +3,9 @@
 Bot Panel is a web application for managing Telegram bots, created using Laravel, Vue.js, Laravel Sanctum, and Vuex.
 
 ## [Try the bot panel now!](https://www.calories365.space)
+### Test Access:
+- **Login**: admin@example.com
+- **Password**: admin@example.com
 
 ## Features
 

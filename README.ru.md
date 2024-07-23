@@ -3,6 +3,9 @@
 Bot Panel — это веб-приложение для управления телеграм-ботами, созданное с использованием Laravel, Vue.js, Laravel Sanctum и Vuex.
 
 ## [Попробуйте панель ботов сейчас!](https://www.calories365.space)
+### Тестовый доступ:
+- **Логин**: admin@example.com
+- **Пароль**: admin@example
 
 ## Особенности
 

@@ -3,6 +3,9 @@
 Панель Ботів — це веб-додаток для керування Telegram-ботами, створений за допомогою Laravel, Vue.js, Laravel Sanctum та Vuex.
 
 ## [Спробуйте панель ботів зараз!](https://www.calories365.space)
+### Тестовий доступ:
+- **Логін**: admin@example.com
+- **Пароль**: admin@example.com
 
 ## Особливості
 
