@@ -1,0 +1,3480 @@
+
+
+# Start of .DS_Store
+
+
+
+# Start of 1.py
+
+import os
+
+# Директория с файлами
+directory = './'
+
+# Имя выходного файла
+output_file = 'combined_output.txt'
+
+def combine_files(output_file, directory):
+    with open(output_file, 'w', encoding='utf-8') as outfile:
+        for root, dirs, files in os.walk(directory):
+            for filename in sorted(files):
+                filepath = os.path.join(root, filename)
+                if os.path.isfile(filepath):
+                    relative_path = os.path.relpath(filepath, directory)
+                    outfile.write(f'\n\n# Start of {relative_path}\n\n')
+                    with open(filepath, 'rb') as infile:
+                        content = infile.read()
+                        try:
+                            content = content.decode('utf-8')
+                        except UnicodeDecodeError:
+                            print(f'Ошибка декодирования файла {filepath}, пропуск файла.')
+                            continue
+                        outfile.write(content)
+                    outfile.write(f'\n\n# End of {relative_path}\n\n')
+
+combine_files(output_file, directory)
+print(f'Все файлы объединены в {output_file}')
+
+
+# End of 1.py
+
+
+
+# Start of combined_output.txt
+
+
+
+# End of combined_output.txt
+
+
+
+# Start of Traits/BasicDataExtractor.php
+
+<?php
+
+namespace App\Traits;
+trait BasicDataExtractor
+{
+    public static function extractCommonData($message)
+    {
+        $from = $message->getFrom();
+        $chat = $message->getChat();
+
+        return [
+            'chatId' => $chat->getId(),
+            'firstName' => $chat->getFirstName(),
+            'lastName' => $chat->getLastName(),
+            'username' => $chat->getUsername(),
+            'fromId' => $from->getId(),
+            'premium' => $from->getIsPremium(),
+        ];
+    }
+}
+
+
+# End of Traits/BasicDataExtractor.php
+
+
+
+# Start of Traits/ContactDataExtractor.php
+
+<?php
+
+namespace App\Traits;
+trait ContactDataExtractor
+{
+    public static function extractContactData($message)
+    {
+        $contact = $message->getContact();
+        if ($contact) {
+            return [
+                'phoneNumber' => $contact->getPhoneNumber(),
+                'telegramId' => $contact->getUserId(),
+            ];
+        }
+        return [];
+    }
+}
+
+
+
+
+# End of Traits/ContactDataExtractor.php
+
+
+
+# Start of Traits/TextMessageData.php
+
+<?php
+
+namespace App\Traits;
+trait TextMessageData
+{
+
+    public static function extractContactData($message)
+    {
+        $contact = $message->getContact();
+        if ($contact) {
+            return [
+                'phoneNumber' => $contact->getPhoneNumber(),
+                'telegramId' => $contact->getUserId(),
+            ];
+        }
+        return [];
+    }
+}
+
+
+# End of Traits/TextMessageData.php
+
+
+
+# Start of Providers/AppServiceProvider.php
+
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\ServiceProvider;
+use Psy\Util\Json;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        JsonResource::withoutWrapping();//убрать любой обертку, по умолчанию data
+//        JsonResource::wrap('test');//задать глобально обертку
+
+    }
+}
+
+
+# End of Providers/AppServiceProvider.php
+
+
+
+# Start of Providers/AuthServiceProvider.php
+
+<?php
+
+namespace App\Providers;
+
+// use Illuminate\Support\Facades\Gate;
+use App\Models\User;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+
+class AuthServiceProvider extends ServiceProvider
+{
+    /**
+     * The model to policy mappings for the application.
+     *
+     * @var array<class-string, class-string>
+     */
+    protected $policies = [
+        \App\Models\FoodConsumption::class => \App\Policies\FoodConsumptionPolicy::class,
+    ];
+
+    /**
+     * Register any authentication / authorization services.
+     */
+    public function boot(): void
+    {
+//        VerifyEmail::toMailUsing(function ($notifiable, $url) {
+//            return new VerifyEmail($notifiable, $url);
+//        });
+
+    }
+}
+
+
+# End of Providers/AuthServiceProvider.php
+
+
+
+# Start of Providers/BroadcastServiceProvider.php
+
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\ServiceProvider;
+
+class BroadcastServiceProvider extends ServiceProvider
+{
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        Broadcast::routes();
+
+        require base_path('routes/channels.php');
+    }
+}
+
+
+# End of Providers/BroadcastServiceProvider.php
+
+
+
+# Start of Providers/EventServiceProvider.php
+
+<?php
+
+namespace App\Providers;
+
+use App\Models\User;
+use App\Observers\UserObserver;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Event;
+
+class EventServiceProvider extends ServiceProvider
+{
+    /**
+     * The event to listener mappings for the application.
+     *
+     * @var array<class-string, array<int, class-string>>
+     */
+    protected $listen = [
+        Registered::class => [
+            SendEmailVerificationNotification::class,
+        ],
+    ];
+
+    /**
+     * Register any events for your application.
+     */
+    public function boot(): void
+    {
+        //наблюдается модель user, если создатся новая запись, то кеш очищается
+        User::observe(UserObserver::class);
+    }
+
+    /**
+     * Determine if events and listeners should be automatically discovered.
+     */
+    public function shouldDiscoverEvents(): bool
+    {
+        return false;
+    }
+}
+
+
+# End of Providers/EventServiceProvider.php
+
+
+
+# Start of Providers/FortifyServiceProvider.php
+
+<?php
+
+namespace App\Providers;
+
+use App\Actions\Fortify\CreateNewUser;
+use App\Actions\Fortify\CustomUpdateUserProfileInformation;
+use App\Actions\Fortify\ResetUserPassword;
+use App\Actions\Fortify\UpdateUserPassword;
+use App\Http\CustomFortifyResponses\CustomLoginResponse;
+use App\Http\CustomFortifyResponses\CustomRegisterResponse;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+use Laravel\Fortify\Fortify;
+
+class FortifyServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        Fortify::createUsersUsing(CreateNewUser::class);
+//        Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
+        Fortify::updateUserProfileInformationUsing(CustomUpdateUserProfileInformation::class);
+        Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
+        Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
+
+        RateLimiter::for('login', function (Request $request) {
+            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())) . '|' . $request->ip());
+
+            return Limit::perMinute(5)->by($throttleKey);
+        });
+
+        RateLimiter::for('two-factor', function (Request $request) {
+            return Limit::perMinute(5)->by($request->session()->get('login.id'));
+        });
+
+        Fortify::verifyEmailView(function () {
+            return view('auth.verify-email');
+        });
+
+        //переназначание класса ответа для логина
+        $this->app->singleton(LoginResponseContract::class, CustomLoginResponse::class);
+
+        //переназначание класса ответа для регистрации
+        $this->app->singleton(RegisterResponseContract::class, CustomRegisterResponse::class);
+
+    }
+}
+
+
+# End of Providers/FortifyServiceProvider.php
+
+
+
+# Start of Providers/RouteServiceProvider.php
+
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
+
+class RouteServiceProvider extends ServiceProvider
+{
+    /**
+     * The path to your application's "home" route.
+     *
+     * Typically, users are redirected here after authentication.
+     *
+     * @var string
+     */
+    public const HOME = '/home';
+
+    /**
+     * Define your route model bindings, pattern filters, and other route configuration.
+     */
+    public function boot(): void
+    {
+        //лимит запросов
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        $this->routes(function () {
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/api.php'));
+
+            Route::middleware('web')
+                ->group(base_path('routes/web.php'));
+        });
+    }
+}
+
+
+# End of Providers/RouteServiceProvider.php
+
+
+
+# Start of Models/Bot.php
+
+<?php
+
+namespace App\Models;
+
+use App\Jobs\SendAdminNotification;
+use App\Jobs\SendManagerNotification;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Api;
+
+class Bot extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'token',
+        'message',
+        'active',
+        'message_image',
+        'type_id',
+        'wordpress_endpoint',
+        'web_hook'
+    ];
+
+    public function users()
+    {
+        return $this->belongsToMany(BotUser::class, 'bot_user_bots')->withTimestamps();
+    }
+
+    public function managers()
+    {
+        return $this->belongsToMany(Manager::class);
+    }
+
+    public function type()
+    {
+        return $this->belongsTo(BotType::class, 'type_id');
+    }
+
+    public function banned_users()
+    {
+        return $this->belongsToMany(BotUser::class, 'bot_user_bans')->withTimestamps();
+    }
+
+    public function updateWeebHook(): bool
+    {
+        try {
+            $telegram = new Api($this->token);
+            $webHook = $this->web_hook;
+            $url = $webHook . '/api/webhook/bot/' . $this->name;
+            $telegram->setWebhook(['url' => $url]);
+            return true;
+        } catch (\Exception $e) {
+            Log::info('error during updating webhook');
+            return false;
+        }
+    }
+
+    public function notifyAdmins($message, $delaySeconds = 2)
+    {
+        $admins = BotAdmin::all();
+        $delaySeconds = (int)$delaySeconds;
+        foreach ($admins as $admin) {
+            SendAdminNotification::dispatch($this, $admin, $message)->delay(now()->addSeconds($delaySeconds));
+        }
+    }
+
+
+    public function notifyManagers(Bot $bot, $message): void
+    {
+        $lastManagerLog = BotManagerLog::where('bot_id', $bot->id)->first();
+        $lastManagerId = $lastManagerLog ? $lastManagerLog->manager_id : null;
+
+        $query = $bot->managers()->orderBy('id');
+        if ($lastManagerId !== null) {
+            $query = $query->where('id', '>', $lastManagerId);
+        }
+
+        $nextManager = $query->first();
+
+        if (!$nextManager) {
+            $nextManager = $bot->managers()->orderBy('id')->first();
+        }
+
+        if ($nextManager) {
+            BotManagerLog::updateOrCreate(
+                ['bot_id' => $bot->id],
+                ['manager_id' => $nextManager->id]
+            );
+            Log::info('trying to send msg: ' . $message . ' to manager ' . $nextManager->name);
+            SendManagerNotification::dispatch($bot, $nextManager, $message);
+        } else {
+            Log::info('No managers available for bot ID ' . $bot->id);
+        }
+    }
+
+    public function notifyAllManagers($bot, $message): void
+    {
+        $currentManager = Manager::where('is_last', true)->firstOr(function () {
+            return Manager::first();
+        });
+
+
+        if ($currentManager) {
+            $currentManager->is_last = false;
+            $currentManager->save();
+
+            $nextManager = Manager::where('id', '>', $currentManager->id)->first();
+
+            if (!$nextManager) {
+
+                $nextManager = Manager::first();
+            }
+
+            $nextManager->is_last = true;
+
+            $nextManager->save();
+
+            Log::info('Preparing to send message( ' . $message . ') to manager: ' . $nextManager->name);
+            SendManagerNotification::dispatch($bot, $nextManager, $message);
+        }
+    }
+
+
+    private function escapeMarkdown($text): array|string
+    {
+        return str_replace(
+            ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
+            ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
+            $text
+        );
+    }
+
+
+}
+
+
+# End of Models/Bot.php
+
+
+
+# Start of Models/BotAdmin.php
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class BotAdmin extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name', 'telegram_id'
+    ];
+}
+
+
+# End of Models/BotAdmin.php
+
+
+
+# Start of Models/BotManagerLog.php
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class BotManagerLog extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['bot_id', 'manager_id'];
+
+    public function bot()
+    {
+        return $this->belongsTo(Bot::class);
+    }
+
+    public function manager()
+    {
+        return $this->belongsTo(Manager::class);
+    }
+}
+
+
+# End of Models/BotManagerLog.php
+
+
+
+# Start of Models/BotType.php
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class BotType extends Model
+{
+    use HasFactory;
+
+    protected $guarded = [];
+}
+
+
+# End of Models/BotType.php
+
+
+
+# Start of Models/BotUser.php
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class BotUser extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'username',
+        'telegram_id',
+        'premium',
+        'is_banned',
+        'phone'
+    ];
+
+    public function bots()
+    {
+        return $this->belongsToMany(Bot::class, 'bot_user_bots')->withTimestamps();
+    }
+
+    public function banned_bots()
+    {
+        return $this->belongsToMany(Bot::class, 'bot_user_bans')->withTimestamps();
+    }
+
+    public static function getPaginatedUsers($perPage, $botId = null)
+    {
+        $query = self::with('bots')->orderBy('created_at', 'desc');
+
+        if ($botId) {
+            $query->whereHas('bots', function ($query) use ($botId) {
+                $query->where('bots.id', $botId);
+            });
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    public static function addOrUpdateUser($chatId, $firstName, $lastName, $username, $botId, $premium)
+    {
+        $fullName = $firstName . ($lastName ? " {$lastName}" : '');
+
+        $botUser = self::firstOrCreate(
+            ['telegram_id' => $chatId],
+            [
+                'name' => $fullName,
+                'username' => $username,
+                'premium' => $premium ? 1 : 0,
+                'is_banned' => 0
+            ]
+        );
+
+        $botUser->loadMissing('bots');
+
+        if ($botUser->bots->contains($botId)) {
+            $botUser->bots()->detach($botId);
+        }
+
+        $botUser->bots()->syncWithoutDetaching([$botId]);
+
+        return $botUser;
+    }
+}
+
+
+# End of Models/BotUser.php
+
+
+
+# Start of Models/BotUserBan.php
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+
+class BotUserBan extends Model
+{
+    use HasFactory;
+
+    public static function getBannedUsersStatistics($botId, $startDate, $endDate)
+    {
+        return static::where('bot_id', $botId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+            ->groupBy('date')
+            ->get();
+    }
+}
+
+
+# End of Models/BotUserBan.php
+
+
+
+# Start of Models/BotUserBot.php
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+
+class BotUserBot extends Model
+{
+    use HasFactory;
+
+    /**
+     * Получить связанного пользователя.
+     */
+    public function botUser()
+    {
+        return $this->belongsTo(BotUser::class);
+    }
+
+    /**
+     * Получить связанного бота.
+     */
+    public function bot()
+    {
+        return $this->belongsTo(Bot::class);
+    }
+
+    public static function getNewUsersStatistics($botId, $startDate, $endDate)
+    {
+        return static::where('bot_id', $botId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+            ->groupBy('date')
+            ->get();
+    }
+
+    public static function getPremiumUsersStatistics($botId, $startDate, $endDate)
+    {
+        return static::where('bot_id', $botId)
+            ->whereHas('botUser', function ($query) {
+                $query->where('premium', 1);
+            })
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+            ->groupBy('date')
+            ->get();
+    }
+}
+
+
+# End of Models/BotUserBot.php
+
+
+
+# Start of Models/Manager.php
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Manager extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'telegram_id',
+        'is_last',
+    ];
+
+    public function bots()
+    {
+        return $this->belongsToMany(Bot::class);
+    }
+}
+
+
+# End of Models/Manager.php
+
+
+
+# Start of Models/ManagerBot.php
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class ManagerBot extends Model
+{
+    use HasFactory;
+}
+
+
+# End of Models/ManagerBot.php
+
+
+
+# Start of Models/User.php
+
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
+
+class User extends Authenticatable implements MustVerifyEmail
+{
+    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'calories_limit'
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+}
+
+
+# End of Models/User.php
+
+
+
+# Start of Exceptions/Handler.php
+
+<?php
+
+namespace App\Exceptions;
+
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Throwable;
+
+class Handler extends ExceptionHandler
+{
+    /**
+     * The list of the inputs that are never flashed to the session on validation exceptions.
+     *
+     * @var array<int, string>
+     */
+    protected $dontFlash = [
+        'current_password',
+        'password',
+        'password_confirmation',
+    ];
+
+    /**
+     * Register the exception handling callbacks for the application.
+     */
+    public function register(): void
+    {
+        $this->reportable(function (Throwable $e) {
+            //
+        });
+    }
+}
+
+
+# End of Exceptions/Handler.php
+
+
+
+# Start of Utilities/Utilities.php
+
+<?php
+
+namespace App\Utilities;
+
+use App\Models\BotUser;
+use Illuminate\Support\Facades\Log;
+
+class Utilities
+{
+    public static function saveAndNotify($chatId, $first_name, $lastName, $username, $bot, $premium): bool
+    {
+        BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium);
+        $userMention = "[{$first_name}](tg://user?id=$chatId)";
+        $adminMessage = $premium ? 'премиум ' : '';
+        $messageText = "Новый {$adminMessage}пользователь: {$userMention}";
+        $bot->notifyAdmins($messageText);
+        return true;
+    }
+
+    public static function saveAndNotifyManagers($chatId, $first_name, $lastName, $username, $bot, $premium, $text): bool
+    {
+        BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium);
+
+        $userMention = "[{$first_name}](tg://user?id=$chatId)";
+        $adminMessage = $text;
+        $messageText = "{$adminMessage} пользователь: {$userMention}";
+
+        $bot->notifyManagers($bot, $messageText);
+        return true;
+    }
+
+    public static function saveAndNotifyAllManagers($chatId, $first_name, $lastName, $username, $bot, $premium, $text): bool
+    {
+        BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium);
+
+        $userMention = "[{$first_name}](tg://user?id=$chatId)";
+        $adminMessage = $text;
+        $messageText = "Сообщение: {$adminMessage} пользователь: {$userMention}";
+
+        Log::info('notifyAllManagers');
+        $bot->notifyAllManagers($bot, $messageText);
+        return true;
+    }
+
+    public static function getParam($update): string
+    {
+        if (isset($update['message']['text'])) {
+            $text = $update['message']['text'];
+            if (preg_match('/\/start (\d+)/', $text, $matches)) {
+                return $matches[1];
+            }
+        }
+        return '';
+    }
+
+    public static function isPhoneNumber($text): bool
+    {
+        $pattern = '/^\+?[0-9]+$/';
+        if (preg_match($pattern, $text)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+
+# End of Utilities/Utilities.php
+
+
+
+# Start of Http/Kernel.php
+
+<?php
+
+namespace App\Http;
+
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
+
+class Kernel extends HttpKernel
+{
+    /**
+     * The application's global HTTP middleware stack.
+     *
+     * These middleware are run during every request to your application.
+     *
+     * @var array<int, class-string|string>
+     */
+    protected $middleware = [
+        // \App\Http\Middleware\TrustHosts::class,
+        \App\Http\Middleware\TrustProxies::class,
+        \Illuminate\Http\Middleware\HandleCors::class,
+        \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
+        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+        \App\Http\Middleware\TrimStrings::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+    ];
+
+    /**
+     * The application's route middleware groups.
+     *
+     * @var array<string, array<int, class-string|string>>
+     */
+    protected $middlewareGroups = [
+        'web' => [
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\SetLocale::class,
+        ],
+
+        'api' => [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\SetLocale::class,
+//            'verified', //темка чтобы запретить не верифицированным пользователям доступ к api путям
+        ],
+    ];
+
+    /**
+     * The application's middleware aliases.
+     *
+     * Aliases may be used instead of class names to conveniently assign middleware to routes and groups.
+     *
+     * @var array<string, class-string|string>
+     */
+    protected $middlewareAliases = [
+        'auth' => \App\Http\Middleware\Authenticate::class,
+        'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
+        'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
+        'can' => \Illuminate\Auth\Middleware\Authorize::class,
+        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
+        'precognitive' => \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
+        'signed' => \App\Http\Middleware\ValidateSignature::class,
+        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+    ];
+}
+
+
+# End of Http/Kernel.php
+
+
+
+# Start of Http/Middleware/Authenticate.php
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Illuminate\Http\Request;
+
+class Authenticate extends Middleware
+{
+    /**
+     * Get the path the user should be redirected to when they are not authenticated.
+     */
+    protected function redirectTo(Request $request): ?string
+    {
+        return $request->expectsJson() ? null : route('login');
+    }
+}
+
+
+# End of Http/Middleware/Authenticate.php
+
+
+
+# Start of Http/Middleware/EncryptCookies.php
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Cookie\Middleware\EncryptCookies as Middleware;
+
+class EncryptCookies extends Middleware
+{
+    /**
+     * The names of the cookies that should not be encrypted.
+     *
+     * @var array<int, string>
+     */
+    protected $except = [
+        //
+    ];
+}
+
+
+# End of Http/Middleware/EncryptCookies.php
+
+
+
+# Start of Http/Middleware/PreventRequestsDuringMaintenance.php
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance as Middleware;
+
+class PreventRequestsDuringMaintenance extends Middleware
+{
+    /**
+     * The URIs that should be reachable while maintenance mode is enabled.
+     *
+     * @var array<int, string>
+     */
+    protected $except = [
+        //
+    ];
+}
+
+
+# End of Http/Middleware/PreventRequestsDuringMaintenance.php
+
+
+
+# Start of Http/Middleware/RedirectIfAuthenticated.php
+
+<?php
+
+namespace App\Http\Middleware;
+
+use App\Providers\RouteServiceProvider;
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
+
+class RedirectIfAuthenticated
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next, string ...$guards): Response
+    {
+        $guards = empty($guards) ? [null] : $guards;
+
+        foreach ($guards as $guard) {
+            if (Auth::guard($guard)->check()) {
+                return redirect(RouteServiceProvider::HOME);
+            }
+        }
+
+        return $next($request);
+    }
+}
+
+
+# End of Http/Middleware/RedirectIfAuthenticated.php
+
+
+
+# Start of Http/Middleware/SetLocale.php
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
+use Symfony\Component\HttpFoundation\Response;
+
+class SetLocale
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        if ($request->hasHeader('Accept-Language')) {
+            $locale = $request->header('Accept-Language');
+            if (in_array($locale, Config::get('app.supported_locales'))) {
+                App::setLocale($locale);
+            }
+        }
+
+        return $next($request);
+    }
+}
+
+
+# End of Http/Middleware/SetLocale.php
+
+
+
+# Start of Http/Middleware/TrimStrings.php
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Foundation\Http\Middleware\TrimStrings as Middleware;
+
+class TrimStrings extends Middleware
+{
+    /**
+     * The names of the attributes that should not be trimmed.
+     *
+     * @var array<int, string>
+     */
+    protected $except = [
+        'current_password',
+        'password',
+        'password_confirmation',
+    ];
+}
+
+
+# End of Http/Middleware/TrimStrings.php
+
+
+
+# Start of Http/Middleware/TrustHosts.php
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Http\Middleware\TrustHosts as Middleware;
+
+class TrustHosts extends Middleware
+{
+    /**
+     * Get the host patterns that should be trusted.
+     *
+     * @return array<int, string|null>
+     */
+    public function hosts(): array
+    {
+        return [
+            $this->allSubdomainsOfApplicationUrl(),
+        ];
+    }
+}
+
+
+# End of Http/Middleware/TrustHosts.php
+
+
+
+# Start of Http/Middleware/TrustProxies.php
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Http\Middleware\TrustProxies as Middleware;
+use Illuminate\Http\Request;
+
+class TrustProxies extends Middleware
+{
+    /**
+     * The trusted proxies for this application.
+     *
+     * @var array<int, string>|string|null
+     */
+    protected $proxies;
+
+    /**
+     * The headers that should be used to detect proxies.
+     *
+     * @var int
+     */
+    protected $headers =
+        Request::HEADER_X_FORWARDED_FOR |
+        Request::HEADER_X_FORWARDED_HOST |
+        Request::HEADER_X_FORWARDED_PORT |
+        Request::HEADER_X_FORWARDED_PROTO |
+        Request::HEADER_X_FORWARDED_AWS_ELB;
+}
+
+
+# End of Http/Middleware/TrustProxies.php
+
+
+
+# Start of Http/Middleware/ValidateSignature.php
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Routing\Middleware\ValidateSignature as Middleware;
+
+class ValidateSignature extends Middleware
+{
+    /**
+     * The names of the query string parameters that should be ignored.
+     *
+     * @var array<int, string>
+     */
+    protected $except = [
+        // 'fbclid',
+        // 'utm_campaign',
+        // 'utm_content',
+        // 'utm_medium',
+        // 'utm_source',
+        // 'utm_term',
+    ];
+}
+
+
+# End of Http/Middleware/ValidateSignature.php
+
+
+
+# Start of Http/Middleware/VerifyCsrfToken.php
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+
+class VerifyCsrfToken extends Middleware
+{
+    /**
+     * The URIs that should be excluded from CSRF verification.
+     *
+     * @var array<int, string>
+     */
+    protected $except = [
+        '/webhook/bot/*',
+    ];
+
+}
+
+
+# End of Http/Middleware/VerifyCsrfToken.php
+
+
+
+# Start of Http/Resources/AllManagersResource.php
+
+<?php
+
+namespace App\Http\Resources;
+
+use App\Models\Manager;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class AllManagersResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return array
+     */
+    public function toArray($request)
+    {
+        $allManagers = Manager::all()->map(function ($manager) {
+            return [
+                'id' => $manager->id,
+                'name' => $manager->name,
+            ];
+        });
+
+
+        $botManagers = [];
+
+        return [
+            'managers' => $botManagers,
+            'allManagers' => $allManagers
+        ];
+    }
+}
+
+
+# End of Http/Resources/AllManagersResource.php
+
+
+
+# Start of Http/Resources/BotAdminResource.php
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class BotAdminResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'telegram_id' => $this->telegram_id,
+        ];
+    }
+}
+
+
+# End of Http/Resources/BotAdminResource.php
+
+
+
+# Start of Http/Resources/BotResource.php
+
+<?php
+
+namespace App\Http\Resources;
+
+use App\Models\BotType;
+use App\Models\Manager;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class BotResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return array<string, mixed>
+     */
+    public function toArray($request)
+    {
+        $botManagers = $this->managers->map(function ($manager) {
+            return [
+                'id' => $manager->id,
+                'name' => $manager->name,
+            ];
+        });
+
+        $allManagers = Manager::all()->map(function ($manager) {
+            return [
+                'id' => $manager->id,
+                'name' => $manager->name,
+            ];
+        });
+
+        $allBotTypes = BotType::all()->map(function ($type) {
+            return [
+                'id' => $type->id,
+                'name' => $type->name,
+            ];
+        });
+
+        $typeInfo = [
+            'type_id' => (int)$this->type_id,
+            'types' => $allBotTypes,
+        ];
+
+        $imageInfo = [
+            'image_url' => $this->message_image,
+            'image_file' => null,
+        ];
+
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'token' => $this->token,
+            'message' => $this->message,
+            'message_image' => $imageInfo,
+            'active' => (int)$this->active,
+            'wordpress_endpoint' => $this->wordpress_endpoint,
+            'web_hook' => $this->web_hook,
+            'type_id' => $typeInfo,
+            'managers' => [
+                'managers' => $botManagers,
+                'allManagers' => $allManagers
+            ]
+        ];
+    }
+}
+
+
+# End of Http/Resources/BotResource.php
+
+
+
+# Start of Http/Resources/BotTypesCollection.php
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class BotTypesCollection extends ResourceCollection
+{
+    /**
+     * Transform the resource collection into an array.
+     *
+     * @return array<int|string, mixed>
+     */
+    public function toArray($request)
+    {
+        $firstTypeId = $this->collection->first() ? $this->collection->first()->id : null;
+
+        return [
+            'type_id' => $firstTypeId,
+            'types' => $this->collection->map(function ($type) {
+                return [
+                    'id' => $type->id,
+                    'name' => $type->name
+                ];
+            })->all()
+        ];
+    }
+}
+
+
+# End of Http/Resources/BotTypesCollection.php
+
+
+
+# Start of Http/Resources/BotTypesResource.php
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class BotTypesResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+        ];
+    }
+}
+
+
+# End of Http/Resources/BotTypesResource.php
+
+
+
+# Start of Http/Resources/BotUserResource.php
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class BotUserResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function toArray($request)
+    {
+        // Собираем только ID ботов из связи
+        $botIds = $this->bots->pluck('id');
+
+        // Возвращаем данные пользователя с ID ботов
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'username' => $this->username,
+            'telegram_id' => $this->telegram_id,
+            'is_banned' => $this->is_banned,
+            'phone' => $this->phone,
+            'premium' => $this->premium,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'bot_ids' => $botIds
+        ];
+    }
+}
+
+
+# End of Http/Resources/BotUserResource.php
+
+
+
+# Start of Http/Resources/ManagerResource.php
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class ManagerResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'telegram_id' => $this->telegram_id,
+        ];
+    }
+}
+
+
+# End of Http/Resources/ManagerResource.php
+
+
+
+# Start of Http/Requests/BotDataRequest.php
+
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class BotDataRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return auth()->check();
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'type_id' => 'nullable|exists:bot_types,id',
+            'wordpress_endpoint' => 'nullable|string',
+            'token' => 'required|string|max:255',
+            'message' => 'nullable|string',
+            'active' => 'boolean',
+            'message_image' => 'nullable|image',
+            'web_hook' => 'required',
+            'managers' => 'nullable',
+        ];
+    }
+}
+
+
+# End of Http/Requests/BotDataRequest.php
+
+
+
+# Start of Http/Controllers/AdminController.php
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\BotAdminResource;
+use App\Models\BotAdmin;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Routing\Controller as BaseController;
+
+class AdminController extends BaseController
+{
+    use AuthorizesRequests, ValidatesRequests;
+
+    public function index(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
+
+        Paginator::currentPageResolver(function () use ($page) {
+            return $page;
+        });
+
+        $bots = BotAdmin::paginate($perPage);
+        return BotAdminResource::collection($bots);
+    }
+
+    public function show(BotAdmin $botAdmin): BotAdminResource
+    {
+        return new BotAdminResource($botAdmin);
+    }
+
+    public function create(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->all();
+        $botAdmin = BotAdmin::create($data);
+        return response()->json(['id' => $botAdmin->id]);
+    }
+
+    public function update(Request $request, BotAdmin $botAdmin): BotAdminResource
+    {
+        $botAdmin->update($request->only(['name', 'telegram_id']));
+        return new BotAdminResource($botAdmin);
+    }
+
+    public function destroy(BotAdmin $botAdmin): \Illuminate\Http\JsonResponse
+    {
+        $botAdmin->delete();
+        return response()->json(['message' => 'BotAdmin deleted successfully']);
+    }
+}
+
+
+# End of Http/Controllers/AdminController.php
+
+
+
+# Start of Http/Controllers/BotController.php
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\BotDataRequest;
+use App\Http\Resources\AllManagersResource;
+use App\Http\Resources\BotResource;
+use App\Http\Resources\BotTypesCollection;
+use App\Models\Bot;
+use App\Models\BotType;
+use App\Models\Manager;
+use App\Services\BotManagmentService;
+use App\Services\BotUsersService;
+use App\Services\TelegramServices\TelegramHandler;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Log;
+
+class BotController extends BaseController
+{
+    use AuthorizesRequests, ValidatesRequests;
+
+    protected BotManagmentService $botManagmentService;
+
+    public function __construct(BotManagmentService $botManagmentService)
+    {
+        $this->botManagmentService = $botManagmentService;
+    }
+
+    public function index(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+    {
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
+
+        Paginator::currentPageResolver(function () use ($page) {
+            return $page;
+        });
+
+        $bots = Bot::paginate($perPage);
+        return BotResource::collection($bots);
+    }
+
+    public function show(Bot $bot): BotResource
+    {
+        return new BotResource($bot);
+    }
+
+    public function destroy(Bot $bot): \Illuminate\Http\JsonResponse
+    {
+        $bot->delete();
+        return response()->json(['message' => 'Bot deleted successfully']);
+    }
+
+    public function create(BotDataRequest $request): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->validated();
+
+        if ($request->hasFile('message_image')) {
+            $data['message_image'] = $this->botManagmentService->handleImageUpload($request);
+        }
+        $bot = Bot::create($data);
+        $this->botManagmentService->syncManagers($request, $bot);
+        $bot->updateWeebHook();
+
+        return response()->json(['id' => $bot->id]);
+    }
+
+    public function update(BotDataRequest $request, Bot $bot): BotResource
+    {
+        $data = $request->validated();
+
+        if ($request->hasFile('message_image')) {
+            $data['message_image'] = $this->botManagmentService->handleImageUpload($request);
+        }
+
+        $bot->update($data);
+        $this->botManagmentService->syncManagers($request, $bot);
+        $bot->updateWeebHook();
+
+        return new BotResource($bot);
+    }
+
+
+    public function getTypes(): BotTypesCollection
+    {
+        $botTypes = BotType::all();
+        return new BotTypesCollection($botTypes);
+    }
+
+    public function getManagers(): AllManagersResource
+    {
+        return new AllManagersResource(new Manager);
+    }
+
+    public function getBotUserData(Bot $bot, BotUsersService $botUsersService): \Illuminate\Http\JsonResponse
+    {
+        $data = $botUsersService->getBotUserData($bot);
+        return response()->json($data);
+    }
+
+    public function handle(TelegramHandler $telegramHandler, $bot, Request $request): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $telegramHandler->handle($bot, $request);
+            return response()->json(['status' => 'success']);
+        } catch
+        (\Exception $e) {
+            Log::error('Error in handle: ' . $e->getMessage());
+            return response()->json(['status' => 'success']);
+        }
+    }
+}
+
+
+# End of Http/Controllers/BotController.php
+
+
+
+# Start of Http/Controllers/Controller.php
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
+
+class Controller extends BaseController
+{
+    use AuthorizesRequests, ValidatesRequests;
+}
+
+
+# End of Http/Controllers/Controller.php
+
+
+
+# Start of Http/Controllers/ImageController.php
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Support\Facades\Storage;
+
+class ImageController extends Controller
+{
+    public function show($filename): \Illuminate\Foundation\Application|\Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory
+    {
+        $path = 'public/bots/' . $filename;
+        if (!Storage::exists($path)) {
+            abort(404);
+        }
+
+        $file = Storage::get($path);
+        $type = Storage::mimeType($path);
+
+        return response($file, 200)->header('Content-Type', $type);
+    }
+}
+
+
+# End of Http/Controllers/ImageController.php
+
+
+
+# Start of Http/Controllers/ManagerController.php
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\ManagerResource;
+use App\Models\Manager;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Routing\Controller as BaseController;
+
+class ManagerController extends BaseController
+{
+    use AuthorizesRequests, ValidatesRequests;
+
+    public function index(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
+
+        Paginator::currentPageResolver(function () use ($page) {
+            return $page;
+        });
+
+        $bots = Manager::paginate($perPage);
+        return ManagerResource::collection($bots);
+    }
+
+    public function show(Manager $manager): ManagerResource
+    {
+        return new ManagerResource($manager);
+    }
+
+    public function create(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->all();
+        $manager = Manager::create($data);
+        return response()->json(['id' => $manager->id]);
+    }
+
+    public function update(Request $request, Manager $manager): ManagerResource
+    {
+        $manager->update($request->only(['name', 'telegram_id']));
+        return new ManagerResource($manager);
+    }
+
+    public function destroy(Manager $manager): \Illuminate\Http\JsonResponse
+    {
+        $manager->delete();
+        return response()->json(['message' => 'Managerted successfully']);
+    }
+}
+
+
+# End of Http/Controllers/ManagerController.php
+
+
+
+# Start of Http/Controllers/UserController.php
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class UserController extends Controller
+{
+    public function show(Request $request)
+    {
+        return $request->user()->only(['email', 'name', 'email_verified_at', 'calories_limit', 'id']);
+    }
+
+}
+
+
+# End of Http/Controllers/UserController.php
+
+
+
+# Start of Http/Controllers/UsersController.php
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\BotUserResource;
+use App\Models\BotUser;
+use App\Services\BotUsersService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller as BaseController;
+
+class UsersController extends BaseController
+{
+    use AuthorizesRequests, ValidatesRequests;
+
+    public function index(Request $request): \Illuminate\Http\Resources\Json\ResourceCollection
+    {
+        $perPage = $request->input('per_page', 10);
+        $botId = $request->input('botId');
+
+        $botUsers = BotUser::getPaginatedUsers($perPage, $botId);
+
+        return BotUserResource::collection($botUsers);
+    }
+
+    public function show(BotUser $user): \Illuminate\Http\JsonResponse
+    {
+        return response()->json($user);
+    }
+
+    public function destroy(BotUser $user): \Illuminate\Http\JsonResponse
+    {
+        $user->delete();
+        return response()->json(['message' => 'User deleted successfully']);
+    }
+
+    public function export(Request $request, BotUsersService $botUsersService): \Illuminate\Http\JsonResponse
+    {
+        $botId = $request->query('botId');
+        $content = $botUsersService->exportUsers($botId);
+
+        if (empty($content)) {
+            $content = "No users with valid usernames found.";
+        }
+
+        $downloadUrl = $botUsersService->saveToFile($content);
+
+        return response()->json([
+            'message' => 'Export successful',
+            'downloadUrl' => $downloadUrl
+        ]);
+    }
+}
+
+
+# End of Http/Controllers/UsersController.php
+
+
+
+# Start of Http/CustomFortifyResponses/CustomLoginResponse.php
+
+<?php
+
+namespace App\Http\CustomFortifyResponses;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use Laravel\Fortify\Fortify;
+
+class CustomLoginResponse implements LoginResponseContract
+{
+    public function toResponse($request): JsonResponse|RedirectResponse
+    {
+        if ($request->wantsJson()) {
+            return new JsonResponse([
+                'two_factor' => false,
+                'user' => [
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'email_verified_at' => $request->user()->email_verified_at,
+                    'id' =>$request->user()->id,
+                ]
+            ]);
+        }
+
+        return redirect()->intended(Fortify::redirects('login'));
+    }
+}
+
+
+# End of Http/CustomFortifyResponses/CustomLoginResponse.php
+
+
+
+# Start of Http/CustomFortifyResponses/CustomRegisterResponse.php
+
+<?php
+
+namespace App\Http\CustomFortifyResponses;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+use Laravel\Fortify\Fortify;
+
+class CustomRegisterResponse implements RegisterResponseContract
+{
+    public function toResponse($request): JsonResponse|RedirectResponse
+    {
+        if ($request->wantsJson()) {
+            return new JsonResponse([
+                'user' => [
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'email_verified_at' => $request->user()->email_verified_at,
+                    'id' =>$request->user()->id,
+                ]
+            ], 201);
+        }
+
+        return redirect()->intended(Fortify::redirects('register'));
+    }
+}
+
+
+# End of Http/CustomFortifyResponses/CustomRegisterResponse.php
+
+
+
+# Start of Actions/Fortify/CreateNewUser.php
+
+<?php
+
+namespace App\Actions\Fortify;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Laravel\Fortify\Contracts\CreatesNewUsers;
+
+class CreateNewUser implements CreatesNewUsers
+{
+    use PasswordValidationRules;
+
+    /**
+     * Validate and create a newly registered user.
+     *
+     * @param  array<string, string>  $input
+     */
+    public function create(array $input): User
+    {
+        Validator::make($input, [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique(User::class),
+            ],
+            'password' => $this->passwordRules(),
+        ])->validate();
+
+        return User::create([
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'password' => Hash::make($input['password']),
+        ]);
+    }
+}
+
+
+# End of Actions/Fortify/CreateNewUser.php
+
+
+
+# Start of Actions/Fortify/CustomUpdateUserProfileInformation.php
+
+<?php
+
+namespace App\Actions\Fortify;
+
+use App\Models\User;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
+
+class CustomUpdateUserProfileInformation implements UpdatesUserProfileInformation
+{
+    /**
+     * Validate and update the given user's profile information.
+     *
+     * @param  array<string, string>  $input
+     */
+    public function update(User $user, array $input): void
+    {
+        Validator::make($input, [
+            'name' => ['required', 'string', 'max:255'],
+
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($user->id),
+            ],
+        ])->validateWithBag('updateProfileInformation');
+
+        if ($input['email'] !== $user->email &&
+            $user instanceof MustVerifyEmail) {
+            $this->updateVerifiedUser($user, $input);
+        } else {
+            $user->forceFill([
+                'name' => $input['name'],
+                'email' => $input['email'],
+                'calories_limit' => $input['calories_limit'],
+            ])->save();
+        }
+    }
+
+    /**
+     * Update the given verified user's profile information.
+     *
+     * @param  array<string, string>  $input
+     */
+    protected function updateVerifiedUser(User $user, array $input): void
+    {
+        $user->forceFill([
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'email_verified_at' => null,
+        ])->save();
+
+        $user->sendEmailVerificationNotification();
+    }
+}
+
+
+# End of Actions/Fortify/CustomUpdateUserProfileInformation.php
+
+
+
+# Start of Actions/Fortify/PasswordValidationRules.php
+
+<?php
+
+namespace App\Actions\Fortify;
+
+use Laravel\Fortify\Rules\Password;
+
+trait PasswordValidationRules
+{
+    /**
+     * Get the validation rules used to validate passwords.
+     *
+     * @return array<int, \Illuminate\Contracts\Validation\Rule|array|string>
+     */
+    protected function passwordRules(): array
+    {
+        return ['required', 'string', new Password, 'confirmed'];
+    }
+}
+
+
+# End of Actions/Fortify/PasswordValidationRules.php
+
+
+
+# Start of Actions/Fortify/ResetUserPassword.php
+
+<?php
+
+namespace App\Actions\Fortify;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Laravel\Fortify\Contracts\ResetsUserPasswords;
+
+class ResetUserPassword implements ResetsUserPasswords
+{
+    use PasswordValidationRules;
+
+    /**
+     * Validate and reset the user's forgotten password.
+     *
+     * @param  array<string, string>  $input
+     */
+    public function reset(User $user, array $input): void
+    {
+        Validator::make($input, [
+            'password' => $this->passwordRules(),
+        ])->validate();
+
+        $user->forceFill([
+            'password' => Hash::make($input['password']),
+        ])->save();
+    }
+}
+
+
+# End of Actions/Fortify/ResetUserPassword.php
+
+
+
+# Start of Actions/Fortify/UpdateUserPassword.php
+
+<?php
+
+namespace App\Actions\Fortify;
+
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Laravel\Fortify\Contracts\UpdatesUserPasswords;
+
+class UpdateUserPassword implements UpdatesUserPasswords
+{
+    use PasswordValidationRules;
+
+    /**
+     * Validate and update the user's password.
+     *
+     * @param  array<string, string>  $input
+     */
+    public function update(User $user, array $input): void
+    {
+        Validator::make($input, [
+            'current_password' => ['required', 'string', 'current_password:web'],
+            'password' => $this->passwordRules(),
+        ], [
+            'current_password.current_password' => __('The provided password does not match your current password.'),
+        ])->validateWithBag('updatePassword');
+
+        $user->forceFill([
+            'password' => Hash::make($input['password']),
+        ])->save();
+    }
+}
+
+
+# End of Actions/Fortify/UpdateUserPassword.php
+
+
+
+# Start of Actions/Fortify/UpdateUserProfileInformation.php
+
+<?php
+
+namespace App\Actions\Fortify;
+
+use App\Models\User;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
+
+class UpdateUserProfileInformation implements UpdatesUserProfileInformation
+{
+    /**
+     * Validate and update the given user's profile information.
+     *
+     * @param  array<string, string>  $input
+     */
+    public function update(User $user, array $input): void
+    {
+        Validator::make($input, [
+            'name' => ['required', 'string', 'max:255'],
+
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($user->id),
+            ],
+        ])->validateWithBag('updateProfileInformation');
+
+        if ($input['email'] !== $user->email &&
+            $user instanceof MustVerifyEmail) {
+            $this->updateVerifiedUser($user, $input);
+        } else {
+            $user->forceFill([
+                'name' => $input['name'],
+                'email' => $input['email'],
+            ])->save();
+        }
+    }
+
+    /**
+     * Update the given verified user's profile information.
+     *
+     * @param  array<string, string>  $input
+     */
+    protected function updateVerifiedUser(User $user, array $input): void
+    {
+        $user->forceFill([
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'email_verified_at' => null,
+        ])->save();
+
+        $user->sendEmailVerificationNotification();
+    }
+}
+
+
+# End of Actions/Fortify/UpdateUserProfileInformation.php
+
+
+
+# Start of Jobs/SendAdminNotification.php
+
+<?php
+
+namespace App\Jobs;
+
+use App\Models\Bot;
+use App\Models\BotAdmin;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Api;
+
+class SendAdminNotification implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected $bot;
+    protected $admin;
+    protected $message;
+
+    public function __construct(Bot $bot, BotAdmin $admin, $message)
+    {
+        $this->bot = $bot;
+        $this->admin = $admin;
+        $this->message = $message;
+    }
+
+    public function handle()
+    {
+        $telegram = new Api($this->bot->token);
+        try {
+            $telegram->sendMessage([
+                'chat_id' => $this->admin->telegram_id,
+                'text' => $this->message,
+            ]);
+            Log::info('Sent message to admin: ' . $this->admin->name);
+        } catch (\Exception $e) {
+            Log::error('Error sending message to ' . $this->admin->telegram_id . ': ' . $e->getMessage());
+        }
+    }
+}
+
+
+# End of Jobs/SendAdminNotification.php
+
+
+
+# Start of Jobs/SendManagerNotification.php
+
+<?php
+
+namespace App\Jobs;
+
+use App\Models\Bot;
+use App\Models\Manager;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Api;
+
+class SendManagerNotification implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected $bot;
+    protected $manager;
+    protected $message;
+
+    public function __construct(Bot $bot, Manager $manager, $message)
+    {
+        $this->bot = $bot;
+        $this->manager = $manager;
+        $this->message = $message;
+    }
+
+    public function handle()
+    {
+        $telegram = new Api($this->bot->token);
+        try {
+            sleep(2);
+            $telegram->sendMessage([
+                'chat_id' => $this->manager->telegram_id,
+                'text' => $this->message
+            ]);
+            Log::info('Message sent successfully to manager: ' . $this->manager->name);
+        } catch (\Exception $e) {
+            Log::error('Error sending message to ' . $this->manager->telegram_id . ': ' . $e->getMessage());
+        }
+    }
+}
+
+
+# End of Jobs/SendManagerNotification.php
+
+
+
+# Start of Observers/UserObserver.php
+
+<?php
+
+namespace App\Observers;
+
+use Illuminate\Support\Facades\Cache;
+
+class UserObserver
+{
+    public function created()
+    {
+        Cache::forget('user');
+    }
+}
+
+
+# End of Observers/UserObserver.php
+
+
+
+# Start of Services/.DS_Store
+
+
+
+# Start of Services/BotManagmentService.php
+
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Storage;
+
+class BotManagmentService
+{
+    public function handleImageUpload($request): ?string
+    {
+        $imagePath = $request->file('message_image')->store('public/bots');
+        $url = Storage::url($imagePath);
+        return str_replace('/storage/bots', '/images', $url);
+    }
+
+    public function syncManagers($request, $bot): void
+    {
+        $managerIdsJson = $request->input('managers');
+        $managerIds = $managerIdsJson ? json_decode($managerIdsJson, true) : null;
+        if (is_array($managerIds)) {
+            $managerIds = array_column($managerIds, 'id');
+        } else {
+            $managerIds = [];
+        }
+        $bot->managers()->sync($managerIds);
+    }
+}
+
+
+# End of Services/BotManagmentService.php
+
+
+
+# Start of Services/BotUsersService.php
+
+<?php
+
+namespace App\Services;
+
+use App\Models\Bot;
+use App\Models\BotUser;
+use App\Models\BotUserBan;
+use App\Models\BotUserBot;
+use DateInterval;
+use DatePeriod;
+use Illuminate\Support\Facades\Storage;
+
+class BotUsersService
+{
+    public function exportUsers($botId = null)
+    {
+        if ($botId) {
+            $bot = Bot::findOrFail($botId);
+            $users = $bot->users()
+                ->whereNotNull('username')
+                ->where('username', '!=', '')
+                ->get(['username']);
+        } else {
+            $users = BotUser::whereNotNull('username')
+                ->where('username', '!=', '')
+                ->get(['username']);
+        }
+
+        return $users->pluck('username')->implode("\n");
+    }
+
+    public function saveToFile($content, $fileName = 'usernames.txt'): string
+    {
+        $filePath = 'public/exports/' . $fileName;
+        Storage::disk('public')->put($filePath, $content);
+        return Storage::disk('public')->url($filePath);
+    }
+
+    public function getBotUserData(Bot $bot): array
+    {
+        $endDate = now();
+        $startDate = now()->subDays(7);
+
+        $dateRange = new DatePeriod(
+            $startDate,
+            new DateInterval('P1D'),
+            $endDate->addDay()
+        );
+
+        $dates = array_fill_keys(
+            array_map(
+                function ($date) {
+                    return $date->format('Y-m-d');
+                },
+                iterator_to_array($dateRange)
+            ),
+            0
+        );
+
+        $newUsersStats = $dates;
+        $bannedUsersStats = $dates;
+        $premiumUsersStats = $dates;
+        $botId = $bot->id;
+
+        $newUsersData = BotUserBot::getNewUsersStatistics($botId, $startDate, $endDate);
+        foreach ($newUsersData as $data) {
+            $newUsersStats[$data->date] = $data->count;
+        }
+
+        $bannedUsersData = BotUserBan::getBannedUsersStatistics($botId, $startDate, $endDate);
+        foreach ($bannedUsersData as $data) {
+            $bannedUsersStats[$data->date] = $data->count;
+        }
+
+        $premiumUsersData = BotUserBot::getPremiumUsersStatistics($botId, $startDate, $endDate);
+        foreach ($premiumUsersData as $data) {
+            $premiumUsersStats[$data->date] = $data->count;
+        }
+
+        $totalNewUsers = array_sum($newUsersStats);
+        $totalBannedUsers = array_sum($bannedUsersStats);
+        $totalPremiumUsers = array_sum($premiumUsersStats);
+        $totalDefaultUsers = array_sum($newUsersStats) - array_sum($premiumUsersStats);
+
+        return [
+            'new_users' => $newUsersStats,
+            'banned_users' => $bannedUsersStats,
+            'premium_users' => $premiumUsersStats,
+            'total_new_users' => $totalNewUsers,
+            'total_banned_users' => $totalBannedUsers,
+            'total_premium_users' => $totalPremiumUsers,
+            'total_default_users' => $totalDefaultUsers,
+        ];
+    }
+}
+
+
+# End of Services/BotUsersService.php
+
+
+
+# Start of Services/TelegramServices/ApprovalService.php
+
+<?php
+
+namespace App\Services\TelegramServices;
+
+use App\Services\TelegramServices\ApprovalHandlerParts\ContactMessageHandler;
+use App\Services\TelegramServices\ApprovalHandlerParts\TextMessageHandler;
+
+class ApprovalService extends BaseService
+{
+    public function handle($bot, $telegram, $update): void
+    {
+        self::getUpdateType($bot, $telegram, $update);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function handleMessage($bot, $telegram, $update): void
+    {
+        self::getMessageType($bot, $telegram, $update);
+    }
+
+    public static function handleContactMessage($bot, $telegram, $update): void
+    {
+        ContactMessageHandler::handle($bot, $telegram, $update);
+    }
+
+    public static function handleTextMessage($bot, $telegram, $update): void
+    {
+        TextMessageHandler::handleTextMessage($bot, $telegram, $update);
+    }
+}
+
+
+# End of Services/TelegramServices/ApprovalService.php
+
+
+
+# Start of Services/TelegramServices/BaseService.php
+
+<?php
+
+namespace App\Services\TelegramServices;
+
+use App\Interfaces\BotHandlerStrategy;
+use App\Models\BotUser;
+use Illuminate\Support\Facades\Log;
+
+class BaseService implements BotHandlerStrategy
+{
+    public static function getUpdateType($bot, $telegram, $update): void
+    {
+        $updateType = $update->detectType();
+        switch ($updateType) {
+            case 'message':
+                static::handleMessage($bot, $telegram, $update);
+                break;
+            case 'my_chat_member':
+                static::handleMyChatMember($bot, $telegram, $update);
+                break;
+            default:
+                Log::info("Unhandled update type: " . $updateType);
+                break;
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function getMessageType($bot, $telegram, $update): void
+    {
+        $message = $update->getMessage();
+
+        switch (true) {
+            case isset($message['contact']):
+                static::handleContactMessage($bot, $telegram, $update);
+                break;
+
+            case isset($message['text']):
+                static::handleTextMessage($bot, $telegram, $update);
+                break;
+
+            default:
+                Log::info("Unknown message type: " . json_encode($message));
+                break;
+        }
+    }
+
+    public static function handleMyChatMember($bot, $telegram, $update): void
+    {
+        $myChatMember = $update->getMyChatMember();
+        $newStatus = $myChatMember['new_chat_member']['status'];
+        $userId = $myChatMember['from']['id'];
+
+
+        $userModel = BotUser::where('telegram_id', $userId)->first();
+
+        if ($userModel) {
+            if ($newStatus === 'kicked') {
+                $userModel->banned_bots()->syncWithoutDetaching([$bot->id]);
+            } else {
+                $userModel->banned_bots()->detach($bot->id);
+            }
+        }
+    }
+
+
+    public static function handleMessage($bot, $telegram, $update)
+    {
+    }
+
+    public
+    static function handleContactMessage($bot, $telegram, $update)
+    {
+    }
+
+    public static function handleTextMessage($bot, $telegram, $update)
+    {
+    }
+}
+
+
+# End of Services/TelegramServices/BaseService.php
+
+
+
+# Start of Services/TelegramServices/DefaultService.php
+
+<?php
+
+namespace App\Services\TelegramServices;
+
+
+use App\Services\TelegramServices\DefaultHandlerParts\TextMessageHandler;
+
+class DefaultService extends BaseService
+{
+
+    public function handle($bot, $telegram, $update)
+    {
+        self::getUpdateType($bot, $telegram, $update);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function handleMessage($bot, $telegram, $update)
+    {
+        self::getMessageType($bot, $telegram, $update);
+    }
+
+
+    public static function handleTextMessage($bot, $telegram, $update)
+    {
+        TextMessageHandler::handle($bot, $telegram, $update);
+    }
+}
+
+
+# End of Services/TelegramServices/DefaultService.php
+
+
+
+# Start of Services/TelegramServices/Request2Service.php
+
+<?php
+
+namespace App\Services\TelegramServices;
+
+
+use App\Services\TelegramServices\Request2HandlerService\TextMessageHandler;
+
+class Request2Service extends BaseService
+{
+    public function handle($bot, $telegram, $update)
+    {
+        self::getUpdateType($bot, $telegram, $update);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function handleMessage($bot, $telegram, $update)
+    {
+        self::getMessageType($bot, $telegram, $update);
+    }
+
+
+    public static function handleTextMessage($bot, $telegram, $update)
+    {
+        TextMessageHandler::handle($bot, $telegram, $update);
+    }
+}
+
+
+# End of Services/TelegramServices/Request2Service.php
+
+
+
+# Start of Services/TelegramServices/RequestService.php
+
+<?php
+
+namespace App\Services\TelegramServices;
+
+
+use App\Services\TelegramServices\RequestHandlerService\TextMessageHandler;
+
+class RequestService extends BaseService
+{
+    public function handle($bot, $telegram, $update)
+    {
+        self::getUpdateType($bot, $telegram, $update);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function handleMessage($bot, $telegram, $update)
+    {
+        self::getMessageType($bot, $telegram, $update);
+    }
+
+
+    public static function handleTextMessage($bot, $telegram, $update)
+    {
+        TextMessageHandler::handle($bot, $telegram, $update);
+    }
+}
+
+
+# End of Services/TelegramServices/RequestService.php
+
+
+
+# Start of Services/TelegramServices/TelegramHandler.php
+
+<?php
+
+namespace App\Services\TelegramServices;
+
+use App\Models\Bot;
+use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Api;
+use Telegram\Bot\Objects\Update;
+
+class TelegramHandler
+{
+    protected array $strategies;
+
+    public function __construct(ApprovalService $approvalService, DefaultService $defaultService, RequestService $requestService, Request2Service $request2Service)
+    {
+        $this->strategies = [
+            'Approval' => $approvalService,
+            'Default' => $defaultService,
+            'Request' => $requestService,
+            'Request2' => $request2Service,
+        ];
+    }
+
+    public function handle($botName, $request): void
+    {
+        $bot = Bot::with('type')->where('name', $botName)->firstOrFail();
+
+        $botTypeName = $bot->type->name ?? 'unknown';
+
+        $telegram = new Api($bot->token);
+
+        $update = new Update($request->all());
+
+        if (!$bot->active) {
+            return;
+        }
+
+        if (array_key_exists($botTypeName, $this->strategies)) {
+
+            $this->strategies[$botTypeName]->handle($bot, $telegram, $update);
+
+        } else {
+            Log::error('Unknown bot type: ' . $botTypeName);
+        }
+    }
+}
+
+
+
+# End of Services/TelegramServices/TelegramHandler.php
+
+
+
+# Start of Services/TelegramServices/Request2HandlerService/TextMessageHandler.php
+
+<?php
+
+namespace App\Services\TelegramServices\Request2HandlerService;
+
+use App\Services\TelegramServices\DefaultHandlerParts\Telegram;
+use App\Traits\BasicDataExtractor;
+use App\Utilities\Utilities;
+use Illuminate\Support\Facades\Log;
+
+class TextMessageHandler
+{
+    use BasicDataExtractor;
+
+
+    public static function handle($bot, $telegram, $update)
+    {
+        $message = $update->getMessage();
+        $text = $message->getText();
+        $commonData = self::extractCommonData($message);
+
+        if (str_contains($text, 'start')) {
+            $messageText = $bot->message;
+            $telegram->sendMessage([
+                'chat_id' => $commonData['chatId'],
+                'text' => $messageText,
+            ]);
+
+            Utilities::saveAndNotify($commonData['chatId'], $commonData['firstName'], $commonData['lastName'], $commonData['username'], $bot, $commonData['premium']);
+            return true;
+        } else {
+            Log::info('saveAndNotifyAllManagers');
+            Utilities::saveAndNotifyAllManagers($commonData['chatId'], $commonData['firstName'], $commonData['lastName'], $commonData['username'], $bot, $commonData['premium'], $text);
+
+            $telegram->sendMessage([
+                'chat_id' => $commonData['chatId'],
+                'text' => 'Данные приняты',
+            ]);
+        }
+    }
+}
+
+
+# End of Services/TelegramServices/Request2HandlerService/TextMessageHandler.php
+
+
+
+# Start of Services/TelegramServices/DefaultHandlerParts/TextMessageHandler.php
+
+<?php
+
+namespace App\Services\TelegramServices\DefaultHandlerParts;
+
+use App\Models\BotUser;
+use App\Traits\BasicDataExtractor;
+use App\Utilities\Utilities;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Telegram\Bot\FileUpload\InputFile;
+
+class TextMessageHandler
+{
+    use BasicDataExtractor;
+
+    public static function handle($bot, $telegram, $update)
+    {
+        $message = $update->getMessage();
+        $text = $message->getText();
+
+        if (str_contains($text, 'start')) {
+            $commonData = self::extractCommonData($message);
+            $imagePath = $bot->message_image;
+            $messageText = $bot->message;
+            if ($imagePath) {
+                $relativeImagePath = str_replace('/images', 'public/bots', parse_url($imagePath, PHP_URL_PATH));
+                if (Storage::exists($relativeImagePath)) {
+                    $absoluteImagePath = Storage::path($relativeImagePath);
+                    $photo = InputFile::create($absoluteImagePath, basename($absoluteImagePath));
+
+                    try {
+                        $telegram->sendPhoto([
+                            'chat_id' => $commonData['chatId'],
+                            'photo' => $photo,
+                            'caption' => $messageText
+                        ]);
+                    } catch (Telegram\Bot\Exceptions\TelegramOtherException $e) {
+                        if ($e->getMessage() === 'Forbidden: bot was blocked by the user') {
+                            $userModel = BotUser::where('telegram_id', $commonData['chatId'])->firstOrFail();
+                            $userModel->is_banned = 1;
+                            $userModel->save();
+                        } else {
+                            Log::info($e->getMessage());
+                        }
+                    }
+                } else {
+                    Log::error("Image file not found: " . $relativeImagePath);
+                }
+            } else {
+                $telegram->sendMessage([
+                    'chat_id' => $commonData['chatId'],
+                    'text' => $messageText,
+                ]);
+            }
+
+            Utilities::saveAndNotify(
+                $commonData['chatId'],
+                $commonData['firstName'],
+                $commonData['lastName'],
+                $commonData['username'],
+                $bot,
+                $commonData['premium']
+            );
+        }
+    }
+}
+
+
+# End of Services/TelegramServices/DefaultHandlerParts/TextMessageHandler.php
+
+
+
+# Start of Services/TelegramServices/RequestHandlerService/TextMessageHandler.php
+
+<?php
+
+namespace App\Services\TelegramServices\RequestHandlerService;
+
+use App\Services\TelegramServices\DefaultHandlerParts\Telegram;
+use App\Traits\BasicDataExtractor;
+use App\Utilities\Utilities;
+use Illuminate\Support\Facades\Cache;
+
+class TextMessageHandler
+{
+    use BasicDataExtractor;
+
+    public static function handle($bot, $telegram, $update): void
+    {
+        $message = $update->getMessage();
+        $text = $message->getText();
+        $commonData = self::extractCommonData($message);
+        $chatId = $commonData['chatId'];
+
+        $cacheKey = "bot_{$bot->id}_user_{$commonData['fromId']}_application";
+
+        $userData = Cache::get($cacheKey, []);
+
+        if (empty($userData)) {
+            if (str_contains($text, '/start')) {
+                $telegram->sendMessage([
+                    'chat_id' => $chatId,
+                    'text' => "Введите ваш возраст",
+                ]);
+                Cache::put($cacheKey, ['step' => 'age'], now()->addMinutes(30));
+            } else {
+                $telegram->sendMessage([
+                    'chat_id' => $chatId,
+                    'text' => "Для начала формирования заявки нажмите /start",
+                ]);
+            }
+        } else {
+            switch ($userData['step']) {
+                case 'age':
+                    $userData['age'] = $text;
+                    $userData['step'] = 'name';
+                    $telegram->sendMessage([
+                        'chat_id' => $chatId,
+                        'text' => "Введите ваше имя",
+                    ]);
+                    Cache::put($cacheKey, $userData, now()->addMinutes(30));
+                    break;
+                case 'name':
+                    $userData['name'] = $text;
+                    $userData['step'] = 'contact';
+                    $telegram->sendMessage([
+                        'chat_id' => $chatId,
+                        'text' => "Введите ваш контактный номер",
+                    ]);
+                    Cache::put($cacheKey, $userData, now()->addMinutes(30));
+                    break;
+                case 'contact':
+                    $userData['contact'] = $text;
+                    $managerMessage = "Возраст: {$userData['age']}\nИмя: {$userData['name']}\nКонтакт: {$userData['contact']}\n";
+                    Utilities::saveAndNotifyManagers(
+                        $commonData['chatId'],
+                        $commonData['firstName'],
+                        $commonData['lastName'],
+                        $commonData['username'],
+                        $bot,
+                        $commonData['premium'],
+                        $managerMessage
+                    );
+                    $telegram->sendMessage([
+                        'chat_id' => $chatId,
+                        'text' => "Спасибо, ваша заявка принята!",
+                    ]);
+                    Cache::forget($cacheKey);
+                    break;
+            }
+        }
+    }
+}
+
+
+# End of Services/TelegramServices/RequestHandlerService/TextMessageHandler.php
+
+
+
+# Start of Services/TelegramServices/ApprovalHandlerParts/ContactMessageHandler.php
+
+<?php
+
+namespace App\Services\TelegramServices\ApprovalHandlerParts;
+
+use App\Models\BotUser;
+use App\Traits\BasicDataExtractor;
+use App\Traits\ContactDataExtractor;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
+class ContactMessageHandler
+{
+    use BasicDataExtractor, ContactDataExtractor;
+
+    public static function handle($bot, $telegram, $update): void
+    {
+        $message = $update->getMessage();
+
+        $commonData = self::extractCommonData($message);
+        $contactData = self::extractContactData($message);
+
+        if (!$contactData) {
+            $telegram->sendMessage([
+                'chat_id' => $commonData['chatId'],
+                'text' => 'Ошибка, попробуйте перейти по ссылке еще раз!',
+            ]);
+            return;
+        }
+
+        $user = BotUser::where('telegram_id', $contactData['telegramId'])->first();
+        if ($user) {
+            $user->phone = $contactData['phoneNumber'];
+            $user->save();
+        }
+
+        $userIdFromWordpress = Cache::get($commonData['chatId']);
+        if (!$userIdFromWordpress) {
+            $telegram->sendMessage([
+                'chat_id' => $commonData['chatId'],
+                'text' => 'Ошибка, попробуйте перейти по ссылке еще раз!',
+            ]);
+            return;
+        }
+
+        $phoneNumber = preg_replace('/[^0-9]/', '', $contactData['phoneNumber']);
+
+        $data = [
+            'wp_id' => $userIdFromWordpress,
+            'tg_id' => $commonData['chatId'],
+            'tg_username' => $commonData['username'],
+            'tg_number' => $phoneNumber
+        ];
+
+        try {
+            $url = $bot->wordpress_endpoint;
+//            $response = Http::asForm()->post($url, $data);
+//            $body = $response->body();
+//            Log::info(print_r($body, true));
+
+            $body = '/ID already exists/';
+
+            $patterns = [
+                '/Wrong Query/' => 'Ошибка, попробуйте перейти по ссылке еще раз!',
+                '/Number already exists/' => 'Ваш номер уже есть в базе!',
+                '/Success/' => 'Успех!',
+                '/User does not exist/' => 'Такого пользователя не существует!',
+                '/Number code invalid/' => 'Недопустимый код номера!',
+                '/ID already exists/' => 'Ваш ID уже есть в базе!'
+            ];
+
+            foreach ($patterns as $pattern => $message) {
+                if (preg_match($pattern, $body)) {
+                    $telegram->sendMessage([
+                        'chat_id' => $commonData['chatId'],
+                        'text' => $message,
+                    ]);
+                    break;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("Error accessing /test.wp: " . $e->getMessage());
+        }
+    }
+}
+
+
+# End of Services/TelegramServices/ApprovalHandlerParts/ContactMessageHandler.php
+
+
+
+# Start of Services/TelegramServices/ApprovalHandlerParts/TextMessageHandler.php
+
+<?php
+
+namespace App\Services\TelegramServices\ApprovalHandlerParts;
+
+use App\Services\TelegramServices\DefaultHandlerParts\Telegram;
+use App\Traits\BasicDataExtractor;
+use App\Utilities\Utilities;
+use Illuminate\Support\Facades\Cache;
+use Telegram\Bot\Keyboard\Keyboard;
+
+class TextMessageHandler
+{
+    use BasicDataExtractor;
+
+    public static function handleTextMessage($bot, $telegram, $update): void
+    {
+        $message = $update->getMessage();
+
+        $commonData = self::extractCommonData($message);
+        $text = $message->getText();
+
+        $isPhone = Utilities::isPhoneNumber($text);
+
+        if ($isPhone) {
+            $telegram->sendMessage([
+                'chat_id' => $commonData['chatId'],
+                'text' => 'Для подтверждения номера надо нажать на кнопку "Поделится контактом"!',
+            ]);
+            return;
+        }
+
+        $userIdFromWordpress = Utilities::getParam($update) ?? '';
+
+        if (!$userIdFromWordpress) {
+            $telegram->sendMessage([
+                'chat_id' => $commonData['chatId'],
+                'text' => 'Ошибка, попробуйте перейти по ссылке еще раз!',
+            ]);
+            return;
+        }
+
+        Cache::put($commonData['chatId'], $userIdFromWordpress, 60);
+
+        if (str_contains($text, '/start')) {
+            $keyboard = Keyboard::make([
+                'resize_keyboard' => true,
+                'one_time_keyboard' => true
+            ])->row([
+                [
+                    'text' => 'Поделиться контактом',
+                    'request_contact' => true
+                ]
+            ]);
+
+            $telegram->sendMessage([
+                'chat_id' => $commonData['chatId'],
+                'text' => 'Пожалуйста, поделитесь вашим контактом.',
+                'reply_markup' => $keyboard
+            ]);
+        }
+    }
+}
+
+
+# End of Services/TelegramServices/ApprovalHandlerParts/TextMessageHandler.php
+
+
+
+# Start of Interfaces/BotHandlerStrategy.php
+
+<?php
+
+namespace App\Interfaces;
+
+interface BotHandlerStrategy
+{
+    public static function handleMessage($bot, $telegram, $update);
+
+    public static function handleMyChatMember($bot, $telegram, $update);
+}
+
+
+# End of Interfaces/BotHandlerStrategy.php
+
+
+
+# Start of Console/Kernel.php
+
+<?php
+
+namespace App\Console;
+
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+
+class Kernel extends ConsoleKernel
+{
+    /**
+     * Define the application's command schedule.
+     */
+    protected function schedule(Schedule $schedule): void
+    {
+        // $schedule->command('inspire')->hourly();
+    }
+
+    /**
+     * Register the commands for the application.
+     */
+    protected function commands(): void
+    {
+        $this->load(__DIR__.'/Commands');
+
+        require base_path('routes/console.php');
+    }
+}
+
+
+# End of Console/Kernel.php
+
+
+
+# Start of Console/Commands/SaveBotImages.php
+
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\Bot;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+
+class SaveBotImages extends Command
+{
+    protected $signature = 'bots:save-images';
+    protected $description = 'Saves images from bots to the transfer directory with their original extensions.';
+
+    public function handle()
+    {
+        $bots = Bot::all();
+        foreach ($bots as $bot) {
+            // Попытка найти изображение в форматах jpg и png
+            $sourcePathJpg = 'public/transfer/' . $bot->name . '.jpg';
+            $sourcePathPng = 'public/transfer/' . $bot->name . '.png';
+            $sourcePath = Storage::exists($sourcePathJpg) ? $sourcePathJpg : (Storage::exists($sourcePathPng) ? $sourcePathPng : null);
+
+            if ($sourcePath) {
+                $fileContents = Storage::get($sourcePath);
+
+                // Загрузка файла в бота
+                $uploadedImageUrl = $this->uploadImageToBot($fileContents, $sourcePath);
+
+                // Обновление URL изображения в базе данных
+                if ($uploadedImageUrl) {
+                    $bot->update(['message_image' => $uploadedImageUrl]);
+                    Log::info("Updated image for {$bot->name} with new URL: {$uploadedImageUrl}");
+                    $this->info("Updated image for {$bot->name} with new URL: {$uploadedImageUrl}");
+                } else {
+                    $this->error("Failed to upload image for {$bot->name}");
+                }
+            } else {
+                $this->error("File does not exist for {$bot->name} in both JPG and PNG formats");
+            }
+        }
+    }
+
+    protected function uploadImageToBot($fileContents, $sourcePath)
+    {
+        // Сохранение содержимого файла в новое место
+        $targetPath = 'public/bots/' . basename($sourcePath);
+        Storage::put($targetPath, $fileContents);
+
+        // Получение и возврат URL нового файла
+        $url = Storage::url($targetPath);
+        return str_replace('/storage/bots', '/images', $url);
+    }
+}
+
+
+# End of Console/Commands/SaveBotImages.php
+
