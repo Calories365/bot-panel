@@ -32,6 +32,8 @@ class BotUsersService
     public function saveToFile($content, $fileName = 'usernames.txt'): string
     {
         $filePath = 'public/exports/' . $fileName;
+        Storage::put($filePath, $content);
+        $url = Storage::url($filePath);
         Storage::disk('public')->put($filePath, $content);
         return Storage::disk('public')->url($filePath);
     }

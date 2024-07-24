@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Log;
 
 class UsersController extends BaseController
 {
@@ -44,7 +45,10 @@ class UsersController extends BaseController
             $content = "No users with valid usernames found.";
         }
 
-        $downloadUrl = $botUsersService->saveToFile($content);
+        $fileName = 'usernames.txt';
+        $botUsersService->saveToFile($content, $fileName);
+
+        $downloadUrl = route('file.download', ['filename' => $fileName]);
 
         return response()->json([
             'message' => 'Export successful',
