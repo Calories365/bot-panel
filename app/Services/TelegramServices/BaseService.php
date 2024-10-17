@@ -4,6 +4,7 @@ namespace App\Services\TelegramServices;
 
 use App\Interfaces\BotHandlerStrategy;
 use App\Models\BotUser;
+use App\Services\TelegramServices\HandlerParts\TextMessageHandler;
 use Illuminate\Support\Facades\Log;
 
 class BaseService implements BotHandlerStrategy
@@ -38,6 +39,10 @@ class BaseService implements BotHandlerStrategy
 
             case isset($message['text']):
                 static::handleTextMessage($bot, $telegram, $update);
+                break;
+
+            case isset($message['voice']):
+                static::handleAudioMessage($bot, $telegram, $update);
                 break;
 
             default:
@@ -75,6 +80,11 @@ class BaseService implements BotHandlerStrategy
     }
 
     public static function handleTextMessage($bot, $telegram, $update)
+    {
+        TextMessageHandler::handle($bot, $telegram, $update);
+    }
+
+    public static function handleAudioMessage($bot, $telegram, $update)
     {
     }
 }

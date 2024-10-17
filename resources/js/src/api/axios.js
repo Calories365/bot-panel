@@ -1,7 +1,9 @@
 import axios from "axios";
 import getCookie from "@/helpers/getCookie.js";
 
-axios.defaults.baseURL = `https://${window.location.host}`
+const secureCookie = document.querySelector('meta[name="secure-cookie"]').content === 'true';
+
+axios.defaults.baseURL = `${secureCookie ? 'https' : 'http'}://${window.location.host}`;
 
 axios.defaults.withCredentials = true;
 
@@ -16,9 +18,8 @@ axios.interceptors.request.use(config => {
 });
 
 axios.interceptors.request.use(config => {
-    const locale = localStorage.getItem('locale') || 'ru';
 
-    config.headers['Accept-Language'] = locale;
+    config.headers['Accept-Language'] = localStorage.getItem('locale') || 'ru';
 
     return config;
 }, error => {

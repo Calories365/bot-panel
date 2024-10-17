@@ -47,7 +47,7 @@ function generatePagination() {
     }
 
     // Добавить конец
-    if (currentPage < totalPages && totalPages > 2) {
+    if (currentPage + 1 < totalPages && totalPages > 2) {
         pagination.push({page: totalPages, text: `${totalPages}`, active: false});
     }
 

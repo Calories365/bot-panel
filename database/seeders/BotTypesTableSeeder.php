@@ -13,8 +13,7 @@ class BotTypesTableSeeder extends Seeder
     public function run(): void
     {
         DB::table('bot_types')->insert([
-            ['name' => 'Request'],
-            ['name' => 'Request2'],
+            ['name' => 'Calories'],
         ]);
     }
 }

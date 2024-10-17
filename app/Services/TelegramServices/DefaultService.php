@@ -3,8 +3,6 @@
 namespace App\Services\TelegramServices;
 
 
-use App\Services\TelegramServices\DefaultHandlerParts\TextMessageHandler;
-
 class DefaultService extends BaseService
 {
 
@@ -21,9 +19,4 @@ class DefaultService extends BaseService
         self::getMessageType($bot, $telegram, $update);
     }
 
-
-    public static function handleTextMessage($bot, $telegram, $update)
-    {
-        TextMessageHandler::handle($bot, $telegram, $update);
-    }
 }

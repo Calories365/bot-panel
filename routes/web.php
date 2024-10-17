@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BuilderController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ImageController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 */
 Route::group(['namespace' => 'App\Http\Controllers'], function () {
     Route::get('/images/{filename}', [ImageController::class, 'show'])->name('image.show');
+
+    Route::get('/builder', [BuilderController::class, 'index'])->name('builder.index');
 
     Route::get('/download/{filename}', [FileController::class, 'download'])->name('file.download');
 

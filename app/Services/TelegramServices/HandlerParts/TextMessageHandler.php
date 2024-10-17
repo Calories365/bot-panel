@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Services\TelegramServices\DefaultHandlerParts;
+namespace App\Services\TelegramServices\HandlerParts;
 
 use App\Models\BotUser;
+use App\Services\TelegramServices\CaloriesHandlerParts\Telegram;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +25,7 @@ class TextMessageHandler
             $messageText = $bot->message;
             if ($imagePath) {
                 $relativeImagePath = str_replace('/images', 'public/bots', parse_url($imagePath, PHP_URL_PATH));
+
                 if (Storage::exists($relativeImagePath)) {
                     $absoluteImagePath = Storage::path($relativeImagePath);
                     $photo = InputFile::create($absoluteImagePath, basename($absoluteImagePath));

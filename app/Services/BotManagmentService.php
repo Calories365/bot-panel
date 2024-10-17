@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class BotManagmentService
@@ -10,6 +11,7 @@ class BotManagmentService
     {
         $imagePath = $request->file('message_image')->store('public/bots');
         $url = Storage::url($imagePath);
+        Log::info($imagePath);
         return str_replace('/storage/bots', '/images', $url);
     }
 

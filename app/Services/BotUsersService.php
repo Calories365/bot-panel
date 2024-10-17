@@ -8,6 +8,7 @@ use App\Models\BotUserBan;
 use App\Models\BotUserBot;
 use DateInterval;
 use DatePeriod;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class BotUsersService
@@ -83,6 +84,16 @@ class BotUsersService
         $totalBannedUsers = array_sum($bannedUsersStats);
         $totalPremiumUsers = array_sum($premiumUsersStats);
         $totalDefaultUsers = array_sum($newUsersStats) - array_sum($premiumUsersStats);
+
+        Log::info(print_r([
+            'new_users' => $newUsersStats,
+            'banned_users' => $bannedUsersStats,
+            'premium_users' => $premiumUsersStats,
+            'total_new_users' => $totalNewUsers,
+            'total_banned_users' => $totalBannedUsers,
+            'total_premium_users' => $totalPremiumUsers,
+            'total_default_users' => $totalDefaultUsers,
+        ], true));
 
         return [
             'new_users' => $newUsersStats,
