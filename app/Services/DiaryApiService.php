@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\APIService;
+namespace App\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -13,8 +13,8 @@ class DiaryApiService
 
     public function __construct()
     {
+        $this->apiUrl = 'http://nginx/api/caloriesEndPoint';
         $this->client = new Client();
-        $this->apiUrl = 'https://calories-working.test/api/caloriesEndPoint';
     }
 
     public function sendText(string $text)
@@ -23,11 +23,12 @@ class DiaryApiService
             $response = $this->client->post($this->apiUrl, [
                 'headers' => [
                     'Content-Type' => 'application/json',
-                    'Accept' => 'application/json'
+                    'Accept' => 'application/json',
+                    'Host' => 'calories365.loc',
                 ],
                 'json' => [
-                    'text' => $text
-                ]
+                    'text' => $text,
+                ],
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
@@ -36,5 +37,4 @@ class DiaryApiService
             return ['error' => $e->getMessage()];
         }
     }
-
 }

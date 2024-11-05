@@ -15,6 +15,7 @@ trait BasicDataExtractor
             'username' => $chat->getUsername(),
             'fromId' => $from->getId(),
             'premium' => $from->getIsPremium(),
+            'userId' => $from->getId(),
         ];
     }
 }

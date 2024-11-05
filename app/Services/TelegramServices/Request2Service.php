@@ -2,27 +2,16 @@
 
 namespace App\Services\TelegramServices;
 
-
-use App\Services\TelegramServices\Request2HandlerService\TextMessageHandler;
+use App\Services\TelegramServices\Request2Handlers\TextMessageHandler;
 
 class Request2Service extends BaseService
 {
-    public function handle($bot, $telegram, $update)
+    protected function getMessageHandlers(): array
     {
-        self::getUpdateType($bot, $telegram, $update);
-    }
+        $messageHandlers = parent::getMessageHandlers();
 
-    /**
-     * @throws \Exception
-     */
-    public static function handleMessage($bot, $telegram, $update)
-    {
-        self::getMessageType($bot, $telegram, $update);
-    }
+        $messageHandlers['text'] = new TextMessageHandler();
 
-
-    public static function handleTextMessage($bot, $telegram, $update)
-    {
-        TextMessageHandler::handle($bot, $telegram, $update);
+        return $messageHandlers;
     }
 }

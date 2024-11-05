@@ -104,8 +104,6 @@ class BotController extends BaseController
     public function handle(TelegramHandler $telegramHandler, $bot, Request $request)
     {
         try {
-//            Log::info(var_export($request->all(), true));
-//            return true;
             $telegramHandler->handle($bot, $request);
             return response()->json(['status' => 'success']);
         } catch

@@ -1,20 +1,19 @@
 <?php
 
-namespace App\Services\TelegramServices\ApprovalHandlerParts;
+namespace App\Services\TelegramServices\ApprovalHandlers;
 
-use App\Services\TelegramServices\DefaultHandlerParts\Telegram;
+use App\Services\TelegramServices\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 use Telegram\Bot\Keyboard\Keyboard;
 
-class TextMessageHandler
+class TextMessageHandler implements MessageHandlerInterface
 {
     use BasicDataExtractor;
 
-    public static function handleTextMessage($bot, $telegram, $update): void
+    public function handle($bot, $telegram, $message)
     {
-        $message = $update->getMessage();
 
         $commonData = self::extractCommonData($message);
         $text = $message->getText();
@@ -29,7 +28,7 @@ class TextMessageHandler
             return;
         }
 
-        $userIdFromWordpress = Utilities::getParam($update) ?? '';
+        $userIdFromWordpress = Utilities::getParam($message) ?? '';
 
         if (!$userIdFromWordpress) {
             $telegram->sendMessage([

@@ -7,6 +7,12 @@ use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Api;
 use Telegram\Bot\Objects\Update;
 
+/**
+ * Class TelegramHandler
+ *
+ * this handler realizing the strategy design pattern
+ * determines the bot type and launches the corresponding strategy
+ */
 class TelegramHandler
 {
     protected array $strategies;

@@ -2,31 +2,30 @@
 
 namespace App\Services\TelegramServices;
 
-use App\Services\TelegramServices\ApprovalHandlerParts\ContactMessageHandler;
-use App\Services\TelegramServices\ApprovalHandlerParts\TextMessageHandler;
+use App\Services\TelegramServices\ApprovalHandlers\ContactMessageHandler;
+use App\Services\TelegramServices\ApprovalHandlers\TextMessageHandler;
 
+/**
+ * Class ApprovalService
+ *
+ * This service implements BaseService
+ * strategy for approval bot
+ */
 class ApprovalService extends BaseService
 {
-    public function handle($bot, $telegram, $update): void
-    {
-        self::getUpdateType($bot, $telegram, $update);
-    }
-
     /**
-     * @throws \Exception
+     * ApprovalService getMessageHandlers.
+     *
+     * The parent method getMessageHandlers is called, which loads the default handlers
+     * and overrides the handlers for the given strategy
      */
-    public static function handleMessage($bot, $telegram, $update): void
+    protected function getMessageHandlers(): array
     {
-        self::getMessageType($bot, $telegram, $update);
-    }
+        $messageHandlers = parent::getMessageHandlers();
 
-    public static function handleContactMessage($bot, $telegram, $update): void
-    {
-        ContactMessageHandler::handle($bot, $telegram, $update);
-    }
+        $messageHandlers['text'] = new TextMessageHandler();
+        $messageHandlers['contact'] = new ContactMessageHandler();
 
-    public static function handleTextMessage($bot, $telegram, $update): void
-    {
-        TextMessageHandler::handleTextMessage($bot, $telegram, $update);
+        return $messageHandlers;
     }
 }

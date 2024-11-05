@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Services\TelegramServices\RequestHandlerService;
+namespace App\Services\TelegramServices\RequestHandlers;
 
-use App\Services\TelegramServices\DefaultHandlerParts\Telegram;
+use App\Services\TelegramServices\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 
-class TextMessageHandler
+class TextMessageHandler implements MessageHandlerInterface
 {
     use BasicDataExtractor;
 
-    public static function handle($bot, $telegram, $update): void
+    public function handle($bot, $telegram, $message)
     {
-        $message = $update->getMessage();
         $text = $message->getText();
         $commonData = self::extractCommonData($message);
         $chatId = $commonData['chatId'];

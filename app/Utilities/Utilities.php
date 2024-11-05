@@ -42,10 +42,10 @@ class Utilities
         return true;
     }
 
-    public static function getParam($update): string
+    public static function getParam($message): string
     {
-        if (isset($update['message']['text'])) {
-            $text = $update['message']['text'];
+        if (isset($message['text'])) {
+            $text = $message['text'];
             if (preg_match('/\/start (\d+)/', $text, $matches)) {
                 return $matches[1];
             }

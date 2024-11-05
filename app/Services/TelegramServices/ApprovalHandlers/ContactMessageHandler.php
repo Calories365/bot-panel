@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Services\TelegramServices\ApprovalHandlerParts;
+namespace App\Services\TelegramServices\ApprovalHandlers;
 
 use App\Models\BotUser;
+use App\Services\TelegramServices\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
 use App\Traits\ContactDataExtractor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-class ContactMessageHandler
+class ContactMessageHandler implements MessageHandlerInterface
 {
     use BasicDataExtractor, ContactDataExtractor;
 
-    public static function handle($bot, $telegram, $update): void
+    public function handle($bot, $telegram, $message)
     {
-        $message = $update->getMessage();
 
         $commonData = self::extractCommonData($message);
         $contactData = self::extractContactData($message);

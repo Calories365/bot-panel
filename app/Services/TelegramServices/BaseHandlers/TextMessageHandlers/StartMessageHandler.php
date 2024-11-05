@@ -1,22 +1,21 @@
 <?php
 
-namespace App\Services\TelegramServices\HandlerParts;
+namespace App\Services\TelegramServices\BaseHandlers\TextMessageHandlers;
 
 use App\Models\BotUser;
-use App\Services\TelegramServices\CaloriesHandlerParts\Telegram;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Telegram\Bot\FileUpload\InputFile;
 
-class TextMessageHandler
+class StartMessageHandler
 {
+
     use BasicDataExtractor;
 
-    public static function handle($bot, $telegram, $update)
+    public function handle($bot, $telegram, $message)
     {
-        $message = $update->getMessage();
         $text = $message->getText();
 
         if (str_contains($text, 'start')) {
@@ -65,4 +64,6 @@ class TextMessageHandler
             );
         }
     }
+
+
 }

@@ -49,6 +49,8 @@ const onSubmit = () => {
             <div class="card">
                 <div class="card-body login-card-body">
                     <p class="login-box-msg">Войдите чтобы начать</p>
+                    <p class="login-box-msg"> admin@example.com
+                    </p>
                     <form @submit.prevent="onSubmit">
                         <div class="input-group mb-3">
                             <input type="email" class="form-control" placeholder="Email" autocomplete="email"

@@ -3,88 +3,92 @@
 namespace App\Services\TelegramServices;
 
 use App\Interfaces\BotHandlerStrategy;
-use App\Models\BotUser;
-use App\Services\TelegramServices\HandlerParts\TextMessageHandler;
+use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\StartMessageHandler;
+use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\CallbackQueryHandler;
+use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\MessageUpdateHandler;
+use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\MyChatMemberUpdateHandler;
+use App\Services\TelegramServices\MessageHandlers\AudioMessageHandler;
+use App\Services\TelegramServices\MessageHandlers\TextMessageHandler;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Class BaseService
+ *
+ * This service implements BotHandlerStrategy to handle Telegram bot updates
+ * and distribute them to the appropriate handlers.
+ */
 class BaseService implements BotHandlerStrategy
 {
-    public static function getUpdateType($bot, $telegram, $update): void
+    protected array $updateHandlers;
+
+    /**
+     * BaseService constructor.
+     * Initializes the update handlers by calling the getUpdateHandlers method.
+     */
+    public function __construct()
     {
-        $updateType = $update->detectType();
-        switch ($updateType) {
-            case 'message':
-                static::handleMessage($bot, $telegram, $update);
-                break;
-            case 'my_chat_member':
-                static::handleMyChatMember($bot, $telegram, $update);
-                break;
-            default:
-                Log::info("Unhandled update type: " . $updateType);
-                break;
-        }
+        $this->updateHandlers = $this->getUpdateHandlers();
     }
 
     /**
-     * @throws \Exception
+     * BaseService getUpdateHandlers.
+     * Collects and returns base UpdateHandlers and for each UpdateHandler passes base subhandlers
      */
-    public static function getMessageType($bot, $telegram, $update): void
+    protected function getUpdateHandlers(): array
     {
-        $message = $update->getMessage();
+        $messageUpdateHandler = new MessageUpdateHandler($this->getMessageHandlers());
+        $myChatMemberUpdateHandler = new MyChatMemberUpdateHandler();
+        $callbackQueryHandler = new CallbackQueryHandler();
 
-        switch (true) {
-            case isset($message['contact']):
-                static::handleContactMessage($bot, $telegram, $update);
-                break;
+        return [
+            'message' => $messageUpdateHandler,
+            'my_chat_member' => $myChatMemberUpdateHandler,
+            'callback_query' => $callbackQueryHandler
+        ];
+    }
 
-            case isset($message['text']):
-                static::handleTextMessage($bot, $telegram, $update);
-                break;
+    /**
+     * BaseService getMessageHandlers.
+     * collects and returns all basic MessageHandlers
+     */
+    protected function getMessageHandlers(): array
+    {
+        $textMessageHandler = new TextMessageHandler(
+            $this->getTextMessageHandlers()
+        );
+        $audioMessageHandler = new AudioMessageHandler();
 
-            case isset($message['voice']):
-                static::handleAudioMessage($bot, $telegram, $update);
-                break;
+        return [
+            'text' => $textMessageHandler,
+            'voice' => $audioMessageHandler,
+        ];
+    }
 
-            default:
-                Log::info("Unknown message type: " . json_encode($message));
-                break;
+    /**
+     * BaseService getTextMessageHandlers.
+     * collects and returns all basic TextMessageHandlers
+     */
+    protected function getTextMessageHandlers(): array
+    {
+        $startTextMessageHandler = new StartMessageHandler();
+
+        return [
+            '/start' => $startTextMessageHandler,
+        ];
+    }
+
+    /**
+     * BaseService handle.
+     * starts the required Handler for the event
+     */
+    public function handle($bot, $telegram, $update): void
+    {
+        $updateType = $update->detectType();
+
+        if (isset($this->updateHandlers[$updateType])) {
+            $this->updateHandlers[$updateType]->handle($bot, $telegram, $update);
+        } else {
+            Log::info("Unhandled update type: " . $updateType);
         }
-    }
-
-    public static function handleMyChatMember($bot, $telegram, $update): void
-    {
-        $myChatMember = $update->getMyChatMember();
-        $newStatus = $myChatMember['new_chat_member']['status'];
-        $userId = $myChatMember['from']['id'];
-
-
-        $userModel = BotUser::where('telegram_id', $userId)->first();
-
-        if ($userModel) {
-            if ($newStatus === 'kicked') {
-                $userModel->banned_bots()->syncWithoutDetaching([$bot->id]);
-            } else {
-                $userModel->banned_bots()->detach($bot->id);
-            }
-        }
-    }
-
-
-    public static function handleMessage($bot, $telegram, $update)
-    {
-    }
-
-    public
-    static function handleContactMessage($bot, $telegram, $update)
-    {
-    }
-
-    public static function handleTextMessage($bot, $telegram, $update)
-    {
-        TextMessageHandler::handle($bot, $telegram, $update);
-    }
-
-    public static function handleAudioMessage($bot, $telegram, $update)
-    {
     }
 }

@@ -85,15 +85,15 @@ class BotUsersService
         $totalPremiumUsers = array_sum($premiumUsersStats);
         $totalDefaultUsers = array_sum($newUsersStats) - array_sum($premiumUsersStats);
 
-        Log::info(print_r([
-            'new_users' => $newUsersStats,
-            'banned_users' => $bannedUsersStats,
-            'premium_users' => $premiumUsersStats,
-            'total_new_users' => $totalNewUsers,
-            'total_banned_users' => $totalBannedUsers,
-            'total_premium_users' => $totalPremiumUsers,
-            'total_default_users' => $totalDefaultUsers,
-        ], true));
+//        Log::info(print_r([
+//            'new_users' => $newUsersStats,
+//            'banned_users' => $bannedUsersStats,
+//            'premium_users' => $premiumUsersStats,
+//            'total_new_users' => $totalNewUsers,
+//            'total_banned_users' => $totalBannedUsers,
+//            'total_premium_users' => $totalPremiumUsers,
+//            'total_default_users' => $totalDefaultUsers,
+//        ], true));
 
         return [
             'new_users' => $newUsersStats,

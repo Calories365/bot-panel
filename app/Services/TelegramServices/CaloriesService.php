@@ -2,27 +2,44 @@
 
 namespace App\Services\TelegramServices;
 
-
-use App\Services\TelegramServices\CaloriesHandlerParts\AudioMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\AudioMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CancelCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\DeleteCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditActionCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SaveCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\EditMessageHandler;
 
 class CaloriesService extends BaseService
 {
-
-    public function handle($bot, $telegram, $update): void
+    protected function getUpdateHandlers(): array
     {
-        self::getUpdateType($bot, $telegram, $update);
+        $updateHandlers = parent::getUpdateHandlers();
+
+        $updateHandlers['callback_query'] = new CallbackQueryHandler
+        (
+            new CancelCallbackQueryHandler(),
+            new SaveCallbackQueryHandler(),
+            new EditCallbackQueryHandler(),
+            new DeleteCallbackQueryHandler(),
+            new EditActionCallbackQueryHandler()
+        );
+
+        return $updateHandlers;
     }
 
-    /**
-     * @throws \Exception
-     */
-    public static function handleMessage($bot, $telegram, $update): void
+    protected function getMessageHandlers(): array
     {
-        self::getMessageType($bot, $telegram, $update);
+        $messageHandlers = parent::getMessageHandlers();
+
+        // Используем AudioMessageHandler для обработки голосовых сообщений
+        $messageHandlers['voice'] = app(AudioMessageHandler::class);
+
+        // Используем EditMessageHandler для обработки текстовых сообщений во время редактирования
+        $messageHandlers['text'] = app(EditMessageHandler::class);
+
+        return $messageHandlers;
     }
 
-    public static function handleAudioMessage($bot, $telegram, $update): void
-    {
-        AudioMessageHandler::handle($bot, $telegram, $update);
-    }
 }
