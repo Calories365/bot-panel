@@ -7,12 +7,13 @@ use App\Services\ChatGPTService;
 use App\Services\DiaryApiService;
 use App\Services\TelegramServices\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
+use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache; // Добавляем фасад Cache
 use Illuminate\Support\Facades\Log;
 
 class AudioMessageHandler implements MessageHandlerInterface
 {
-    use BasicDataExtractor;
+    use BasicDataExtractor, EditHandlerTrait;
 
     protected AudioConversionService $audioConversionService;
     protected DiaryApiService $diaryApiService;
@@ -63,34 +64,14 @@ class AudioMessageHandler implements MessageHandlerInterface
                     foreach ($products as $index => $productInfo) {
 
                         if (isset($productInfo['product_translation']) && isset($productInfo['product'])) {
+
                             $productTranslation = $productInfo['product_translation'];
                             $product = $productInfo['product'];
-
-                            $messageText = "*" . $productTranslation['name'] . "*\n";
-                            $messageText .= "Количество: " . ($product['quantity_grams'] ?? '—') . " грамм\n";
-                            $messageText .= "Калории: " . ($product['calories'] ?? '—') . " ккал\n";
-                            $messageText .= "Белки: " . ($product['proteins'] ?? '—') . " г\n";
-                            $messageText .= "Углеводы: " . ($product['carbohydrates'] ?? '—') . " г\n";
-                            $messageText .= "Жиры: " . ($product['fats'] ?? '—') . " г\n";
-
                             $productId = $productTranslation['id'];
+                            $data = $this->generateTableBody($product, $productTranslation, $productId);
 
-                            $inlineKeyboard = [
-                                [
-                                    [
-                                        'text' => 'Изменить',
-                                        'callback_data' => 'edit_' . $productId
-                                    ],
-                                    [
-                                        'text' => 'Удалить',
-                                        'callback_data' => 'delete_' . $productId
-                                    ]
-                                ]
-                            ];
-
-                            $replyMarkup = json_encode([
-                                'inline_keyboard' => $inlineKeyboard
-                            ]);
+                            $messageText = $data[0];
+                            $replyMarkup = $data[1];
 
                             // Отправляем сообщение пользователю и получаем отправленное сообщение
                             $sentMessage = $telegram->sendMessage([
@@ -117,7 +98,6 @@ class AudioMessageHandler implements MessageHandlerInterface
                             ]);
                         }
                     }
-
                     // Сохраняем список продуктов в кеше с привязкой к userId
                     Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30)); // Время хранения - 30 минут
 
@@ -141,12 +121,15 @@ class AudioMessageHandler implements MessageHandlerInterface
                         'inline_keyboard' => $finalInlineKeyboard
                     ]);
 
-                    $telegram->sendMessage([
+                    $finalMessage = $telegram->sendMessage([
                         'chat_id' => $chatId,
                         'text' => $finalMessageText,
                         'parse_mode' => 'Markdown',
                         'reply_markup' => $finalReplyMarkup
                     ]);
+                    $finalMessageId = $finalMessage->getMessageId();
+
+                    Cache::put("user_final_message_id_{$userId}", $finalMessageId, now()->addMinutes(30));
                 } else {
                     $telegram->sendMessage([
                         'chat_id' => $chatId,

@@ -23,11 +23,21 @@ class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
             if ($userProducts && isset($userProducts[$productId])) {
                 $productData = $userProducts[$productId];
 
+                $replyMarkup = json_encode([
+                    'inline_keyboard' => [
+                        [
+                            ['text' => 'Сохранить', 'callback_data' => 'editing_save'],
+                            ['text' => 'Пропустить шаг', 'callback_data' => 'editing_skip'],
+                            ['text' => 'Отменить', 'callback_data' => 'editing_cancel'],
+                        ]
+                    ]
+                ]);
+
                 // Отправляем пользователю сообщение с просьбой ввести новое название продукта
                 $sentMessage = $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text' => "Вы редактируете продукт: *{$productData['product_translation']['name']}*\n\nПожалуйста, введите новое название продукта или отправьте /skip, чтобы оставить без изменений.",
-                    'parse_mode' => 'Markdown',
+                    'text' => "Вы редактируете продукт: *{$productData['product_translation']['name']}*\n\nПожалуйста, введите новое название продукта.",
+                    'reply_markup' => $replyMarkup,
                 ]);
 
                 // Сохраняем состояние редактирования в кеше, включая message_id

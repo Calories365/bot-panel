@@ -41,6 +41,9 @@ class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
                 Log::error("Error deleting final action message: " . $e->getMessage());
             }
 
+            // Очищаем кеш message_id
+            Cache::forget("user_final_message_id_{$userId}");
+
             // Очищаем кеш пользователя
             Cache::forget("user_products_{$userId}");
 

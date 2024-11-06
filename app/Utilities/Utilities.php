@@ -62,4 +62,31 @@ class Utilities
             return false;
         }
     }
+
+    public static function generateTable($title, $quantity, $dataArray)
+    {
+        $title = $title . "\n\n";
+        $quantity .="г";
+        $quantity = str_pad(' ' . $quantity, 8, " ", STR_PAD_RIGHT);
+        $header = "`| Параметр   | 100г  |" . $quantity. "|\n";
+        $partition = "|------------|-------|-------|\n";
+        $body = "";
+        foreach ($dataArray as $key => $subArray) {
+            $body .=
+                "|". str_pad(' ' . $subArray[0], mb_strlen($subArray[0], "UTF-8")+12, " ", STR_PAD_RIGHT) .
+                "|". str_pad(' ' . $subArray[1], 7, " ", STR_PAD_RIGHT) .
+                "|". str_pad(' ' . $subArray[2], 7, " ", STR_PAD_RIGHT) . "|\n";
+        }
+        $body .= "`";
+        return $title . $header . $partition . $body;
+    }
+    //      $arr = [
+    //          ["Калории",123, 3462],
+    //          ["Белки",1232, 341],
+    //          ["Жиры",123, 346],
+    //          ["Углеводы", 123, 346],
+    //          ];
+    //
+    //
+    //        $text = Utilities::generateTable("Творог", 1250,$arr);
 }
