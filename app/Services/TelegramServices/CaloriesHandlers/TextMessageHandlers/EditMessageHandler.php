@@ -68,18 +68,21 @@ class EditMessageHandler implements MessageHandlerInterface
             case 'awaiting_name':
                 // Обновляем название продукта
                 $userProducts[$productId]['product_translation']['name'] = $text;
+                $userProducts[$productId]['product']['edited'] = 1;
                 $nextStep = 'awaiting_quantity';
                 $nextPrompt = 'Пожалуйста, введите новое количество грамм.';
                 break;
             case 'awaiting_quantity':
                 // Обновляем название продукта
                 $userProducts[$productId]['product']['quantity_grams'] = $text;
+                $userProducts[$productId]['product']['edited'] = 1;
                 $nextStep = 'awaiting_calories';
                 $nextPrompt = 'Пожалуйста, введите новое количество калорий.';
                 break;
             case 'awaiting_calories':
                 if (is_numeric($text)) {
                     $userProducts[$productId]['product']['calories'] = $text;
+                    $userProducts[$productId]['product']['edited'] = 1;
                     $nextStep = 'awaiting_proteins';
                     $nextPrompt = 'Пожалуйста, введите новое количество белков.';
                 } else {
@@ -90,6 +93,7 @@ class EditMessageHandler implements MessageHandlerInterface
             case 'awaiting_proteins':
                 if (is_numeric($text)) {
                     $userProducts[$productId]['product']['proteins'] = $text;
+                    $userProducts[$productId]['product']['edited'] = 1;
                     $nextStep = 'awaiting_fats';
                     $nextPrompt = 'Пожалуйста, введите новое количество жиров.';
                 } else {
@@ -100,6 +104,7 @@ class EditMessageHandler implements MessageHandlerInterface
             case 'awaiting_fats':
                 if (is_numeric($text)) {
                     $userProducts[$productId]['product']['fats'] = $text;
+                    $userProducts[$productId]['product']['edited'] = 1;
                     $nextStep = 'awaiting_carbohydrates';
                     $nextPrompt = 'Пожалуйста, введите новое количество углеводов.';
                 } else {
@@ -110,9 +115,11 @@ class EditMessageHandler implements MessageHandlerInterface
             case 'awaiting_carbohydrates':
                 if (is_numeric($text)) {
                     $userProducts[$productId]['product']['carbohydrates'] = $text;
+                    $userProducts[$productId]['product']['edited'] = 1;
 
                     // Редактирование завершено
                     $this->saveEditing($telegram, $chatId, $userId, $userProducts, $productId, $messageId);
+                    Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));
                     return;
                 } else {
                     $validInput = false;

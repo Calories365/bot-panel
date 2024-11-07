@@ -80,13 +80,4 @@ class Utilities
         $body .= "`";
         return $title . $header . $partition . $body;
     }
-    //      $arr = [
-    //          ["Калории",123, 3462],
-    //          ["Белки",1232, 341],
-    //          ["Жиры",123, 346],
-    //          ["Углеводы", 123, 346],
-    //          ];
-    //
-    //
-    //        $text = Utilities::generateTable("Творог", 1250,$arr);
 }

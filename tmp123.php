@@ -1,26 +1,98 @@
-<?php
-$arr = [
-    [123, 3462],
-    [1232, 341],
-    [123, 346],
-    [123, 3436],
-];
-$params = ["Калории", "Белки", "Жиры", "Углеводы"];
-function generateTable($title, $quantity, $dataArray, $params) {
-    $title = $title . "\n\n";
-    $quantity .="г";
-    $quantity = str_pad(' ' . $quantity, 8, " ", STR_PAD_RIGHT);
-    $header = "| Параметр   | 100г  |" . $quantity. "|\n";
-    $partition = "|------------|-------|-------|\n";
-    $body = "";
-    foreach ($dataArray as $key => $subArray) {
-        $body .=
-            "|". str_pad(' ' . $params[$key], mb_strlen($params[$key], "UTF-8")+12, " ", STR_PAD_RIGHT) .
-            "|". str_pad(' ' . $subArray[0], 7, " ", STR_PAD_RIGHT) .
-            "|". str_pad(' ' . $subArray[1], 7, " ", STR_PAD_RIGHT) . "|\n";
-    }
-    $body .= "";
-    return $title . $header . $partition . $body;
-}
+[2024-11-07 11:35:47] local.INFO: saving:
+[2024-11-07 11:35:47] local.INFO: Array
+(
+[19838] => Array
+(
+[product_translation] => Array
+(
+[id] => 19838
+[product_id] => 6613
+[locale] => ru
+[name] => Картошка печеная
+[user_id] =>
+[created_at] => 2024-01-19T08:57:20.000000Z
+[updated_at] => 2024-01-19T08:57:20.000000Z
+)
 
-$text = generateTable("Творог", 1250,$arr, $params );
+[product] => Array
+(
+[id] => 6613
+[user_id] =>
+[calories] => 91
+[proteins] => 2
+[carbohydrates] => 19
+[fats] => 0
+[fibers] => 2
+[quantity_grams] => 200
+[is_popular] => 0
+[created_at] =>
+[updated_at] =>
+)
+
+[message_id] => 1054
+)
+
+[24794] => Array
+(
+[product_translation] => Array
+(
+[id] => 24794
+[product_id] => 8265
+[locale] => ru
+[name] => Творог
+[user_id] =>
+[created_at] => 2024-01-19T08:57:26.000000Z
+[updated_at] => 2024-01-19T08:57:26.000000Z
+)
+
+[product] => Array
+(
+[id] => 8265
+[user_id] =>
+[calories] => 136
+[proteins] => 21
+[carbohydrates] => 3
+[fats] => 4
+[fibers] => 0
+[quantity_grams] => 300
+[is_popular] => 0
+[created_at] =>
+[updated_at] =>
+)
+
+[message_id] => 1055
+)
+
+[65] => Array
+(
+[product_translation] => Array
+(
+[id] => 65
+[product_id] => 22
+[locale] => ru
+[name] => Сало
+[user_id] =>
+[created_at] => 2024-01-19T08:57:10.000000Z
+[updated_at] => 2024-01-19T08:57:10.000000Z
+)
+
+[product] => Array
+(
+[id] => 22
+[user_id] =>
+[calories] => 896
+[proteins] => 0.2
+[carbohydrates] => 0
+[fats] => 100
+[fibers] => 0
+[quantity_grams] => 34
+[is_popular] => 0
+[created_at] =>
+[updated_at] =>
+)
+
+[message_id] => 1056
+)
+
+)
+
