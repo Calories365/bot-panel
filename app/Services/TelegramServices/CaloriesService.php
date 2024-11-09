@@ -8,6 +8,9 @@ use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CancelC
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\DeleteCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditActionCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingCancelCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSaveCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSkipCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SaveCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\EditMessageHandler;
 
@@ -17,17 +20,19 @@ class CaloriesService extends BaseService
     {
         $updateHandlers = parent::getUpdateHandlers();
 
-        $updateHandlers['callback_query'] = new CallbackQueryHandler
-        (
+        $updateHandlers['callback_query'] = new CallbackQueryHandler(
             new CancelCallbackQueryHandler(),
             new SaveCallbackQueryHandler(),
             new EditCallbackQueryHandler(),
             new DeleteCallbackQueryHandler(),
-            new EditActionCallbackQueryHandler()
+            new EditingSaveCallbackQueryHandler(),
+            new EditingCancelCallbackQueryHandler(),
+            new EditingSkipCallbackQueryHandler(),
         );
 
         return $updateHandlers;
     }
+
 
     protected function getMessageHandlers(): array
     {

@@ -7,7 +7,6 @@ use App\Services\TelegramServices\MessageHandlers\MessageHandlerInterface;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use function App\Services\TelegramServices\CaloriesHandlers\generateFormattedText;
 
 class EditMessageHandler implements MessageHandlerInterface
 {
@@ -19,7 +18,6 @@ class EditMessageHandler implements MessageHandlerInterface
         $chatId = $message->getChat()->getId();
         $text = $message->getText();
 
-        // Проверяем, находится ли пользователь в процессе редактирования
         $editingState = Cache::get("user_editing_{$userId}");
 
         if ($editingState) {
@@ -27,11 +25,9 @@ class EditMessageHandler implements MessageHandlerInterface
             $step = $editingState['step'];
             $messageId = $editingState['message_id'];
 
-            // Получаем список продуктов из кеша
             $userProducts = Cache::get("user_products_{$userId}");
 
             if (!$userProducts || !isset($userProducts[$productId])) {
-                // Продукт не найден, очищаем состояние редактирования
                 $this->clearEditingState($userId);
 
                 $telegram->sendMessage([
@@ -47,17 +43,13 @@ class EditMessageHandler implements MessageHandlerInterface
             $this->processInput($telegram, $chatId, $userId, $text, $editingState, $userProducts, $productId, $messageId);
 
 
-            // Пытаемся удалить сообщение пользователя (невозможно в личных чатах)
             $this->deleteUserMessage($telegram, $chatId, $message->getMessageId());
 
-            return; // Останавливаем дальнейшую обработку
+            return;
         } else {
-            // Пользователь не в процессе редактирования
-            // Можно обработать другие текстовые сообщения или игнорировать
             return;
         }
     }
-
 
     protected function processInput($telegram, $chatId, $userId, $text, &$editingState, &$userProducts, $productId, $messageId)
     {
@@ -66,16 +58,13 @@ class EditMessageHandler implements MessageHandlerInterface
 
         switch ($currentStep) {
             case 'awaiting_name':
-                // Обновляем название продукта
                 $userProducts[$productId]['product_translation']['name'] = $text;
                 $userProducts[$productId]['product']['edited'] = 1;
                 $nextStep = 'awaiting_quantity';
                 $nextPrompt = 'Пожалуйста, введите новое количество грамм.';
                 break;
             case 'awaiting_quantity':
-                // Обновляем название продукта
                 $userProducts[$productId]['product']['quantity_grams'] = $text;
-                $userProducts[$productId]['product']['edited'] = 1;
                 $nextStep = 'awaiting_calories';
                 $nextPrompt = 'Пожалуйста, введите новое количество калорий.';
                 break;
@@ -117,7 +106,6 @@ class EditMessageHandler implements MessageHandlerInterface
                     $userProducts[$productId]['product']['carbohydrates'] = $text;
                     $userProducts[$productId]['product']['edited'] = 1;
 
-                    // Редактирование завершено
                     $this->saveEditing($telegram, $chatId, $userId, $userProducts, $productId, $messageId);
                     Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));
                     return;
@@ -127,7 +115,6 @@ class EditMessageHandler implements MessageHandlerInterface
                 }
                 break;
             default:
-                // Неизвестный шаг, очищаем состояние редактирования
                 $this->clearEditingState($userId);
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
@@ -137,19 +124,15 @@ class EditMessageHandler implements MessageHandlerInterface
         }
 
         if ($validInput) {
-            // Сохраняем обновленные данные продукта и состояние редактирования
             Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));
 
             $editingState['step'] = $nextStep;
             Cache::put("user_editing_{$userId}", $editingState, now()->addMinutes(30));
 
-            // Обновляем сообщение с продуктом
             $this->updateProductMessage($telegram, $chatId, $userProducts[$productId]);
 
-            // Обновляем сообщение бота с новым запросом
             $this->editEditingMessage($telegram, $chatId, $messageId, $nextPrompt);
         } else {
-            // Обновляем сообщение бота с сообщением об ошибке
             $this->editEditingMessage($telegram, $chatId, $messageId, $errorMessage);
         }
     }
@@ -164,7 +147,6 @@ class EditMessageHandler implements MessageHandlerInterface
                 'message_id' => $messageId,
             ]);
         } catch (\Exception $e) {
-            // Игнорируем ошибку, так как это ожидаемое поведение в личных чатах
         }
     }
 

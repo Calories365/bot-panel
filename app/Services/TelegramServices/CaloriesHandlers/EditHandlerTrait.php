@@ -10,7 +10,6 @@ trait EditHandlerTrait
 {
     protected function saveEditing($telegram, $chatId, $userId, &$userProducts, $productId, $messageId, $callbackQueryId = false)
     {
-        // Обновляем сообщение с продуктом, чтобы отобразить финальные изменения
         $this->updateProductMessage($telegram, $chatId, $userProducts[$productId]);
 
         if($callbackQueryId){
@@ -20,24 +19,19 @@ trait EditHandlerTrait
             'show_alert' => false,
         ]);}
 
-        // Удаляем сообщение редактирования
         $this->deleteEditingMessage($telegram, $chatId, $messageId);
 
-        // Очищаем состояние редактирования
         $this->clearEditingState($userId);
     }
 
     protected function exitEditing($telegram, $chatId, $userId, &$userProducts, $productId, $messageId, $callbackQueryId = false)
     {
-        // Восстанавливаем исходные данные продукта из состояния редактирования
         $editingState = Cache::get("user_editing_{$userId}");
         if (isset($editingState['original_product'])) {
             $userProducts[$productId] = $editingState['original_product'];
-            // Сохраняем обратно в кеш
             Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));
         }
 
-        // Обновляем сообщение с продуктом, чтобы отобразить исходные данные
         $this->updateProductMessage($telegram, $chatId, $userProducts[$productId]);
 
         if($callbackQueryId){
@@ -46,10 +40,8 @@ trait EditHandlerTrait
                 'text' => 'Изменения отменены',
                 'show_alert' => false,
             ]);}
-        // Удаляем сообщение редактирования
         $this->deleteEditingMessage($telegram, $chatId, $messageId);
 
-        // Очищаем состояние редактирования
         $this->clearEditingState($userId);
     }
 
@@ -83,10 +75,8 @@ trait EditHandlerTrait
         } catch (\Telegram\Bot\Exceptions\TelegramResponseException $e) {
             $errorData = $e->getResponseData();
             if (isset($errorData['description']) && strpos($errorData['description'], 'message is not modified') !== false) {
-                // Сообщение не изменилось, игнорируем ошибку
                 Log::info('Сообщение не изменилось, обновление не требуется.');
             } else {
-                // Логируем другие ошибки
                 Log::error("Error updating product message: " . $e->getMessage());
             }
         } catch (\Exception $e) {

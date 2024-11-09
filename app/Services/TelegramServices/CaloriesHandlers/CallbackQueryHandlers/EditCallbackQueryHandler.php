@@ -17,7 +17,6 @@ class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
             $userId = $callbackQuery->getFrom()->getId();
             $chatId = $callbackQuery->getMessage()->getChat()->getId();
 
-            // Получаем список продуктов из кеша
             $userProducts = Cache::get("user_products_{$userId}");
 
             if ($userProducts && isset($userProducts[$productId])) {
@@ -33,27 +32,23 @@ class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
                     ]
                 ]);
 
-                // Отправляем пользователю сообщение с просьбой ввести новое название продукта
                 $sentMessage = $telegram->sendMessage([
                     'chat_id' => $chatId,
                     'text' => "Вы редактируете продукт: *{$productData['product_translation']['name']}*\n\nПожалуйста, введите новое название продукта.",
                     'reply_markup' => $replyMarkup,
                 ]);
 
-                // Сохраняем состояние редактирования в кеше, включая message_id
                 Cache::put("user_editing_{$userId}", [
                     'product_id' => $productId,
-                    'step' => 'awaiting_name', // Первый шаг редактирования
+                    'step' => 'awaiting_name',
                     'message_id' => $sentMessage->getMessageId(),
-                    'original_product' => $productData, // Сохраняем исходные данные продукта
+                    'original_product' => $productData,
                 ], now()->addMinutes(30));
 
-                // Отвечаем на callback_query, чтобы убрать "часики"
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
                 ]);
             } else {
-                // Продукт не найден в кеше
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
                     'text' => 'Продукт не найден или истекло время сессии.',
@@ -61,7 +56,6 @@ class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
                 ]);
             }
         } else {
-            // Некорректный формат callback_data
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
                 'text' => 'Некорректный запрос.',

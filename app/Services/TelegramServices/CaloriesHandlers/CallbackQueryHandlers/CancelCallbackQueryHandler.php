@@ -12,11 +12,9 @@ class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
         $userId = $callbackQuery->getFrom()->getId();
         $chatId = $callbackQuery->getMessage()->getChat()->getId();
 
-        // Получаем список продуктов из кеша
         $userProducts = Cache::get("user_products_{$userId}");
 
         if ($userProducts && is_array($userProducts)) {
-            // Удаляем сообщения с продуктами
             foreach ($userProducts as $productId => $productData) {
                 if (isset($productData['message_id'])) {
                     try {
@@ -30,7 +28,6 @@ class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
                 }
             }
 
-            // Удаляем сообщение с общими действиями (Сохранить/Отменить)
             $finalMessageId = $callbackQuery->getMessage()->getMessageId();
             try {
                 $telegram->deleteMessage([
@@ -41,26 +38,21 @@ class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
                 Log::error("Error deleting final action message: " . $e->getMessage());
             }
 
-            // Очищаем кеш message_id
             Cache::forget("user_final_message_id_{$userId}");
 
-            // Очищаем кеш пользователя
             Cache::forget("user_products_{$userId}");
 
-            // Уведомляем пользователя об отмене
             $telegram->sendMessage([
                 'chat_id' => $chatId,
                 'text' => 'Действие отменено. Ваш список продуктов был очищен.',
             ]);
 
-            // Отвечаем на callback_query, чтобы убрать "часики" у пользователя
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
                 'text' => 'Отмена выполнена',
                 'show_alert' => false,
             ]);
         } else {
-            // Если список продуктов отсутствует
             $telegram->sendMessage([
                 'chat_id' => $chatId,
                 'text' => 'Ваш список продуктов пуст или уже был очищен.',

@@ -15,11 +15,9 @@ class DeleteCallbackQueryHandler implements CallbackQueryHandlerInterface
         if (isset($parts[1])) {
             $productId = $parts[1];
 
-            // Получаем chat_id и message_id
             $chatId = $callbackQuery->getMessage()->getChat()->getId();
             $messageId = $callbackQuery->getMessage()->getMessageId();
 
-            // Удаляем сообщение с продуктом
             try {
                 $telegram->deleteMessage([
                     'chat_id' => $chatId,
@@ -29,7 +27,6 @@ class DeleteCallbackQueryHandler implements CallbackQueryHandlerInterface
                 Log::error("Error deleting product message: " . $e->getMessage());
             }
 
-            // Удаляем продукт из кеша
             $userId = $callbackQuery->getFrom()->getId();
 
             $products = Cache::get("user_products_{$userId}", []);
@@ -38,13 +35,10 @@ class DeleteCallbackQueryHandler implements CallbackQueryHandlerInterface
                 unset($products[$productId]);
 
                 if (count($products) > 0) {
-                    // Обновляем кеш
                     Cache::put("user_products_{$userId}", $products, now()->addMinutes(30));
                 } else {
-                    // Продуктов больше нет
                     Cache::forget("user_products_{$userId}");
 
-                    // Удаляем сообщение с кнопками «Сохранить» и «Отменить»
                     $finalMessageId = Cache::get("user_final_message_id_{$userId}");
 
                     if ($finalMessageId) {
@@ -57,12 +51,10 @@ class DeleteCallbackQueryHandler implements CallbackQueryHandlerInterface
                             Log::error("Error deleting final action message: " . $e->getMessage());
                         }
 
-                        // Удаляем message_id из кеша
                         Cache::forget("user_final_message_id_{$userId}");
                     }
                 }
 
-                // Отправляем уведомление пользователю
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
                     'text' => 'Продукт удалён из списка.',
