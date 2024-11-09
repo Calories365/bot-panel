@@ -2,7 +2,7 @@
 
 namespace App\Services\TelegramServices\Request2Handlers;
 
-use App\Services\TelegramServices\MessageHandlers\MessageHandlerInterface;
+use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Services\TelegramServices\MessageHandlers\Telegram;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;

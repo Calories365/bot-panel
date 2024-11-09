@@ -48,6 +48,7 @@ trait EditHandlerTrait
     protected function clearEditingState($userId)
     {
         Cache::forget("user_editing_{$userId}");
+        Cache::forget("command_block{$userId}", 0);
     }
 
     protected function updateProductMessage($telegram, $chatId, $productData)

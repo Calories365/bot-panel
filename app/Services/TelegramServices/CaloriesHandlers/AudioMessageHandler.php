@@ -5,11 +5,12 @@ namespace App\Services\TelegramServices\CaloriesHandlers;
 use App\Services\AudioConversionService;
 use App\Services\ChatGPTService;
 use App\Services\DiaryApiService;
-use App\Services\TelegramServices\MessageHandlers\MessageHandlerInterface;
+use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
-use App\Utilities\Utilities;
-use Illuminate\Support\Facades\Cache; // Добавляем фасад Cache
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+
+// Добавляем фасад Cache
 
 class AudioMessageHandler implements MessageHandlerInterface
 {

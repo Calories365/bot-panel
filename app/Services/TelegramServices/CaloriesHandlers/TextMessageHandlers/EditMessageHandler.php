@@ -2,11 +2,9 @@
 
 namespace App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers;
 
+use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Services\TelegramServices\CaloriesHandlers\EditHandlerTrait;
-use App\Services\TelegramServices\MessageHandlers\MessageHandlerInterface;
-use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class EditMessageHandler implements MessageHandlerInterface
 {

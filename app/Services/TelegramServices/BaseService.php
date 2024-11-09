@@ -3,12 +3,12 @@
 namespace App\Services\TelegramServices;
 
 use App\Interfaces\BotHandlerStrategy;
+use App\Services\TelegramServices\BaseHandlers\MessageHandlers\AudioMessageHandler;
+use App\Services\TelegramServices\BaseHandlers\MessageHandlers\TextMessageHandler;
 use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\CallbackQueryHandler;
 use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\MessageUpdateHandler;
 use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\MyChatMemberUpdateHandler;
-use App\Services\TelegramServices\MessageHandlers\AudioMessageHandler;
-use App\Services\TelegramServices\MessageHandlers\TextMessageHandler;
 use Illuminate\Support\Facades\Log;
 
 /**

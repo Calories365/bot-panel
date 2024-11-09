@@ -2,7 +2,7 @@
 
 namespace App\Services\TelegramServices\ApprovalHandlers;
 
-use App\Services\TelegramServices\MessageHandlers\MessageHandlerInterface;
+use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;

@@ -45,6 +45,8 @@ class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
                     'original_product' => $productData,
                 ], now()->addMinutes(30));
 
+                Cache::put("command_block{$userId}", 1);
+
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
                 ]);

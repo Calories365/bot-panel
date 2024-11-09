@@ -3,7 +3,7 @@
 namespace App\Services\TelegramServices\ApprovalHandlers;
 
 use App\Models\BotUser;
-use App\Services\TelegramServices\MessageHandlers\MessageHandlerInterface;
+use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
 use App\Traits\ContactDataExtractor;
 use Illuminate\Support\Facades\Cache;

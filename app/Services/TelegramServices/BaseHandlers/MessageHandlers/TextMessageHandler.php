@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Services\TelegramServices\BaseHandlers\MessageHandlers;
+
+use App\Traits\BasicDataExtractor;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
+class TextMessageHandler implements MessageHandlerInterface
+{
+
+    use BasicDataExtractor;
+
+    protected array $textMessageHandlers;
+
+    public function __construct($textMessageHandlers)
+    {
+        $this->textMessageHandlers = $textMessageHandlers;
+    }
+
+    public function handle($bot, $telegram, $message): void
+    {
+        $text = $message->getText();
+        $userId = $message->getFrom()->getId();
+        $chatId = $message->getChat()->getId();
+
+        if (isset($this->textMessageHandlers[$text])) {
+            $isBlocked = Cache::get("command_block{$userId}", 0);
+            if (!$isBlocked){
+                $this->textMessageHandlers[$text]->handle($bot, $telegram, $message);
+            } else {
+                $sentMessage = $telegram->sendMessage([
+                    'chat_id' => $chatId,
+                    'text' => 'действие невозможно',
+                    'parse_mode' => 'Markdown',
+                ]);
+                return;
+            }
+        } else {
+            $this->textMessageHandlers['default']->handle($bot, $telegram, $message);
+        }
+    }
+}

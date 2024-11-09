@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\TelegramServices\MessageHandlers;
+namespace App\Services\TelegramServices\BaseHandlers\MessageHandlers;
 
 class AudioMessageHandler implements MessageHandlerInterface
 {

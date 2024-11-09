@@ -2,6 +2,7 @@
 
 namespace App\Services\TelegramServices;
 
+use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\AudioMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CancelCallbackQueryHandler;
@@ -42,9 +43,18 @@ class CaloriesService extends BaseService
         $messageHandlers['voice'] = app(AudioMessageHandler::class);
 
         // Используем EditMessageHandler для обработки текстовых сообщений во время редактирования
-        $messageHandlers['text'] = app(EditMessageHandler::class);
+//        $messageHandlers['text'] = app(EditMessageHandler::class);
 
         return $messageHandlers;
+    }
+
+    protected function getTextMessageHandlers(): array
+    {
+        $textMessageHandlers = parent::getTextMessageHandlers();
+
+        $textMessageHandlers['default'] = app(EditMessageHandler::class);
+
+        return $textMessageHandlers;
     }
 
 }
