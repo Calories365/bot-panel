@@ -131,13 +131,17 @@ trait EditHandlerTrait
         ];
 
 
-        $messageText = Utilities::generateTable($productTranslation['name'] ,$product['quantity_grams'], $productArray);
+        $messageText = Utilities::generateTable($productTranslation['name'] ,$product['quantity_grams'], $productArray , $productTranslation['said_name']);
 
         $inlineKeyboard = [
             [
                 [
                     'text' => 'Изменить',
                     'callback_data' => 'edit_' . $productId
+                ],
+                [
+                    'text' => 'Обновить',
+                    'callback_data' => 'generate_' . $productId
                 ],
                 [
                     'text' => 'Удалить',

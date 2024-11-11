@@ -20,6 +20,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
         EditingSaveCallbackQueryHandler   $editingSaveCallbackQueryHandler,
         EditingCancelCallbackQueryHandler $editingCancelCallbackQueryHandler,
         EditingSkipCallbackQueryHandler   $editingSkipCallbackQueryHandler,
+        GenerateCallbackQueryHandler      $generateCallbackQueryHandler
     )
     {
         $this->callbackQueryHandlers = [
@@ -27,6 +28,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
             'save' => $saveCallbackQuery,
             'edit' => $editCallbackQuery,
             'delete' => $deleteCallbackQuery,
+            'generate' => $generateCallbackQueryHandler,
             'editing_save' => $editingSaveCallbackQueryHandler,
             'editing_cancel' => $editingCancelCallbackQueryHandler,
             'editing_skip' => $editingSkipCallbackQueryHandler,

@@ -64,7 +64,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             'proteins' => $product['proteins_per_100g'] ?? $product['proteins'],
             'quantity' => $product['quantity_grams'],
             'consumed_at' => date('Y-m-d'),
-            'part_of_day' => 'morning',
+            'part_of_day' => $this->getPartOfTheDay(),
         ];
 
         $response = $this->diaryApiService->saveProduct($postData);
@@ -78,13 +78,16 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
 
     protected function saveFoodConsumption($product, $diaryUserId)
     {
+
+
         $postData = [
-            'user_id' => $diaryUserId,
-            'food_id' => $product['id'],
-            'quantity' => $product['quantity_grams'],
-            'consumed_at' => date('Y-m-d'),
-            'part_of_day' => 'morning',
+            'user_id'      => $diaryUserId,
+            'food_id'      => $product['id'],
+            'quantity'     => $product['quantity_grams'],
+            'consumed_at'  => date('Y-m-d'),
+            'part_of_day'  => $this->getPartOfTheDay(),
         ];
+
 
         $response = $this->diaryApiService->saveFoodConsumption($postData);
 
@@ -119,5 +122,19 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         } catch (\Exception $e) {
             Log::error("Error deleting final action message: " . $e->getMessage());
         }
+    }
+    private function getPartOfTheDay(): string
+    {
+
+        $currentHour = (int)date('G');
+
+        if ($currentHour >= 6 && $currentHour < 12) {
+            $partOfDay = 'morning';
+        } elseif ($currentHour >= 12 && $currentHour < 18) {
+            $partOfDay = 'dinner';
+        } else {
+            $partOfDay = 'supper';
+        }
+        return $partOfDay;
     }
 }

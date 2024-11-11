@@ -57,6 +57,7 @@ class EditMessageHandler implements MessageHandlerInterface
         switch ($currentStep) {
             case 'awaiting_name':
                 $userProducts[$productId]['product_translation']['name'] = $text;
+                $userProducts[$productId]['product_translation']['said_name'] = $text;
                 $userProducts[$productId]['product']['edited'] = 1;
                 $nextStep = 'awaiting_quantity';
                 $nextPrompt = 'Пожалуйста, введите новое количество грамм.';

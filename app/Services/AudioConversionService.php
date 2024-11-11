@@ -39,10 +39,9 @@ class AudioConversionService
             $convertedPath = $this->convertToMp3($localFilePath);
 
             if ($convertedPath) {
-                Log::info('Audio converted successfully: ' . $convertedPath);
-
                 // Преобразование аудио в текст
                 $text = $this->speechToTextService->convertSpeechToText($convertedPath);
+                Log::info('Audio converted successfully: ' . $text);
 
                 return $text;
             } else {

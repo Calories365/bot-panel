@@ -46,7 +46,7 @@ class AudioMessageHandler implements MessageHandlerInterface
                 Log::info('Product list: ' . $text);
 
                 $responseArray = $this->diaryApiService->sendText($text);
-                Log::info('Response from calories API: ' . print_r($responseArray, true));
+//                Log::info('Response from calories API: ' . print_r($responseArray, true));
 
                 if (isset($responseArray['error'])) {
                     $telegram->sendMessage([

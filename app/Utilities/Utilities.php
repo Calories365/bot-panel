@@ -63,8 +63,9 @@ class Utilities
         }
     }
 
-    public static function generateTable($title, $quantity, $dataArray)
+    public static function generateTable($title, $quantity, $dataArray, $saidProduct)
     {
+        $youSaid = 'Вы сказали: ' . $saidProduct . "\n\n";
         $title = $title . "\n\n";
         $quantity .="г";
         $quantity = str_pad(' ' . $quantity, 8, " ", STR_PAD_RIGHT);
@@ -78,6 +79,6 @@ class Utilities
                 "|". str_pad(' ' . $subArray[2], 7, " ", STR_PAD_RIGHT) . "|\n";
         }
         $body .= "`";
-        return $title . $header . $partition . $body;
+        return $youSaid . $title . $header . $partition . $body;
     }
 }
