@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 
 trait EditHandlerTrait
 {
+    protected $messageText;
+    protected $replyMarkup;
     protected function saveEditing($telegram, $chatId, $userId, &$userProducts, $productId, $messageId, $callbackQueryId = false)
     {
         $this->updateProductMessage($telegram, $chatId, $userProducts[$productId]);
@@ -53,6 +55,7 @@ trait EditHandlerTrait
 
     protected function updateProductMessage($telegram, $chatId, $productData)
     {
+        Log::info(print_r($productData, true));
         $messageId = $productData['message_id'];
 
 
@@ -60,18 +63,15 @@ trait EditHandlerTrait
         $product = $productData['product'];
         $productId = $productTranslation['id'];
 
-        $data = $this->generateTableBody($product, $productTranslation,$productId);
-
-        $messageText = $data[0];
-        $replyMarkup = $data[1];
+        $this->generateTableBody($product, $productTranslation,$productId);
 
         try {
             $telegram->editMessageText([
                 'chat_id' => $chatId,
                 'message_id' => $messageId,
-                'text' => $messageText,
+                'text' => $this->messageText,
                 'parse_mode' => 'Markdown',
-                'reply_markup' => $replyMarkup,
+                'reply_markup' => $this->replyMarkup,
             ]);
         } catch (\Telegram\Bot\Exceptions\TelegramResponseException $e) {
             $errorData = $e->getResponseData();
@@ -131,17 +131,24 @@ trait EditHandlerTrait
         ];
 
 
-        $messageText = Utilities::generateTable($productTranslation['name'] ,$product['quantity_grams'], $productArray , $productTranslation['said_name']);
+        $this->messageText = Utilities::generateTable($productTranslation['name'] ,$product['quantity_grams'], $productArray , $productTranslation['said_name']);
 
         $inlineKeyboard = [
             [
                 [
-                    'text' => 'Изменить',
-                    'callback_data' => 'edit_' . $productId
-                ],
+                'text' => 'Искать',
+                'callback_data' => 'search_' . $productId
+            ],
+
                 [
                     'text' => 'Обновить',
                     'callback_data' => 'generate_' . $productId
+                ]
+            ],
+            [
+                [
+                    'text' => 'Изменить',
+                    'callback_data' => 'edit_' . $productId
                 ],
                 [
                     'text' => 'Удалить',
@@ -149,11 +156,90 @@ trait EditHandlerTrait
                 ]
             ]
         ];
-
-        $replyMarkup = json_encode([
+        $this->replyMarkup = json_encode([
             'inline_keyboard' => $inlineKeyboard
         ]);
-        return [$messageText, $replyMarkup];
+        return true;
     }
+
+//    protected function sentProductsToUser($responseArray, $telegram, $chatId, $userId){
+//
+//        if (isset($responseArray['message']) && $responseArray['message'] === 'Products found' && !empty($responseArray['products'])) {
+//            $products = $responseArray['products'];
+//
+//            // Инициализируем массив для хранения продуктов с дополнительной информацией
+//            $userProducts = [];
+//
+//            foreach ($products as $index => $productInfo) {
+//
+//                if (isset($productInfo['product_translation']) && isset($productInfo['product'])) {
+//
+//                    $productTranslation = $productInfo['product_translation'];
+//                    $product = $productInfo['product'];
+//                    $productId = $productTranslation['id'];
+//                    $this->generateTableBody($product, $productTranslation, $productId);
+//
+//                    $sentMessage = $telegram->sendMessage([
+//                        'chat_id' => $chatId,
+//                        'text' => $this->messageText,
+//                        'parse_mode' => 'Markdown',
+//                        'reply_markup' => $this->replyMarkup
+//                    ]);
+//
+//                    $userProducts[$productId] = [
+//                        'product_translation' => $productTranslation,
+//                        'product' => $product,
+//                        'message_id' => $sentMessage->getMessageId()
+//                    ];
+//
+//                } else {
+//                    $messageText = ($index + 1) . ". Информация о продукте неполная.\n";
+//
+//                    $telegram->sendMessage([
+//                        'chat_id' => $chatId,
+//                        'text' => $messageText,
+//                        'parse_mode' => 'Markdown'
+//                    ]);
+//                }
+//            }
+//            // Сохраняем список продуктов в кеше с привязкой к userId
+//            Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30)); // Время хранения - 30 минут
+//
+//            // Отправляем сообщение с общими действиями
+//            $finalMessageText = "Действия с продуктами:\n";
+//
+//            $finalInlineKeyboard = [
+//                [
+//                    [
+//                        'text' => 'Сохранить',
+//                        'callback_data' => 'save'
+//                    ],
+//                    [
+//                        'text' => 'Отменить',
+//                        'callback_data' => 'cancel'
+//                    ]
+//                ]
+//            ];
+//
+//            $finalReplyMarkup = json_encode([
+//                'inline_keyboard' => $finalInlineKeyboard
+//            ]);
+//
+//            $finalMessage = $telegram->sendMessage([
+//                'chat_id' => $chatId,
+//                'text' => $finalMessageText,
+//                'parse_mode' => 'Markdown',
+//                'reply_markup' => $finalReplyMarkup
+//            ]);
+//            $finalMessageId = $finalMessage->getMessageId();
+//
+//            Cache::put("user_final_message_id_{$userId}", $finalMessageId, now()->addMinutes(30));
+//        } else {
+//            $telegram->sendMessage([
+//                'chat_id' => $chatId,
+//                'text' => $responseArray['message'] ?? 'Продукты не найдены.'
+//            ]);
+//        }
+//    }
 
     }

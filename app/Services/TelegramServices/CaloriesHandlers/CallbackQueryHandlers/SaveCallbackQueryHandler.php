@@ -8,7 +8,7 @@ use App\Services\DiaryApiService;
 
 class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
-    protected $diaryApiService;
+    protected DiaryApiService $diaryApiService;
 
     public function __construct()
     {

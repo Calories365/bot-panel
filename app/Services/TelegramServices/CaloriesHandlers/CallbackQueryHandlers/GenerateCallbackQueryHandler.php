@@ -56,6 +56,7 @@ class GenerateCallbackQueryHandler implements CallbackQueryHandlerInterface
                     }
 
                     $products[$productId]['product']['edited'] = 1;
+                    $products[$productId]['product_translation']['name'] = $saidName;
 
                     Cache::put("user_products_{$userId}", $products, now()->addMinutes(30));
 

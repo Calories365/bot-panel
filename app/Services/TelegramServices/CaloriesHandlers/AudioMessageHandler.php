@@ -69,20 +69,15 @@ class AudioMessageHandler implements MessageHandlerInterface
                             $productTranslation = $productInfo['product_translation'];
                             $product = $productInfo['product'];
                             $productId = $productTranslation['id'];
-                            $data = $this->generateTableBody($product, $productTranslation, $productId);
+                            $this->generateTableBody($product, $productTranslation, $productId);
 
-                            $messageText = $data[0];
-                            $replyMarkup = $data[1];
-
-                            // Отправляем сообщение пользователю и получаем отправленное сообщение
                             $sentMessage = $telegram->sendMessage([
                                 'chat_id' => $chatId,
-                                'text' => $messageText,
+                                'text' => $this->messageText,
                                 'parse_mode' => 'Markdown',
-                                'reply_markup' => $replyMarkup
+                                'reply_markup' => $this->replyMarkup
                             ]);
 
-                            // Сохраняем информацию о продукте и message_id в массиве userProducts
                             $userProducts[$productId] = [
                                 'product_translation' => $productTranslation,
                                 'product' => $product,
@@ -137,6 +132,9 @@ class AudioMessageHandler implements MessageHandlerInterface
                         'text' => $responseArray['message'] ?? 'Продукты не найдены.'
                     ]);
                 }
+
+//                $this->sentProductsToUser($responseArray, $telegram, $chatId, $userId);
+
             } else {
                 $telegram->sendMessage([
                     'chat_id' => $chatId,

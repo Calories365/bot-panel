@@ -20,7 +20,8 @@ class CallbackQueryHandler implements UpdateHandlerInterface
         EditingSaveCallbackQueryHandler   $editingSaveCallbackQueryHandler,
         EditingCancelCallbackQueryHandler $editingCancelCallbackQueryHandler,
         EditingSkipCallbackQueryHandler   $editingSkipCallbackQueryHandler,
-        GenerateCallbackQueryHandler      $generateCallbackQueryHandler
+        GenerateCallbackQueryHandler      $generateCallbackQueryHandler,
+        SearchCallbackQueryHandler      $searchCallbackQueryHandler,
     )
     {
         $this->callbackQueryHandlers = [
@@ -32,6 +33,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
             'editing_save' => $editingSaveCallbackQueryHandler,
             'editing_cancel' => $editingCancelCallbackQueryHandler,
             'editing_skip' => $editingSkipCallbackQueryHandler,
+            'search' => $searchCallbackQueryHandler,
         ];
     }
 
