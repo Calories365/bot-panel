@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
+    public bool $blockAble = true;
     public function handle($bot, $telegram, $callbackQuery)
     {
         $userId = $callbackQuery->getFrom()->getId();
@@ -65,4 +66,6 @@ class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
             ]);
         }
     }
+
+
 }

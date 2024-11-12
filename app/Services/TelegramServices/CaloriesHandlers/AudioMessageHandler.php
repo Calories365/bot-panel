@@ -94,10 +94,8 @@ class AudioMessageHandler implements MessageHandlerInterface
                             ]);
                         }
                     }
-                    // Сохраняем список продуктов в кеше с привязкой к userId
                     Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30)); // Время хранения - 30 минут
 
-                    // Отправляем сообщение с общими действиями
                     $finalMessageText = "Действия с продуктами:\n";
 
                     $finalInlineKeyboard = [
@@ -132,8 +130,6 @@ class AudioMessageHandler implements MessageHandlerInterface
                         'text' => $responseArray['message'] ?? 'Продукты не найдены.'
                     ]);
                 }
-
-//                $this->sentProductsToUser($responseArray, $telegram, $chatId, $userId);
 
             } else {
                 $telegram->sendMessage([

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class GenerateCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
+    public bool $blockAble = true;
      use EditHandlerTrait;
     protected SpeechToTextService $speechToTextService;
     public function __construct(SpeechToTextService $speechToTextService)

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 class EditingBaseCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
     use EditHandlerTrait;
-
+    public bool $blockAble = false;
     protected $callbackData;
     protected $userId;
     protected $chatId;

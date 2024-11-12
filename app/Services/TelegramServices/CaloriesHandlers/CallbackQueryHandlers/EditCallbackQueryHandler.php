@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Cache;
 
 class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
+    public bool $blockAble = true;
     public function handle($bot, $telegram, $callbackQuery)
     {
         $callbackData = $callbackQuery->getData();
@@ -16,6 +17,7 @@ class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
 
             $userId = $callbackQuery->getFrom()->getId();
             $chatId = $callbackQuery->getMessage()->getChat()->getId();
+
 
             $userProducts = Cache::get("user_products_{$userId}");
 
@@ -45,7 +47,7 @@ class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
                     'original_product' => $productData,
                 ], now()->addMinutes(30));
 
-                Cache::put("command_block{$userId}", 1);
+                Cache::put("command_block{$userId}", 1,  now()->addMinutes(30));
 
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),

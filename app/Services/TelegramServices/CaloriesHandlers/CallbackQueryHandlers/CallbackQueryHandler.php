@@ -6,6 +6,7 @@ use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\UpdateHandlerInter
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingCancelCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSaveCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSkipCallbackQueryHandler;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class CallbackQueryHandler implements UpdateHandlerInterface
@@ -43,6 +44,8 @@ class CallbackQueryHandler implements UpdateHandlerInterface
 
         $callbackData = $callbackQuery->getData();
 
+        $userId = $callbackQuery->getFrom()->getId();
+
         $parts = explode('_', $callbackData);
 
         $action = $parts[0];
@@ -51,8 +54,21 @@ class CallbackQueryHandler implements UpdateHandlerInterface
         }
 
         if (isset($this->callbackQueryHandlers[$action])) {
+
             $handler = $this->callbackQueryHandlers[$action];
-            $handler->handle($bot, $telegram, $callbackQuery);
+            $isBlocked = Cache::get("command_block{$userId}", 0);
+
+            if (!$isBlocked || !$handler->blockAble) {
+
+                $handler->handle($bot, $telegram, $callbackQuery);
+            } else {
+
+                $telegram->answerCallbackQuery([
+                    'callback_query_id' => $callbackQuery->getId(),
+                    'text' => 'Выйдите с режима редактирование(нажмите сохранить или отменить).',
+                    'show_alert' => true,
+                ]);
+            }
             return true;
         }
 

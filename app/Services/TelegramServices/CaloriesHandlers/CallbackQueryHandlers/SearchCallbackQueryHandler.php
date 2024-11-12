@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
+    public bool $blockAble = true;
      use EditHandlerTrait;
     protected DiaryApiService $diaryApiService;
     public function __construct(DiaryApiService $diaryApiService)
@@ -42,10 +43,11 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                 $saidName = $products[$productId]['product_translation']['said_name'];
 
                 try {
-
-                    $formatedText = $saidName . " - 100грамм;";
+                    $quantityGrams = $products[$productId]['product']['quantity_grams'];
+                    $formatedText = $saidName . " - " . $quantityGrams . "грамм;";
 
                     $responseArray = $this->diaryApiService->sendText($formatedText);
+
                     $product = $responseArray['products'][0];
 
             } catch (GuzzleException $e) {
@@ -58,6 +60,8 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                     $products[$productId]['message_id'] = $messageId;
 
                     Cache::put("user_products_{$userId}", $products, now()->addMinutes(30));
+
+                    $products = Cache::get("user_products_{$userId}", []);
 
                     $this->updateProductMessage($telegram, $chatId, $products[$productId]);
 

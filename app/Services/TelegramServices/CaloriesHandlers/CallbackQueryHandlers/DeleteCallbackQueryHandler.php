@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 class DeleteCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
+    public bool $blockAble = true;
     public function handle($bot, $telegram, $callbackQuery)
     {
         $callbackData = $callbackQuery->getData();

@@ -8,6 +8,7 @@ use App\Services\DiaryApiService;
 
 class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
+    public bool $blockAble = true;
     protected DiaryApiService $diaryApiService;
 
     public function __construct()
