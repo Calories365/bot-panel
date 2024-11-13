@@ -30,7 +30,6 @@ class MessageUpdateHandler implements UpdateHandlerInterface
     public function handle($bot, $telegram, $update)
     {
         $message = $update->getMessage();
-
         foreach ($this->messageHandlers as $type => $handler) {
             if (isset($message[$type])) {
                 $handler->handle($bot, $telegram, $message);

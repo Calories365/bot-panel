@@ -75,4 +75,22 @@ class DiaryApiService
             return ['error' => $e->getMessage()];
         }
     }
+    public function showUserStats($date)
+    {
+        try {
+            $response = $this->client->get($this->apiUrl . '/caloriesEndPoint/showUserStats/' . $date, [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'Host' => 'calories365.loc',
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            Log::error("Error retrieving user stats from diary service: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
+
 }

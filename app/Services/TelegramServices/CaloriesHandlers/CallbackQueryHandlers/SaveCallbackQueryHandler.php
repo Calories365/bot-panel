@@ -26,10 +26,12 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             return;
         }
         $diaryUserId = 32;
-
+        $totalCalories = 0;
         foreach ($data as $productData) {
             $product = $productData['product'];
             $productTranslation = $productData['product_translation'];
+
+            $totalCalories += round($product['calories'] * $product['quantity_grams'] / 100);
 
             if (isset($product['edited']) && $product['edited'] == 1) {
                 $this->saveProduct($product, $productTranslation, $diaryUserId);
@@ -43,7 +45,8 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
 
         $telegram->sendMessage([
             'chat_id' => $chatId,
-            'text' => 'Ваши данные успешно сохранены.',
+            'text' => 'Ваши данные успешно сохранены' . "\n\n" .
+                       'Вы употребили: ' . $totalCalories . 'калорий',
         ]);
 
         $this->deleteProductMessages($telegram, $chatId, $data, $callbackQuery);

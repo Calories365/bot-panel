@@ -17,6 +17,7 @@ use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\Generat
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SaveCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SearchCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\EditMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMessageHandler;
 
 class CaloriesService extends BaseService
 {
@@ -58,6 +59,9 @@ class CaloriesService extends BaseService
         $textMessageHandlers = parent::getTextMessageHandlers();
 
         $textMessageHandlers['default'] = app(EditMessageHandler::class);
+        $textMessageHandlers['/stats'] = new StatsMessageHandler(
+            new DiaryApiService()
+        );
 
         return $textMessageHandlers;
     }

@@ -81,4 +81,17 @@ class Utilities
         $body .= "`";
         return $youSaid . $title . $header . $partition . $body;
     }
+    public static function generateTableType2($title, $dataArray)
+    {
+        $title = $title .": " . "\n\n";
+        $partition = "`|------------|-------|\n";
+        $body = "";
+        foreach ($dataArray as $key => $subArray) {
+            $body .=
+                "|". str_pad(' ' . $subArray[0], mb_strlen($subArray[0], "UTF-8")+12, " ", STR_PAD_RIGHT) .
+                "|". str_pad(' ' . $subArray[1], 7, " ", STR_PAD_RIGHT) . "|\n";
+        }
+        $body .= "`";
+        return $title . $partition . $body;
+    }
 }
