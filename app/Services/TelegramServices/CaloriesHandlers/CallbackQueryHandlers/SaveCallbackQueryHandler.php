@@ -2,6 +2,7 @@
 
 namespace App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers;
 
+use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Services\DiaryApiService;
@@ -26,12 +27,21 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             return;
         }
         $diaryUserId = 32;
-        $totalCalories = 0;
+        $total = [
+            'calories' => 0,
+            'proteins' => 0,
+            'fats' => 0,
+            'carbohydrates' => 0,
+        ];
+
         foreach ($data as $productData) {
             $product = $productData['product'];
             $productTranslation = $productData['product_translation'];
 
-            $totalCalories += round($product['calories'] * $product['quantity_grams'] / 100);
+            $total['calories'] += round($product['calories'] * $product['quantity_grams'] / 100);
+            $total['proteins'] += round($product['proteins'] * $product['quantity_grams'] / 100);
+            $total['fats'] += round($product['fats'] * $product['quantity_grams'] / 100);
+            $total['carbohydrates'] += round($product['carbohydrates'] * $product['quantity_grams'] / 100);
 
             if (isset($product['edited']) && $product['edited'] == 1) {
                 $this->saveProduct($product, $productTranslation, $diaryUserId);
@@ -40,13 +50,22 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             }
         }
 
+        $productArray = [
+            [ "Калории", $total['calories']],
+            [ "Белки",$total['proteins']],
+            [ "Жиры", $total['fats']],
+            [ "Углеводы", $total['carbohydrates']],
+        ];
+        $messageText = Utilities::generateTableType2('Данные сохранены, dы употребили' , $productArray) . "\n\n";
+
         Cache::forget("user_products_{$userId}");
         Cache::forget("user_final_message_id_{$userId}");
 
         $telegram->sendMessage([
             'chat_id' => $chatId,
-            'text' => 'Ваши данные успешно сохранены' . "\n\n" .
-                       'Вы употребили: ' . $totalCalories . 'калорий',
+            'text' => $messageText,
+            'parse_mode' => 'Markdown',
+
         ]);
 
         $this->deleteProductMessages($telegram, $chatId, $data, $callbackQuery);
