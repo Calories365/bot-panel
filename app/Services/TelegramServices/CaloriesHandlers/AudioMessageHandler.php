@@ -10,7 +10,6 @@ use App\Traits\BasicDataExtractor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-// Добавляем фасад Cache
 
 class AudioMessageHandler implements MessageHandlerInterface
 {

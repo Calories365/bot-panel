@@ -3,6 +3,7 @@
 namespace App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
@@ -20,6 +21,9 @@ class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
 
 
             $userProducts = Cache::get("user_products_{$userId}");
+
+            Log::info('$userProducts: ');
+            Log::info(print_r($userProducts, true));
 
             if ($userProducts && isset($userProducts[$productId])) {
                 $productData = $userProducts[$productId];

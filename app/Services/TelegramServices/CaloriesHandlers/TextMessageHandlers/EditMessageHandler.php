@@ -59,6 +59,7 @@ class EditMessageHandler implements MessageHandlerInterface
                 $userProducts[$productId]['product_translation']['name'] = $text;
                 $userProducts[$productId]['product_translation']['said_name'] = $text;
                 $userProducts[$productId]['product']['edited'] = 1;
+                Cache::forget("product_click_count_{$userId}_{$productId}");
                 $nextStep = 'awaiting_quantity';
                 $nextPrompt = 'Пожалуйста, введите новое количество грамм.';
                 break;

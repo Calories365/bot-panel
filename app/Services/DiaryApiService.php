@@ -37,6 +37,26 @@ class DiaryApiService
             return ['error' => $e->getMessage()];
         }
     }
+    public function getTheMostRelevantProduct(string $text)
+    {
+        try {
+            $response = $this->client->post($this->apiUrl . '/caloriesEndPoint/getTheMostRelevantProduct', [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'Host' => 'calories365.loc',
+                ],
+                'json' => [
+                    'text' => $text,
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            Log::error("Error sending text to diary service: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
 
     public function saveProduct(array $data)
     {

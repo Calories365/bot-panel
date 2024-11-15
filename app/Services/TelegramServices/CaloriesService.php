@@ -13,7 +13,6 @@ use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditCal
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingCancelCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSaveCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSkipCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\GenerateCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SaveCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SearchCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\EditMessageHandler;
@@ -33,11 +32,9 @@ class CaloriesService extends BaseService
             new EditingSaveCallbackQueryHandler(),
             new EditingCancelCallbackQueryHandler(),
             new EditingSkipCallbackQueryHandler(),
-            new GenerateCallbackQueryHandler(
-                new SpeechToTextService()
-            ),
             new SearchCallbackQueryHandler(
-                new DiaryApiService()
+                new DiaryApiService(),
+                new SpeechToTextService()
             ),
         );
 

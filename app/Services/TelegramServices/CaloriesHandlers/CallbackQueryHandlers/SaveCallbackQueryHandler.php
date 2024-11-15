@@ -48,6 +48,9 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             } else {
                 $this->saveFoodConsumption($product, $diaryUserId);
             }
+//            Log::info('before deleting');
+//            Log::info("product_click_count_{$userId}_{$productTranslation['id']}");
+            Cache::forget("product_click_count_{$userId}_{$productTranslation['id']}");
         }
 
         $productArray = [
@@ -56,7 +59,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             [ "Жиры", $total['fats']],
             [ "Углеводы", $total['carbohydrates']],
         ];
-        $messageText = Utilities::generateTableType2('Данные сохранены, dы употребили' , $productArray) . "\n\n";
+        $messageText = Utilities::generateTableType2('Данные сохранены, Вы употребили' , $productArray) . "\n\n";
 
         Cache::forget("user_products_{$userId}");
         Cache::forget("user_final_message_id_{$userId}");
