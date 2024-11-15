@@ -136,7 +136,7 @@ trait EditHandlerTrait
         $inlineKeyboard = [
             [
                 [
-                    'text' => 'Искать' . $productId,
+                    'text' => 'Искать',
                     'callback_data' => 'search_' . $productId
                 ],
             ],

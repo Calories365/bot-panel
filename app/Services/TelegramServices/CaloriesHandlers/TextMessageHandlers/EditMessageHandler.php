@@ -56,53 +56,63 @@ class EditMessageHandler implements MessageHandlerInterface
 
         switch ($currentStep) {
             case 'awaiting_name':
+                if (strlen($text) <= 50){
                 $userProducts[$productId]['product_translation']['name'] = $text;
                 $userProducts[$productId]['product_translation']['said_name'] = $text;
                 $userProducts[$productId]['product']['edited'] = 1;
                 Cache::forget("product_click_count_{$userId}_{$productId}");
                 $nextStep = 'awaiting_quantity';
                 $nextPrompt = 'Пожалуйста, введите новое количество грамм.';
+                } else {
+                    $validInput = false;
+                    $errorMessage = 'Значение слишком длинное';
+                }
                 break;
             case 'awaiting_quantity':
-                $userProducts[$productId]['product']['quantity_grams'] = $text;
-                $nextStep = 'awaiting_calories';
-                $nextPrompt = 'Пожалуйста, введите новое количество калорий.';
+                if (is_numeric($text) && $text > -1 && $text <= 1250) {
+                    $userProducts[$productId]['product']['quantity_grams'] = $text;
+                    $nextStep = 'awaiting_calories';
+                    $nextPrompt = 'Пожалуйста, введите новое количество калорий.';
+                } else {
+                    $validInput = false;
+                    $errorMessage = 'Пожалуйста, введите корректное числовое значение для грамм.';
+                    }
                 break;
             case 'awaiting_calories':
-                if (is_numeric($text)) {
+                if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['calories'] = $text;
                     $userProducts[$productId]['product']['edited'] = 1;
                     $nextStep = 'awaiting_proteins';
                     $nextPrompt = 'Пожалуйста, введите новое количество белков.';
                 } else {
                     $validInput = false;
-                    $errorMessage = 'Пожалуйста, введите числовое значение для калорий.';
+                    $errorMessage = 'Пожалуйста, введите корректное числовое значение для калорий.';
                 }
                 break;
             case 'awaiting_proteins':
-                if (is_numeric($text)) {
+                if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['proteins'] = $text;
                     $userProducts[$productId]['product']['edited'] = 1;
                     $nextStep = 'awaiting_fats';
                     $nextPrompt = 'Пожалуйста, введите новое количество жиров.';
                 } else {
                     $validInput = false;
-                    $errorMessage = 'Пожалуйста, введите числовое значение для белков.';
+                    $errorMessage = 'Пожалуйста, введите корректное числовое значение для белков.';
                 }
                 break;
             case 'awaiting_fats':
-                if (is_numeric($text)) {
+                if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['fats'] = $text;
                     $userProducts[$productId]['product']['edited'] = 1;
                     $nextStep = 'awaiting_carbohydrates';
                     $nextPrompt = 'Пожалуйста, введите новое количество углеводов.';
                 } else {
                     $validInput = false;
-                    $errorMessage = 'Пожалуйста, введите числовое значение для жиров.';
+                    $errorMessage = 'Пожалуйста, введите корректное числовое значение для жиров.';
                 }
                 break;
             case 'awaiting_carbohydrates':
-                if (is_numeric($text)) {
+                if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['carbohydrates'] = $text;
                     $userProducts[$productId]['product']['edited'] = 1;
 
@@ -111,7 +121,7 @@ class EditMessageHandler implements MessageHandlerInterface
                     return;
                 } else {
                     $validInput = false;
-                    $errorMessage = 'Пожалуйста, введите числовое значение для углеводов.';
+                    $errorMessage = 'Пожалуйста, введите корректное числовое значение для углеводов.';
                 }
                 break;
             default:
