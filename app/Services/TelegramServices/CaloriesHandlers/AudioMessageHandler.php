@@ -95,13 +95,23 @@ class AudioMessageHandler implements MessageHandlerInterface
                     }
                     Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30)); // Время хранения - 30 минут
 
-                    $finalMessageText = "Действия с продуктами:\n";
+                    $finalMessageText = "Сохранить продукты на:\n";
 
                     $finalInlineKeyboard = [
                         [
                             [
-                                'text' => 'Сохранить',
-                                'callback_data' => 'save'
+                                'text' => 'Завтрак',
+                                'callback_data' => 'save_morning'
+                            ],
+                            [
+                                'text' => 'Oбед',
+                                'callback_data' => 'save_dinner'
+                            ],
+                        ],
+                        [
+                            [
+                                'text' => 'Ужин',
+                                'callback_data' => 'save_supper'
                             ],
                             [
                                 'text' => 'Отменить',
@@ -109,6 +119,7 @@ class AudioMessageHandler implements MessageHandlerInterface
                             ]
                         ]
                     ];
+
 
                     $finalReplyMarkup = json_encode([
                         'inline_keyboard' => $finalInlineKeyboard

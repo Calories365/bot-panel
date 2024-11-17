@@ -21,6 +21,13 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
     {
         $userId = $callbackQuery->getFrom()->getId();
         $chatId = $callbackQuery->getMessage()->getChat()->getId();
+        $callbackData = $callbackQuery->getData();
+
+        $parts = explode('_', $callbackData);
+
+        if(count($parts) > 1){
+            $partOfTheDay = $parts[1];
+        }
 
         $data = Cache::get("user_products_{$userId}");
         if (!$data){
@@ -44,9 +51,9 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             $total['carbohydrates'] += round($product['carbohydrates'] * $product['quantity_grams'] / 100);
 
             if (isset($product['edited']) && $product['edited'] == 1) {
-                $this->saveProduct($product, $productTranslation, $diaryUserId);
+                $this->saveProduct($product, $productTranslation, $diaryUserId, $partOfTheDay);
             } else {
-                $this->saveFoodConsumption($product, $diaryUserId);
+                $this->saveFoodConsumption($product, $diaryUserId, $partOfTheDay);
             }
 //            Log::info('before deleting');
 //            Log::info("product_click_count_{$userId}_{$productTranslation['id']}");
@@ -78,7 +85,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         ]);
     }
 
-    protected function saveProduct($product, $productTranslation, $diaryUserId)
+    protected function saveProduct($product, $productTranslation, $diaryUserId, $partOfTheDay)
     {
         $postData = [
             'user_id' => $diaryUserId,
@@ -90,7 +97,8 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             'proteins' => $product['proteins_per_100g'] ?? $product['proteins'],
             'quantity' => $product['quantity_grams'],
             'consumed_at' => date('Y-m-d'),
-            'part_of_day' => $this->getPartOfTheDay(),
+//            'consumed_at' =>  date('Y-m-d', strtotime('-1 day')),
+            'part_of_day' => $partOfTheDay,
         ];
 
         $response = $this->diaryApiService->saveProduct($postData);
@@ -102,7 +110,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         }
     }
 
-    protected function saveFoodConsumption($product, $diaryUserId)
+    protected function saveFoodConsumption($product, $diaryUserId, $partOfTheDay)
     {
 
 
@@ -111,7 +119,8 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             'food_id'      => $product['id'],
             'quantity'     => $product['quantity_grams'],
             'consumed_at'  => date('Y-m-d'),
-            'part_of_day'  => $this->getPartOfTheDay(),
+//            'consumed_at' =>  date('Y-m-d', strtotime('-1 day')),
+            'part_of_day'  => $partOfTheDay,
         ];
 
 

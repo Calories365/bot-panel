@@ -118,7 +118,10 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
         $saidName = $products[$productId]['product_translation']['said_name'];
 
         try {
+            Log::info('saidName: ' . $saidName);
             $productData = $this->speechToTextService->generateNewProductData($saidName);
+            Log::info('generated: ');
+            Log::info(print_r($productData, true));
         } catch (GuzzleException $e) {
             Log::error("Error generating product data: " . $e->getMessage());
             $telegram->answerCallbackQuery([
