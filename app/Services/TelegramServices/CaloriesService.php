@@ -8,6 +8,7 @@ use App\Services\TelegramServices\CaloriesHandlers\AudioMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CancelCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\DeleteCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\DeleteMealCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingCancelCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSaveCallbackQueryHandler;
@@ -35,6 +36,9 @@ class CaloriesService extends BaseService
             new SearchCallbackQueryHandler(
                 new DiaryApiService(),
                 new SpeechToTextService()
+            ),
+            new DeleteMealCallbackQueryHandler(
+                new DiaryApiService(),
             ),
         );
 

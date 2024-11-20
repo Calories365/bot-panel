@@ -118,5 +118,24 @@ class DiaryApiService
         }
     }
 
+    public function deleteMeal($mealId)
+    {
+        try {
+            $response = $this->client->delete($this->apiUrl . '/caloriesEndPoint/deleteMeal/' . $mealId, [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'Host' => 'calories365.loc',
+                ],
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            Log::error("Error deleting meal in diary service: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+
 
 }

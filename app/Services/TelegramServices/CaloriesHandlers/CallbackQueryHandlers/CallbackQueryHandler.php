@@ -22,6 +22,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
         EditingCancelCallbackQueryHandler $editingCancelCallbackQueryHandler,
         EditingSkipCallbackQueryHandler   $editingSkipCallbackQueryHandler,
         SearchCallbackQueryHandler      $searchCallbackQueryHandler,
+        DeleteMealCallbackQueryHandler $deleteMealCallbackQueryHandler,
     )
     {
         $this->callbackQueryHandlers = [
@@ -33,6 +34,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
             'editing_cancel' => $editingCancelCallbackQueryHandler,
             'editing_skip' => $editingSkipCallbackQueryHandler,
             'search' => $searchCallbackQueryHandler,
+            'delete_meal' => $deleteMealCallbackQueryHandler,
         ];
     }
 
@@ -46,8 +48,10 @@ class CallbackQueryHandler implements UpdateHandlerInterface
 
         $parts = explode('_', $callbackData);
 
+        Log::info(print_r($parts, true));
+
         $action = $parts[0];
-        if (isset($parts[1]) && in_array($action, ['editing'])) {
+        if (isset($parts[1]) && in_array($action, ['editing', 'delete'])) {
             $action = $action . '_' . $parts[1];
         }
 
