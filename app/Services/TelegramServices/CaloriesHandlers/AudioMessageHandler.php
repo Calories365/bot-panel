@@ -58,7 +58,6 @@ class AudioMessageHandler implements MessageHandlerInterface
                 if (isset($responseArray['message']) && $responseArray['message'] === 'Products found' && !empty($responseArray['products'])) {
                     $products = $responseArray['products'];
 
-                    // Инициализируем массив для хранения продуктов с дополнительной информацией
                     $userProducts = [];
 
                     foreach ($products as $index => $productInfo) {

@@ -1,0 +1,1 @@
+import{_ as n,j as e,b as s,l as o}from"./app-0435e394.js";const r={},c={type:"submit",class:"btn btn-warning"};function a(t,_){return e(),s("button",c,[o(t.$slots,"default")])}const i=n(r,[["render",a]]);export{i as B};

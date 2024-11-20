@@ -25,14 +25,13 @@ class StatsMessageHandler
             $userId = $message->getFrom()->getId();
 
             $date = date('Y-m-d');
-
-            $commandParts = explode(' ', $text);
+            $partOfDay = false;
+            $commandParts = explode('_', $text);
             if (isset($commandParts[1])) {
-                $date = $commandParts[1];
+                $partOfDay = $commandParts[1];
             }
 
-            $responseArray = $this->diaryApiService->showUserStats($date);
-
+            $responseArray = $this->diaryApiService->showUserStats($date, $partOfDay);
             if (isset($responseArray['error'])) {
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
@@ -57,7 +56,6 @@ class StatsMessageHandler
             return "У вас нет записей на дату *{$date}*.";
         }
 
-        // Инициализируем массивы для каждой части дня
         $partsOfDay = [
             'morning' => [
                 'name' => 'Завтрак',
@@ -138,4 +136,66 @@ class StatsMessageHandler
 
         return $messageText;
     }
+//    protected function formatStatsMessageWithPartOfDay($meals, $date, $partOfDay)
+//    {
+//        if (empty($meals)) {
+//            return "У вас нет записей за *{$partOfDay}*.";
+//        }
+//
+//
+//
+//        $total = [
+//            'calories' => 0,
+//            'proteins' => 0,
+//            'fats' => 0,
+//            'carbohydrates' => 0,
+//        ];
+//
+//        foreach ($meals as $meal) {
+//
+//            $quantityFactor = $meal['quantity'] / 100;
+//
+//            $calories = $meal['calories'] * $quantityFactor;
+//            $proteins = $meal['proteins'] * $quantityFactor;
+//            $fats = $meal['fats'] * $quantityFactor;
+//            $carbohydrates = $meal['carbohydrates'] * $quantityFactor;
+//
+//            $partsOfDay[$part]['calories'] += $calories;
+//            $partsOfDay[$part]['proteins'] += $proteins;
+//            $partsOfDay[$part]['fats'] += $fats;
+//            $partsOfDay[$part]['carbohydrates'] += $carbohydrates;
+//
+//            $total['calories'] += $calories;
+//            $total['proteins'] += $proteins;
+//            $total['fats'] += $fats;
+//            $total['carbohydrates'] += $carbohydrates;
+//        }
+//
+//        $messageText = "Ваши данные за *{$partOfDay}*:\n\n";
+//
+//        foreach ($partsOfDay as $part) {
+//            if ($part['calories'] == 0) {
+//                continue;
+//            }
+////            $this->generateTableBody($product, $productTranslation, $productId);
+//
+//            $productArray = [
+//                [ "Калории", round($part['calories'])],
+//                [ "Белки", round($part['proteins'])],
+//                [ "Жиры", round($part['fats'])],
+//                [ "Углеводы",round( $part['carbohydrates'])],
+//            ];
+//            $messageText .= Utilities::generateTableType2($part['name'] , $productArray) . "\n\n";
+//
+//        }
+//        $productArray = [
+//            [ "Калории", round($total['calories'])],
+//            [ "Белки", round($total['proteins'])],
+//            [ "Жиры", round($total['fats'])],
+//            [ "Углеводы",round( $total['carbohydrates'])],
+//        ];
+//        $messageText .= Utilities::generateTableType2('Итого за день' , $productArray);
+//
+//        return $messageText;
+//    }
 }

@@ -1,0 +1,1 @@
+function f({localData:t,showModal:i=!1,actions:u={}}){function c(e){if(e.key&&e.value!==void 0)t.value[e.key]=e.value;else if(e.action){const n=u[e.action];n?n(e):console.log("Неизвестное действие")}}return{handleEvent:c,showModal:i}}export{f as u};

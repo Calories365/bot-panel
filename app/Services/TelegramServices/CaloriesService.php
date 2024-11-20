@@ -4,7 +4,6 @@ namespace App\Services\TelegramServices;
 
 use App\Services\ChatGPTServices\SpeechToTextService;
 use App\Services\DiaryApiService;
-use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\AudioMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CancelCallbackQueryHandler;
@@ -16,6 +15,7 @@ use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\Editing
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SaveCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SearchCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\EditMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMessageHandler;
 
 class CaloriesService extends BaseService
@@ -59,6 +59,7 @@ class CaloriesService extends BaseService
         $textMessageHandlers['/stats'] = new StatsMessageHandler(
             new DiaryApiService()
         );
+        $textMessageHandlers['/start'] = new StartMessageHandler();
 
         return $textMessageHandlers;
     }

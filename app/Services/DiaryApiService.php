@@ -95,10 +95,15 @@ class DiaryApiService
             return ['error' => $e->getMessage()];
         }
     }
-    public function showUserStats($date)
+    public function showUserStats($date, $partOfDay = false)
     {
         try {
-            $response = $this->client->get($this->apiUrl . '/caloriesEndPoint/showUserStats/' . $date, [
+            $url = $this->apiUrl . '/caloriesEndPoint/showUserStats/' . $date;
+            if ($partOfDay) {
+                $url .= '/' . $partOfDay;
+            }
+
+            $response = $this->client->get($url, [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
@@ -112,5 +117,6 @@ class DiaryApiService
             return ['error' => $e->getMessage()];
         }
     }
+
 
 }

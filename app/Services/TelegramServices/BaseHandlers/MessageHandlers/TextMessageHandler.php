@@ -24,6 +24,11 @@ class TextMessageHandler implements MessageHandlerInterface
         $userId = $message->getFrom()->getId();
         $chatId = $message->getChat()->getId();
 
+         $commandParts = explode('_', $text);
+         if (isset($commandParts[1])) {
+             $text = $commandParts[0];
+         }
+
         if (isset($this->textMessageHandlers[$text])) {
             $isBlocked = Cache::get("command_block{$userId}", 0);
             if (!$isBlocked){

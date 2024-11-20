@@ -22,8 +22,8 @@ class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
 
             $userProducts = Cache::get("user_products_{$userId}");
 
-            Log::info('$userProducts: ');
-            Log::info(print_r($userProducts, true));
+//            Log::info('$userProducts: ');
+//            Log::info(print_r($userProducts, true));
 
             if ($userProducts && isset($userProducts[$productId])) {
                 $productData = $userProducts[$productId];
