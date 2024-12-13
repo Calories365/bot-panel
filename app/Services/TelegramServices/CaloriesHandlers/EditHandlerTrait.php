@@ -147,7 +147,7 @@ trait EditHandlerTrait
                 ],
                 [
                     'text' => 'Удалить',
-                    'callback_data' => 'delete_' . $productId
+                    'callback_data' => 'destroy_' . $productId
                 ]
             ]
         ];

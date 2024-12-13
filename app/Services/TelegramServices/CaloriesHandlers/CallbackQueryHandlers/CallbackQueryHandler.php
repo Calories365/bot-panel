@@ -29,7 +29,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
             'cancel' => $cancelCallbackQuery,
             'save' => $saveCallbackQuery,
             'edit' => $editCallbackQuery,
-            'delete' => $deleteCallbackQuery,
+            'destroy' => $deleteCallbackQuery,
             'editing_save' => $editingSaveCallbackQueryHandler,
             'editing_cancel' => $editingCancelCallbackQueryHandler,
             'editing_skip' => $editingSkipCallbackQueryHandler,

@@ -19,7 +19,6 @@ const validationErrors = computed(() => store.state.auth.validationErrors);
 onBeforeUnmount(() => {
     store.dispatch(actionTypes.destroyErrors);
 });
-
 const onSubmit = () => {
     store.dispatch(actionTypes.login, {
         email: formState.email,
