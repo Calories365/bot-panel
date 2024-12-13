@@ -13,7 +13,8 @@ class DiaryApiService
 
     public function __construct()
     {
-        $this->apiUrl = 'http://nginx/api';
+//        $this->apiUrl = 'http://nginx/api';
+        $this->apiUrl = config('services.diary_api.url');
         $this->client = new Client();
     }
 

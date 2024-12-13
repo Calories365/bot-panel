@@ -31,4 +31,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'diary_api' => [
+        'url' => env('DIARY_API_URL', 'http://nginx/api'),
+        // token можно добавить позже, сейчас без токена
+        'token' => env('DIARY_API_TOKEN', null),
+    ],
+
 ];

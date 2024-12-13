@@ -4,7 +4,7 @@ import getCookie from "@/helpers/getCookie.js";
 // const secureCookie = document.querySelector('meta[name="secure-cookie"]').content === 'true';
 
 // axios.defaults.baseURL = `${secureCookie ? 'https' : 'http'}://${window.location.host}`;
-axios.defaults.baseURL =`https://${window.location.host}`;
+axios.defaults.baseURL =`http://${window.location.host}`;
 
 axios.defaults.withCredentials = true;
 
