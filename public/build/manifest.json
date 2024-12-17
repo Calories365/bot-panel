@@ -7,29 +7,29 @@
     "file": "assets/BotsForm-9cb19c7c.css",
     "src": "BotsForm.css"
   },
-  "_BotsButtonWarning-a5408521.js": {
-    "file": "assets/BotsButtonWarning-a5408521.js",
+  "_BotsButtonWarning-fdc6fbfb.js": {
+    "file": "assets/BotsButtonWarning-fdc6fbfb.js",
     "imports": [
       "resources/js/app.js"
     ]
   },
-  "_BotsConfirmatiomModal-20ec1d61.js": {
+  "_BotsConfirmatiomModal-195fa7ad.js": {
     "css": [
       "assets/BotsConfirmatiomModal-2eb29bdf.css"
     ],
-    "file": "assets/BotsConfirmatiomModal-20ec1d61.js",
+    "file": "assets/BotsConfirmatiomModal-195fa7ad.js",
     "imports": [
       "resources/js/app.js"
     ]
   },
-  "_BotsForm-701fc87a.js": {
+  "_BotsForm-0b26dc18.js": {
     "css": [
       "assets/BotsForm-9cb19c7c.css"
     ],
-    "file": "assets/BotsForm-701fc87a.js",
+    "file": "assets/BotsForm-0b26dc18.js",
     "imports": [
       "resources/js/app.js",
-      "_BotsButtonWarning-a5408521.js"
+      "_BotsButtonWarning-fdc6fbfb.js"
     ]
   },
   "_admin_rows-e1561ab5.js": {
@@ -41,11 +41,11 @@
   "_useHandleEvent-b8d05d3b.js": {
     "file": "assets/useHandleEvent-b8d05d3b.js"
   },
-  "_usePagination-3abddefd.js": {
+  "_usePagination-756c2212.js": {
     "css": [
       "assets/usePagination-59a5c523.css"
     ],
-    "file": "assets/usePagination-3abddefd.js",
+    "file": "assets/usePagination-756c2212.js",
     "imports": [
       "resources/js/app.js"
     ]
@@ -86,7 +86,7 @@
       "resources/js/src/pages/ShowManagers.vue",
       "resources/js/src/pages/ShowManager.vue"
     ],
-    "file": "assets/app-4dc402c1.js",
+    "file": "assets/app-9a7aa4bf.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },
@@ -98,13 +98,13 @@
     "css": [
       "assets/AddAdmin-7c923c51.css"
     ],
-    "file": "assets/AddAdmin-485e3b84.js",
+    "file": "assets/AddAdmin-6b99f8d0.js",
     "imports": [
       "resources/js/app.js",
-      "_BotsForm-701fc87a.js",
+      "_BotsForm-0b26dc18.js",
       "_useHandleEvent-b8d05d3b.js",
       "_admin_rows-e1561ab5.js",
-      "_BotsButtonWarning-a5408521.js"
+      "_BotsButtonWarning-fdc6fbfb.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/src/pages/AddAdmin.vue"
@@ -117,12 +117,12 @@
     "css": [
       "assets/AddBot-a5b2ced9.css"
     ],
-    "file": "assets/AddBot-344c6875.js",
+    "file": "assets/AddBot-22a2f6bb.js",
     "imports": [
-      "_BotsForm-701fc87a.js",
+      "_BotsForm-0b26dc18.js",
       "resources/js/app.js",
       "_useHandleEvent-b8d05d3b.js",
-      "_BotsButtonWarning-a5408521.js"
+      "_BotsButtonWarning-fdc6fbfb.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/src/pages/AddBot.vue"
@@ -135,19 +135,19 @@
     "css": [
       "assets/AddManager-35ebbf16.css"
     ],
-    "file": "assets/AddManager-b7f7e38c.js",
+    "file": "assets/AddManager-e8536344.js",
     "imports": [
       "resources/js/app.js",
-      "_BotsForm-701fc87a.js",
+      "_BotsForm-0b26dc18.js",
       "_useHandleEvent-b8d05d3b.js",
       "_manager_rows-f136a19f.js",
-      "_BotsButtonWarning-a5408521.js"
+      "_BotsButtonWarning-fdc6fbfb.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/src/pages/AddManager.vue"
   },
   "resources/js/src/pages/Home.vue": {
-    "file": "assets/Home-d4bbd731.js",
+    "file": "assets/Home-0dcb5548.js",
     "imports": [
       "resources/js/app.js"
     ],
@@ -162,13 +162,13 @@
     "css": [
       "assets/ShowAdmin-fff8d132.css"
     ],
-    "file": "assets/ShowAdmin-439e9ad1.js",
+    "file": "assets/ShowAdmin-5e93360d.js",
     "imports": [
       "resources/js/app.js",
-      "_BotsForm-701fc87a.js",
-      "_BotsConfirmatiomModal-20ec1d61.js",
+      "_BotsForm-0b26dc18.js",
+      "_BotsConfirmatiomModal-195fa7ad.js",
       "_admin_rows-e1561ab5.js",
-      "_BotsButtonWarning-a5408521.js"
+      "_BotsButtonWarning-fdc6fbfb.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/src/pages/ShowAdmin.vue"
@@ -181,11 +181,11 @@
     "css": [
       "assets/ShowAdmins-3cd8f55b.css"
     ],
-    "file": "assets/ShowAdmins-c4033e4a.js",
+    "file": "assets/ShowAdmins-ff4d69fc.js",
     "imports": [
-      "_usePagination-3abddefd.js",
+      "_usePagination-756c2212.js",
       "resources/js/app.js",
-      "_BotsConfirmatiomModal-20ec1d61.js"
+      "_BotsConfirmatiomModal-195fa7ad.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/src/pages/ShowAdmins.vue"
@@ -198,13 +198,13 @@
     "css": [
       "assets/ShowBot-84be8538.css"
     ],
-    "file": "assets/ShowBot-8592ccff.js",
+    "file": "assets/ShowBot-be696ccb.js",
     "imports": [
-      "_BotsForm-701fc87a.js",
+      "_BotsForm-0b26dc18.js",
       "resources/js/app.js",
-      "_BotsConfirmatiomModal-20ec1d61.js",
+      "_BotsConfirmatiomModal-195fa7ad.js",
       "_useHandleEvent-b8d05d3b.js",
-      "_BotsButtonWarning-a5408521.js"
+      "_BotsButtonWarning-fdc6fbfb.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/src/pages/ShowBot.vue"
@@ -217,11 +217,11 @@
     "css": [
       "assets/ShowBots-35516b48.css"
     ],
-    "file": "assets/ShowBots-78e2ce64.js",
+    "file": "assets/ShowBots-1348a2a1.js",
     "imports": [
-      "_usePagination-3abddefd.js",
+      "_usePagination-756c2212.js",
       "resources/js/app.js",
-      "_BotsConfirmatiomModal-20ec1d61.js"
+      "_BotsConfirmatiomModal-195fa7ad.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/src/pages/ShowBots.vue"
@@ -234,14 +234,14 @@
     "css": [
       "assets/ShowManager-16f18ad5.css"
     ],
-    "file": "assets/ShowManager-fbcb6aa3.js",
+    "file": "assets/ShowManager-ae84856c.js",
     "imports": [
       "resources/js/app.js",
-      "_BotsForm-701fc87a.js",
-      "_BotsConfirmatiomModal-20ec1d61.js",
+      "_BotsForm-0b26dc18.js",
+      "_BotsConfirmatiomModal-195fa7ad.js",
       "_useHandleEvent-b8d05d3b.js",
       "_manager_rows-f136a19f.js",
-      "_BotsButtonWarning-a5408521.js"
+      "_BotsButtonWarning-fdc6fbfb.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/src/pages/ShowManager.vue"
@@ -254,11 +254,11 @@
     "css": [
       "assets/ShowManagers-ba03dc87.css"
     ],
-    "file": "assets/ShowManagers-bdcf47ea.js",
+    "file": "assets/ShowManagers-c3ddcf9a.js",
     "imports": [
-      "_usePagination-3abddefd.js",
+      "_usePagination-756c2212.js",
       "resources/js/app.js",
-      "_BotsConfirmatiomModal-20ec1d61.js"
+      "_BotsConfirmatiomModal-195fa7ad.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/src/pages/ShowManagers.vue"
@@ -271,12 +271,12 @@
     "css": [
       "assets/ShowUsers-caa5fce5.css"
     ],
-    "file": "assets/ShowUsers-33f94d4a.js",
+    "file": "assets/ShowUsers-7abd373c.js",
     "imports": [
       "resources/js/app.js",
-      "_usePagination-3abddefd.js",
-      "_BotsConfirmatiomModal-20ec1d61.js",
-      "_BotsButtonWarning-a5408521.js"
+      "_usePagination-756c2212.js",
+      "_BotsConfirmatiomModal-195fa7ad.js",
+      "_BotsButtonWarning-fdc6fbfb.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/src/pages/ShowUsers.vue"

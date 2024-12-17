@@ -1,0 +1,1 @@
+import{_ as n,b as r,j as s}from"./app-9a7aa4bf.js";const a={name:"Home",beforeRouteEnter(o,t,e){e({name:"showBots"})}};function c(o,t,e,m,_,f){return s(),r("h1",null,"Home")}const l=n(a,[["render",c]]);export{l as default};

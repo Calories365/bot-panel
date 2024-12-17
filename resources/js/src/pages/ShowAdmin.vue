@@ -7,7 +7,7 @@ import router from "@/router/router.js";
 import BotsForm from "@/Components/BotsForm.vue";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import Loader from "@/Components/UI/Loader.vue";
-import {useHandleEvent} from '@/composables/useHandleEvent.js';
+import {useHandleEvent} from '@/Composables/useHandleEvent.js';
 import {admin_rows} from "@/ComponentConfigs/Form/Admin/admin_rows.js";
 
 const store = useStore();
