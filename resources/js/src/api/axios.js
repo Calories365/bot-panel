@@ -1,7 +1,7 @@
 import axios from "axios";
 import getCookie from "@/helpers/getCookie.js";
 
-axios.defaults.baseURL = window.location.host;
+axios.defaults.baseURL = window.location.origin;
 
 axios.defaults.withCredentials = true;
 
