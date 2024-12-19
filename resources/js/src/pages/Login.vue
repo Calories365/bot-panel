@@ -67,7 +67,7 @@ const onSubmit = () => {
                         </div>
                         <div class="row">
                             <div class="col text-center">
-                                <button type="submit" class="btn btn-primary">Войти</button>
+                                <button type="submit" class="btn btn-primary">Войти123</button>
                             </div>
                         </div>
                     </form>
