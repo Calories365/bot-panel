@@ -98,6 +98,11 @@ class Utilities
     public static function hasCaloriesId($chatId)
     {
         $botUser = BotUser::where('telegram_id', $chatId)->first();
+
+        if (!$botUser){
+            return false;
+        }
+
         $calories_id = $botUser->calories_id;
 
         return $calories_id ? $botUser : false;
