@@ -10,24 +10,53 @@ class DiaryApiService
 {
     private Client $client;
     private string $apiUrl;
+    private mixed $host;
+    private string $diaryApiKey;
 
     public function __construct()
     {
-//        $this->apiUrl = 'http://nginx/api';
-        $this->apiUrl = config('services.diary_api.url');
-        $this->client = new Client();
+        $this->diaryApiKey = config('services.diary_api.key');
+        $this->apiUrl      = config('services.diary_api.url');
+        $this->client      = new Client();
+        $this->host        = config('services.diary_api.host');
     }
 
-    public function sendText(string $text)
+    /**
+     * Унифицированный метод для формирования заголовков запроса.
+     *
+     * @param int|null    $telegramId
+     * @param string|null $locale
+     * @return array
+     */
+    private function getHeaders($telegramId = null, $locale = null): array
+    {
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Accept'       => 'application/json',
+            'Host'         => $this->host,
+            'X-Api-Key'    => $this->diaryApiKey,
+        ];
+
+        if (!empty($telegramId)) {
+            $headers['X-Telegram-Id'] = $telegramId;
+        }
+
+        if (!empty($locale)) {
+            $headers['X-Locale'] = $locale;
+        }
+
+        return $headers;
+    }
+
+    /**
+     * Отправляем текст на сервис (пример).
+     */
+    public function sendText(string $text, $telegram_id, $locale)
     {
         try {
             $response = $this->client->post($this->apiUrl . '/caloriesEndPoint', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                    'Host' => 'calories365.loc',
-                ],
-                'json' => [
+                'headers' => $this->getHeaders($telegram_id, $locale),
+                'json'    => [
                     'text' => $text,
                 ],
             ]);
@@ -38,37 +67,38 @@ class DiaryApiService
             return ['error' => $e->getMessage()];
         }
     }
-    public function getTheMostRelevantProduct(string $text)
+
+    /**
+     * Получаем наиболее релевантный продукт
+     */
+    public function getTheMostRelevantProduct(string $text, $telegram_id, $locale)
     {
         try {
             $response = $this->client->post($this->apiUrl . '/caloriesEndPoint/getTheMostRelevantProduct', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                    'Host' => 'calories365.loc',
-                ],
-                'json' => [
+                'headers' => $this->getHeaders($telegram_id, $locale),
+                'json'    => [
                     'text' => $text,
                 ],
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
-            Log::error("Error sending text to diary service: " . $e->getMessage());
+            Log::error("Error getting relevant product from diary service: " . $e->getMessage());
             return ['error' => $e->getMessage()];
         }
     }
 
-    public function saveProduct(array $data)
+    /**
+     * Сохранение продукта
+     */
+    public function saveProduct(array $data, $telegram_id, $locale)
     {
         try {
+            $payload = array_merge($data);
+
             $response = $this->client->post($this->apiUrl . '/caloriesEndPoint/saveProduct', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                    'Host' => 'calories365.loc',
-                ],
-                'json' => $data,
+                'headers' => $this->getHeaders($telegram_id, $locale),
+                'json'    => $payload,
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
@@ -78,16 +108,17 @@ class DiaryApiService
         }
     }
 
-    public function saveFoodConsumption(array $data)
+    /**
+     * Сохранение употреблённого продукта (приём пищи)
+     */
+    public function saveFoodConsumption(array $data, $telegram_id, $locale)
     {
         try {
+            $payload = array_merge($data);
+
             $response = $this->client->post($this->apiUrl . '/caloriesEndPoint/saveFoodConsumption', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                    'Host' => 'calories365.loc',
-                ],
-                'json' => $data,
+                'headers' => $this->getHeaders($telegram_id, $locale),
+                'json'    => $payload,
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
@@ -96,7 +127,11 @@ class DiaryApiService
             return ['error' => $e->getMessage()];
         }
     }
-    public function showUserStats($date, $partOfDay = false)
+
+    /**
+     * Показать статистику пользователя
+     */
+    public function showUserStats($date, $partOfDay = false, $telegram_id, $locale)
     {
         try {
             $url = $this->apiUrl . '/caloriesEndPoint/showUserStats/' . $date;
@@ -105,11 +140,7 @@ class DiaryApiService
             }
 
             $response = $this->client->get($url, [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                    'Host' => 'calories365.loc',
-                ],
+                'headers' => $this->getHeaders($telegram_id, $locale),
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
@@ -119,15 +150,14 @@ class DiaryApiService
         }
     }
 
-    public function deleteMeal($mealId)
+    /**
+     * Удаление отдельного приёма пищи
+     */
+    public function deleteMeal($mealId, $telegram_id, $locale)
     {
         try {
             $response = $this->client->delete($this->apiUrl . '/caloriesEndPoint/deleteMeal/' . $mealId, [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                    'Host' => 'calories365.loc',
-                ],
+                'headers' => $this->getHeaders($telegram_id, $locale),
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
@@ -137,6 +167,24 @@ class DiaryApiService
         }
     }
 
+    /**
+     * Проверка телеграм-кода
+     */
+    public function checkTelegramCode(string $code, int $telegram_id, $locale)
+    {
+        try {
+            $response = $this->client->post($this->apiUrl . '/caloriesEndPoint/checkTelegramCode', [
+                'headers' => $this->getHeaders($telegram_id, $locale),
+                'json'    => [
+                    'code'        => $code,
+                    'telegram_id' => $telegram_id
+                ],
+            ]);
 
-
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            Log::error("Error verifying telegram code: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
 }

@@ -7,6 +7,7 @@ use App\Services\ChatGPTService;
 use App\Services\DiaryApiService;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
+use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -35,6 +36,16 @@ class AudioMessageHandler implements MessageHandlerInterface
         $commonData = self::extractCommonData($message);
         $userId = $commonData['userId'];
 
+        $botUser = Utilities::hasCaloriesId($userId);
+
+        if (!$botUser){
+            $telegram->sendMessage([
+                'chat_id' => $userId,
+                'text'    => "Вы должны быть авторизированны!"
+            ]);
+            return;
+        }
+
         $chatId = $commonData['chatId'];
 
         if (isset($message['voice'])) {
@@ -44,8 +55,9 @@ class AudioMessageHandler implements MessageHandlerInterface
             if ($text) {
                 Log::info('Product list: ' . $text);
 
-                $responseArray = $this->diaryApiService->sendText($text);
-//                Log::info('Response from calories API: ' . print_r($responseArray, true));
+                $locale = $botUser->locale;
+
+                $responseArray = $this->diaryApiService->sendText($text, $chatId, $locale);
 
                 if (isset($responseArray['error'])) {
                     $telegram->sendMessage([

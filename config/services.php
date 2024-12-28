@@ -33,8 +33,9 @@ return [
 
     'diary_api' => [
         'url' => env('DIARY_API_URL', 'http://nginx/api'),
-        // token можно добавить позже, сейчас без токена
+        'host' => env('DIARY_HOST', 'calories365.org'),
         'token' => env('DIARY_API_TOKEN', null),
+        'key' =>env('DIARY_API_KEY', null),
     ],
 
 ];

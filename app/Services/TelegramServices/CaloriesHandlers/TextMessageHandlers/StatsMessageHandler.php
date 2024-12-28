@@ -20,8 +20,21 @@ class StatsMessageHandler
     {
         $text = $message->getText();
 
+        $chatId = $message->getChat()->getId();
+
+        $botUser = Utilities::hasCaloriesId($chatId);
+
+        $locale = $botUser->locale;
+
+        if (!$botUser){
+            $telegram->sendMessage([
+                'chat_id' => $chatId,
+                'text'    => "Вы должны быть авторизированны!"
+            ]);
+            return;
+        }
+
         if (str_contains($text, '/stats')) {
-            $chatId = $message->getChat()->getId();
             $userId = $message->getFrom()->getId();
 
             $date = date('Y-m-d');
@@ -31,7 +44,7 @@ class StatsMessageHandler
                 $partOfDay = $commandParts[1];
             }
 
-            $responseArray = $this->diaryApiService->showUserStats($date, $partOfDay);
+            $responseArray = $this->diaryApiService->showUserStats($date, $partOfDay, $chatId, $locale);
 
             if (isset($responseArray['error'])) {
                 $telegram->sendMessage([

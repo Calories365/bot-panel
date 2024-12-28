@@ -15,7 +15,9 @@ class BotUser extends Model
         'telegram_id',
         'premium',
         'is_banned',
-        'phone'
+        'phone',
+        'calories_id',
+        'locale'
     ];
 
     public function bots()

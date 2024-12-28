@@ -7,14 +7,14 @@ use Illuminate\Support\Facades\Log;
 
 class Utilities
 {
-    public static function saveAndNotify($chatId, $first_name, $lastName, $username, $bot, $premium): bool
+    public static function saveAndNotify($chatId, $first_name, $lastName, $username, $bot, $premium)
     {
-        BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium);
+        $botUser = BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium);
         $userMention = "[{$first_name}](tg://user?id=$chatId)";
         $adminMessage = $premium ? 'премиум ' : '';
         $messageText = "Новый {$adminMessage}пользователь: {$userMention}";
         $bot->notifyAdmins($messageText);
-        return true;
+        return $botUser;
     }
 
     public static function saveAndNotifyManagers($chatId, $first_name, $lastName, $username, $bot, $premium, $text): bool
@@ -94,4 +94,13 @@ class Utilities
         $body .= "`";
         return $title . $partition . $body;
     }
+
+    public static function hasCaloriesId($chatId)
+    {
+        $botUser = BotUser::where('telegram_id', $chatId)->first();
+        $calories_id = $botUser->calories_id;
+
+        return $calories_id ? $botUser : false;
+    }
+
 }

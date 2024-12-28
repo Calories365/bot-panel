@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
     public bool $blockAble = true;
-    public function handle($bot, $telegram, $callbackQuery)
+    public function handle($bot, $telegram, $callbackQuery, $locale)
     {
         $callbackData = $callbackQuery->getData();
         $parts = explode('_', $callbackData);

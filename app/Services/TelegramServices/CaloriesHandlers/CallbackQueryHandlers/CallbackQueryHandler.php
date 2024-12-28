@@ -6,6 +6,7 @@ use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\UpdateHandlerInter
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingCancelCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSaveCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSkipCallbackQueryHandler;
+use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -46,9 +47,20 @@ class CallbackQueryHandler implements UpdateHandlerInterface
 
         $userId = $callbackQuery->getFrom()->getId();
 
-        $parts = explode('_', $callbackData);
+        $botUser = Utilities::hasCaloriesId($userId);
 
-        Log::info(print_r($parts, true));
+        $locale = $botUser->locale;
+
+        if (!$botUser){
+            $telegram->sendMessage([
+                'chat_id' => $userId,
+                'text'    => "Вы должны быть авторизированны!"
+            ]);
+
+            return;
+        }
+
+        $parts = explode('_', $callbackData);
 
         $action = $parts[0];
         if (isset($parts[1]) && in_array($action, ['editing', 'delete'])) {
@@ -62,7 +74,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
 
             if (!$isBlocked || !$handler->blockAble) {
 
-                $handler->handle($bot, $telegram, $callbackQuery);
+                $handler->handle($bot, $telegram, $callbackQuery, $locale);
             } else {
 
                 $telegram->answerCallbackQuery([

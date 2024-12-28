@@ -40,6 +40,8 @@ class TelegramHandler
 
         $botTypeName = $bot->type->name ?? 'unknown';
 
+//        Log::info('Telegram request data: ' . print_r($request->all(), true));
+
         $telegram = new Api($bot->token);
 
         $update = new Update($request->all());
@@ -49,9 +51,7 @@ class TelegramHandler
         }
 
         if (array_key_exists($botTypeName, $this->strategies)) {
-
             $this->strategies[$botTypeName]->handle($bot, $telegram, $update);
-
         } else {
             Log::error('Unknown bot type: ' . $botTypeName);
         }

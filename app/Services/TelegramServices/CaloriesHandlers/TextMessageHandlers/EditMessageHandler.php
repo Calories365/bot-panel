@@ -4,6 +4,7 @@ namespace App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers;
 
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Services\TelegramServices\CaloriesHandlers\EditHandlerTrait;
+use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 
 class EditMessageHandler implements MessageHandlerInterface
@@ -14,6 +15,17 @@ class EditMessageHandler implements MessageHandlerInterface
     {
         $userId = $message->getFrom()->getId();
         $chatId = $message->getChat()->getId();
+
+        $botUser = Utilities::hasCaloriesId($userId);
+
+        if (!$botUser){
+            $telegram->sendMessage([
+                'chat_id' => $userId,
+                'text'    => "Вы должны быть авторизированны!"
+            ]);
+            return;
+        }
+
         $text = $message->getText();
 
         $editingState = Cache::get("user_editing_{$userId}");

@@ -74,6 +74,7 @@ class BaseService implements BotHandlerStrategy
 
         return [
             '/start' => $startTextMessageHandler,
+            '/default' => $startTextMessageHandler
         ];
     }
 
@@ -84,7 +85,6 @@ class BaseService implements BotHandlerStrategy
     public function handle($bot, $telegram, $update): void
     {
         $updateType = $update->detectType();
-
         if (isset($this->updateHandlers[$updateType])) {
             $this->updateHandlers[$updateType]->handle($bot, $telegram, $update);
         } else {

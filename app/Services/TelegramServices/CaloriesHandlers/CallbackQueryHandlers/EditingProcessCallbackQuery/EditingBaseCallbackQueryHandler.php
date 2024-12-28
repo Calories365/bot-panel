@@ -18,7 +18,7 @@ class EditingBaseCallbackQueryHandler implements CallbackQueryHandlerInterface
     protected $userProducts;
     protected $editingState;
 
-    public function handle($bot, $telegram, $callbackQuery)
+    public function handle($bot, $telegram, $callbackQuery, $locale)
     {
         if (!$this->initialize($telegram, $callbackQuery)) {
             return;

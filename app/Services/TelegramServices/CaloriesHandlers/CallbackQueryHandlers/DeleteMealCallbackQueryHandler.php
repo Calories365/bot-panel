@@ -16,7 +16,7 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
         $this->diaryApiService = $diaryApiService;
     }
 
-    public function handle($bot, $telegram, $callbackQuery)
+    public function handle($bot, $telegram, $callbackQuery, $locale)
     {
         $callbackData = $callbackQuery->getData();
         $parts = explode('_', $callbackData);
@@ -29,7 +29,7 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
 
             // Отправляем запрос на удаление продукта в дневнике
             Log::info('try');
-            $response = $this->diaryApiService->deleteMeal($mealId);
+            $response = $this->diaryApiService->deleteMeal($mealId, $chatId, $locale);
             Log::info($response);
             if (isset($response['error'])) {
                 Log::error('Error deleting meal: ' . $response['error']);
