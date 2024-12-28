@@ -170,7 +170,7 @@ class DiaryApiService
     /**
      * Проверка телеграм-кода
      */
-    public function checkTelegramCode(string $code, int $telegram_id, $locale)
+    public function checkTelegramCode(string $code, int $telegram_id, string $locale = 'en')
     {
         try {
             $response = $this->client->post($this->apiUrl . '/caloriesEndPoint/checkTelegramCode', [

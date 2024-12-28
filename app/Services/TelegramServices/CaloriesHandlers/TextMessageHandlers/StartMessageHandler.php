@@ -36,21 +36,20 @@ class StartMessageHandler
 
         $botUser = Utilities::hasCaloriesId($chatId);
 
-        if (!$botUser){
-            $telegram->sendMessage([
-                'chat_id' => $chatId,
-                'text'    => "Вы должны быть авторизированны!"
-            ]);
-            return;
-        }
+//        if (!$botUser){
+//            $telegram->sendMessage([
+//                'chat_id' => $chatId,
+//                'text'    => "Вы должны быть авторизированны!"
+//            ]);
+//            return;
+//        }
 
-        $locale = $botUser->locale;
 
         $parts = explode(' ', $text);
         $code = $parts[1] ?? null;
 
         if ($code) {
-            $result = $this->diaryApiService->checkTelegramCode($code, $chatId, $locale);
+            $result = $this->diaryApiService->checkTelegramCode($code, $chatId);
 
             if (!empty($result['success']) && $result['success'] === true) {
                 $caloriesUserId = $result['user_id'];
