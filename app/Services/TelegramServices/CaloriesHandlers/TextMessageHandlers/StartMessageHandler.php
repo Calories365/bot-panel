@@ -94,7 +94,7 @@ class StartMessageHandler implements MessageHandlerInterface
         } else {
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text'    => "Похоже, вы здесь впервые. Чтобы связать аккаунт, используйте ссылку «Подключить» из личного кабинета (на сайте)."
+                'text'    => "Похоже, вы здесь впервые. Чтобы связать аккаунт, используйте ссылку «Подключить» из личного кабинета (https://calculator.calories365.com)."
             ]);
         }
     }
