@@ -57,7 +57,6 @@ class TelegramHandler
         } else {
             $botUser = null;
         }
-
         $strategy->handle($bot, $telegram, $update, $botUser);
     }
 

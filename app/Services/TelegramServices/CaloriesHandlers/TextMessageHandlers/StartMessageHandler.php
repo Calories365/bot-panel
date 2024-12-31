@@ -37,13 +37,13 @@ class StartMessageHandler implements MessageHandlerInterface
 
         $caloires_id = $botUser->calories_id;
 
-        if (!$caloires_id){
-            $telegram->sendMessage([
-                'chat_id' => $chatId,
-                'text'    => "Вы должны быть авторизированны!"
-            ]);
-            return;
-        }
+//        if (!$caloires_id){
+//            $telegram->sendMessage([
+//                'chat_id' => $chatId,
+//                'text'    => "Вы должны быть авторизированны!"
+//            ]);
+//            return;
+//        }
 
 
         $parts = explode(' ', $text);
@@ -80,7 +80,7 @@ class StartMessageHandler implements MessageHandlerInterface
             }
         }
 
-        if ($botUser) {
+        if ($botUser->calories_id) {
             $this->sendWelcome($bot, $telegram, $message, $commonData);
 
             Utilities::saveAndNotify(
