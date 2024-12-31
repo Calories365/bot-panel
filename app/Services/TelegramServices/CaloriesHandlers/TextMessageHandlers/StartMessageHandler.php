@@ -4,6 +4,7 @@ namespace App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers;
 
 use App\Models\BotUser;
 use App\Services\DiaryApiService;
+use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\Telegram;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Telegram\Bot\FileUpload\InputFile;
 use Telegram\Bot\Keyboard\Keyboard;
 
-class StartMessageHandler
+class StartMessageHandler implements MessageHandlerInterface
 {
     use BasicDataExtractor;
 
@@ -23,7 +24,7 @@ class StartMessageHandler
         $this->diaryApiService = $diaryApiService;
     }
 
-    public function handle($bot, $telegram, $message)
+    public function handle($bot, $telegram, $message, $botUser)
     {
         $text = $message->getText();
 
@@ -34,15 +35,15 @@ class StartMessageHandler
         $commonData = self::extractCommonData($message);
         $chatId = $commonData['chatId'];
 
-        $botUser = Utilities::hasCaloriesId($chatId);
+        $caloires_id = $botUser->calories_id;
 
-//        if (!$botUser){
-//            $telegram->sendMessage([
-//                'chat_id' => $chatId,
-//                'text'    => "Вы должны быть авторизированны!"
-//            ]);
-//            return;
-//        }
+        if (!$caloires_id){
+            $telegram->sendMessage([
+                'chat_id' => $chatId,
+                'text'    => "Вы должны быть авторизированны!"
+            ]);
+            return;
+        }
 
 
         $parts = explode(' ', $text);
@@ -116,6 +117,10 @@ class StartMessageHandler
         ])->row([
             ['text' => '/stats_supper'],
             ['text' => '/stats']
+        ])->row([
+            ['text' => 'Русский'],
+            ['text' => 'Українська'],
+            ['text' => 'English']
         ]);
 
         // Если есть картинка

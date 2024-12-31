@@ -11,20 +11,10 @@ class EditMessageHandler implements MessageHandlerInterface
 {
     use EditHandlerTrait;
 
-    public function handle($bot, $telegram, $message)
+    public function handle($bot, $telegram, $message, $botUser)
     {
         $userId = $message->getFrom()->getId();
         $chatId = $message->getChat()->getId();
-
-        $botUser = Utilities::hasCaloriesId($userId);
-
-        if (!$botUser){
-            $telegram->sendMessage([
-                'chat_id' => $userId,
-                'text'    => "Вы должны быть авторизированны!"
-            ]);
-            return;
-        }
 
         $text = $message->getText();
 
@@ -128,7 +118,7 @@ class EditMessageHandler implements MessageHandlerInterface
                     $userProducts[$productId]['product']['carbohydrates'] = $text;
                     $userProducts[$productId]['product']['edited'] = 1;
 
-                    $this->saveEditing($telegram, $chatId, $userId, $userProducts, $productId, $messageId);
+                    $this->saveEditing($telegram, $chatId, $userId, $userProducts, $productId, $messageId, $botUser);
                     Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));
                     return;
                 } else {

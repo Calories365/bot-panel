@@ -12,7 +12,7 @@ class TextMessageHandler implements MessageHandlerInterface
 {
     use BasicDataExtractor;
 
-    public function handle($bot, $telegram, $message)
+    public function handle($bot, $telegram, $message, $botUser)
     {
 
         $commonData = self::extractCommonData($message);

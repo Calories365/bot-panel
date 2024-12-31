@@ -82,11 +82,11 @@ class BaseService implements BotHandlerStrategy
      * BaseService handle.
      * starts the required Handler for the event
      */
-    public function handle($bot, $telegram, $update): void
+    public function handle($bot, $telegram, $update, $botUser): void
     {
         $updateType = $update->detectType();
         if (isset($this->updateHandlers[$updateType])) {
-            $this->updateHandlers[$updateType]->handle($bot, $telegram, $update);
+            $this->updateHandlers[$updateType]->handle($bot, $telegram, $update, $botUser);
         } else {
             Log::info("Unhandled update type: " . $updateType);
         }

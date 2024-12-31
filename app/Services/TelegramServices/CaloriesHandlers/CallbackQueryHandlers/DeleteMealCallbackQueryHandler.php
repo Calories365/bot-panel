@@ -16,10 +16,13 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
         $this->diaryApiService = $diaryApiService;
     }
 
-    public function handle($bot, $telegram, $callbackQuery, $locale)
+    public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
         $callbackData = $callbackQuery->getData();
         $parts = explode('_', $callbackData);
+
+        $locale = $botUser->locale;
+        $calories_id = $botUser->calories_id;
 
         if (isset($parts[2])) {
             $mealId = $parts[2];
@@ -27,10 +30,7 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
             $chatId = $callbackQuery->getMessage()->getChat()->getId();
             $messageId = $callbackQuery->getMessage()->getMessageId();
 
-            // Отправляем запрос на удаление продукта в дневнике
-            Log::info('try');
-            $response = $this->diaryApiService->deleteMeal($mealId, $chatId, $locale);
-            Log::info($response);
+            $response = $this->diaryApiService->deleteMeal($mealId, $calories_id, $locale);
             if (isset($response['error'])) {
                 Log::error('Error deleting meal: ' . $response['error']);
                 $telegram->answerCallbackQuery([
@@ -39,7 +39,6 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                     'show_alert' => true,
                 ]);
             } else {
-                // Удаляем сообщение с продуктом
                 try {
                     $telegram->deleteMessage([
                         'chat_id' => $chatId,

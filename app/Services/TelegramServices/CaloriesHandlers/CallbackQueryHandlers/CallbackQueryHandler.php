@@ -39,26 +39,13 @@ class CallbackQueryHandler implements UpdateHandlerInterface
         ];
     }
 
-    public function handle($bot, $telegram, $update)
+    public function handle($bot, $telegram, $update, $botUser)
     {
         $callbackQuery = $update->getCallbackQuery();
 
         $callbackData = $callbackQuery->getData();
 
         $userId = $callbackQuery->getFrom()->getId();
-
-        $botUser = Utilities::hasCaloriesId($userId);
-
-        $locale = $botUser->locale;
-
-        if (!$botUser){
-            $telegram->sendMessage([
-                'chat_id' => $userId,
-                'text'    => "Вы должны быть авторизированны!"
-            ]);
-
-            return;
-        }
 
         $parts = explode('_', $callbackData);
 
@@ -74,7 +61,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
 
             if (!$isBlocked || !$handler->blockAble) {
 
-                $handler->handle($bot, $telegram, $callbackQuery, $locale);
+                $handler->handle($bot, $telegram, $callbackQuery, $botUser);
             } else {
 
                 $telegram->answerCallbackQuery([

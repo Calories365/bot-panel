@@ -4,7 +4,7 @@ namespace App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\E
 
 class EditingCancelCallbackQueryHandler extends EditingBaseCallbackQueryHandler
 {
-    protected function process($bot, $telegram, $callbackQuery)
+    protected function process($bot, $telegram, $callbackQuery, $botUser)
     {
         $this->exitEditing(
             $telegram,

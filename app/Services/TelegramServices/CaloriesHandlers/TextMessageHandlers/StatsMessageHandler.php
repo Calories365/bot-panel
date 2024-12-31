@@ -16,20 +16,20 @@ class StatsMessageHandler
         $this->diaryApiService = $diaryApiService;
     }
 
-    public function handle($bot, $telegram, $message)
+    public function handle($bot, $telegram, $message, $botUser)
     {
         $text = $message->getText();
-
         $chatId = $message->getChat()->getId();
 
-        $botUser = Utilities::hasCaloriesId($chatId);
+        // Локаль
+        $locale = $botUser->locale ?? 'ru'; // или любой другой fallback
 
-        $locale = $botUser->locale;
+        $calories_id = $botUser->calories_id;
 
-        if (!$botUser){
+        if (!$botUser) {
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text'    => "Вы должны быть авторизированны!"
+                'text'    => __('calories365-bot.auth_required', [], $locale)
             ]);
             return;
         }
@@ -44,22 +44,24 @@ class StatsMessageHandler
                 $partOfDay = $commandParts[1];
             }
 
-            $responseArray = $this->diaryApiService->showUserStats($date, $partOfDay, $chatId, $locale);
+            $responseArray = $this->diaryApiService->showUserStats($date, $partOfDay, $calories_id, $locale);
 
             if (isset($responseArray['error'])) {
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text' => 'Произошла ошибка при получении данных. Пожалуйста, попробуйте позже.',
+                    'text' => __('calories365-bot.error_retrieving_data', [], $locale),
                 ]);
                 return;
             }
-            if (!$partOfDay){
+
+            if (!$partOfDay) {
                 Log::info($partOfDay);
             }
-            if ($partOfDay){
-                $messageText = $this->formatStatsMessage($responseArray, $date, $partOfDay, $chatId, $telegram);
+
+            if ($partOfDay) {
+                $messageText = $this->formatStatsMessage($responseArray, $date, $partOfDay, $chatId, $telegram, $locale);
             } else {
-                $messageText = $this->formatTotalStatsMessage($responseArray, $date);
+                $messageText = $this->formatTotalStatsMessage($responseArray, $date, $locale);
             }
 
             $telegram->sendMessage([
@@ -69,29 +71,32 @@ class StatsMessageHandler
             ]);
         }
     }
-    protected function formatTotalStatsMessage($meals, $date)
+
+    protected function formatTotalStatsMessage($meals, $date, $locale)
     {
+        // Если нет записей
         if (empty($meals)) {
-            return "У вас нет записей на дату *{$date}*.";
+            return __('calories365-bot.no_entries_for_date', ['date' => $date], $locale);
         }
 
+        // Используем переводы для названий приёмов пищи
         $partsOfDay = [
             'morning' => [
-                'name' => 'Завтрак',
+                'name' => __('calories365-bot.breakfast', [], $locale),
                 'calories' => 0,
                 'proteins' => 0,
                 'fats' => 0,
                 'carbohydrates' => 0,
             ],
             'dinner' => [
-                'name' => 'Обед',
+                'name' => __('calories365-bot.lunch', [], $locale),
                 'calories' => 0,
                 'proteins' => 0,
                 'fats' => 0,
                 'carbohydrates' => 0,
             ],
             'supper' => [
-                'name' => 'Ужин',
+                'name' => __('calories365-bot.dinner', [], $locale),
                 'calories' => 0,
                 'proteins' => 0,
                 'fats' => 0,
@@ -130,38 +135,48 @@ class StatsMessageHandler
             $total['carbohydrates'] += $carbohydrates;
         }
 
-        $messageText = "Ваши данные за *{$date}*:\n\n";
+        // Заголовок «Ваши данные за *:date*:»
+        $messageText = __('calories365-bot.your_data_for_date', ['date' => $date], $locale) . "\n\n";
 
+        // Вывод статистики по утрам/обедам/ужинам
         foreach ($partsOfDay as $part) {
             if ($part['calories'] == 0) {
                 continue;
             }
             $productArray = [
-                [ "Калории", round($part['calories'])],
-                [ "Белки", round($part['proteins'])],
-                [ "Жиры", round($part['fats'])],
-                [ "Углеводы",round( $part['carbohydrates'])],
+                [ __('calories365-bot.calories', [], $locale), round($part['calories']) ],
+                [ __('calories365-bot.proteins', [], $locale), round($part['proteins']) ],
+                [ __('calories365-bot.fats', [], $locale), round($part['fats']) ],
+                [ __('calories365-bot.carbohydrates', [], $locale), round($part['carbohydrates']) ],
             ];
-            $messageText .= Utilities::generateTableType2($part['name'] , $productArray) . "\n\n";
-
+            $messageText .= Utilities::generateTableType2($part['name'], $productArray) . "\n\n";
         }
+
+        // Итог
         $productArray = [
-            [ "Калории", round($total['calories'])],
-            [ "Белки", round($total['proteins'])],
-            [ "Жиры", round($total['fats'])],
-            [ "Углеводы",round( $total['carbohydrates'])],
+            [ __('calories365-bot.calories', [], $locale), round($total['calories']) ],
+            [ __('calories365-bot.proteins', [], $locale), round($total['proteins']) ],
+            [ __('calories365-bot.fats', [], $locale), round($total['fats']) ],
+            [ __('calories365-bot.carbohydrates', [], $locale), round($total['carbohydrates']) ],
         ];
-        $messageText .= Utilities::generateTableType2('Итого за день' , $productArray);
+
+        // «Итого за день»
+        $messageText .= Utilities::generateTableType2(
+            __('calories365-bot.total_for_day', [], $locale),
+            $productArray
+        );
 
         return $messageText;
     }
-    protected function formatStatsMessage($meals, $date, $partOfDay, $chatId, $telegram)
+
+    protected function formatStatsMessage($meals, $date, $partOfDay, $chatId, $telegram, $locale)
     {
         if (empty($meals)) {
-            $partOfDayText = $partOfDay ? "за *{$partOfDay}*" : "на дату *{$date}*";
+            // Текст «за *{$partOfDay}*» или «на дату *{$date}*»
+            $partOfDayText = $partOfDay ? "*{$partOfDay}*" : "*{$date}*";
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text' => "У вас нет записей {$partOfDayText}.",
+                'text' => __('calories365-bot.no_entries_for_part_of_day', ['partOfDayText' => $partOfDayText], $locale),
                 'parse_mode' => 'Markdown',
             ]);
             return;
@@ -174,8 +189,8 @@ class StatsMessageHandler
             'carbohydrates' => 0,
         ];
 
+        // Выводим каждую добавленную еду
         foreach ($meals as $meal) {
-
             $quantityFactor = $meal['quantity'] / 100;
 
             $calories = $meal['calories'] * $quantityFactor;
@@ -189,18 +204,22 @@ class StatsMessageHandler
             $total['carbohydrates'] += $carbohydrates;
 
             $productArray = [
-                ["Калории", round($calories)],
-                ["Белки", round($proteins)],
-                ["Жиры", round($fats)],
-                ["Углеводы", round($carbohydrates)],
+                [ __('calories365-bot.calories', [], $locale), round($calories) ],
+                [ __('calories365-bot.proteins', [], $locale), round($proteins) ],
+                [ __('calories365-bot.fats', [], $locale), round($fats) ],
+                [ __('calories365-bot.carbohydrates', [], $locale), round($carbohydrates) ],
             ];
 
-            $messageText = Utilities::generateTableType2($meal['name'] . " ({$meal['quantity']}г)", $productArray);
+            $messageText = Utilities::generateTableType2(
+                $meal['name'] . " ({$meal['quantity']}г)",
+                $productArray
+            );
 
+            // Кнопка «Удалить» => перевод
             $inlineKeyboard = [
                 [
                     [
-                        'text' => 'Удалить',
+                        'text' => __('calories365-bot.delete', [], $locale),
                         'callback_data' => 'delete_meal_' . $meal['id']
                     ]
                 ]
@@ -216,32 +235,38 @@ class StatsMessageHandler
             ]);
         }
 
+        // Итоговая сводка по выбранной части дня
         $productArray = [
-            ["Калории", round($total['calories'])],
-            ["Белки", round($total['proteins'])],
-            ["Жиры", round($total['fats'])],
-            ["Углеводы", round($total['carbohydrates'])],
+            [ __('calories365-bot.calories', [], $locale), round($total['calories']) ],
+            [ __('calories365-bot.proteins', [], $locale), round($total['proteins']) ],
+            [ __('calories365-bot.fats', [], $locale), round($total['fats']) ],
+            [ __('calories365-bot.carbohydrates', [], $locale), round($total['carbohydrates']) ],
         ];
 
-        $partOfDayName = $this->getPartOfDayName($partOfDay);
-        $messageText = Utilities::generateTableType2("Итого за {$partOfDayName}", $productArray);
-
-
+        $partOfDayName = $this->getPartOfDayName($partOfDay, $locale);
+        $messageText = Utilities::generateTableType2(
+            __('calories365-bot.total_for_part_of_day', ['partOfDayName' => $partOfDayName], $locale),
+            $productArray
+        );
 
         return $messageText;
     }
 
-    private function getPartOfDayName($partOfDay)
+    /**
+     * Преобразуем часть дня в переведённую строку (Завтрак/Обед/Ужин)
+     */
+    private function getPartOfDayName($partOfDay, $locale)
     {
         switch ($partOfDay) {
             case 'morning':
-                return 'Завтрак';
+                return __('calories365-bot.breakfast', [], $locale);
             case 'dinner':
-                return 'Обед';
+                return __('calories365-bot.lunch', [], $locale);
             case 'supper':
-                return 'Ужин';
+                return __('calories365-bot.dinner', [], $locale);
             default:
-                return 'день';
+                // Если вдруг нет совпадения — «день» или как-то иначе
+                return __('calories365-bot.total_for_day', [], $locale);
         }
     }
 }

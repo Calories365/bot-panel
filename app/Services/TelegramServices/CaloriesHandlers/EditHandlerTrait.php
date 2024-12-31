@@ -10,7 +10,7 @@ trait EditHandlerTrait
 {
     protected $messageText;
     protected $replyMarkup;
-    protected function saveEditing($telegram, $chatId, $userId, &$userProducts, $productId, $messageId, $callbackQueryId = false)
+    protected function saveEditing($telegram, $chatId, $userId, &$userProducts, $productId, $messageId, $botUser, $callbackQueryId = false)
     {
         $this->updateProductMessage($telegram, $chatId, $userProducts[$productId]);
 

@@ -18,16 +18,16 @@ class EditingBaseCallbackQueryHandler implements CallbackQueryHandlerInterface
     protected $userProducts;
     protected $editingState;
 
-    public function handle($bot, $telegram, $callbackQuery, $locale)
+    public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
-        if (!$this->initialize($telegram, $callbackQuery)) {
+        if (!$this->initialize($telegram, $callbackQuery, $botUser)) {
             return;
         }
 
-        $this->process($bot, $telegram, $callbackQuery);
+        $this->process($bot, $telegram, $callbackQuery, $botUser);
     }
 
-    protected function initialize($telegram, $callbackQuery)
+    protected function initialize($telegram, $callbackQuery, $botUser)
     {
         $this->callbackData = $callbackQuery->getData();
         $this->userId = $callbackQuery->getFrom()->getId();

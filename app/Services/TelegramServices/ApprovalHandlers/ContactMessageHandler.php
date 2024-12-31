@@ -13,7 +13,7 @@ class ContactMessageHandler implements MessageHandlerInterface
 {
     use BasicDataExtractor, ContactDataExtractor;
 
-    public function handle($bot, $telegram, $message)
+    public function handle($bot, $telegram, $message, $botUser)
     {
 
         $commonData = self::extractCommonData($message);
@@ -27,7 +27,7 @@ class ContactMessageHandler implements MessageHandlerInterface
             return;
         }
 
-        $user = BotUser::where('telegram_id', $contactData['telegramId'])->first();
+        $user = $botUser;
         if ($user) {
             $user->phone = $contactData['phoneNumber'];
             $user->save();

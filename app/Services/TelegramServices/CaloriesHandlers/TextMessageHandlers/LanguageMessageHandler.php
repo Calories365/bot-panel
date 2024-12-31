@@ -53,7 +53,6 @@ class LanguageMessageHandler
         }
 
         if ($text === 'Русский') {
-            Log::info(11111);
             if ($botUser) {
                 $botUser->locale = 'ru';
                 $botUser->save();
@@ -68,7 +67,7 @@ class LanguageMessageHandler
 
         if ($text === 'Українська') {
             if ($botUser) {
-                $botUser->locale = 'uk';
+                $botUser->locale = 'ua';
                 $botUser->save();
             }
 

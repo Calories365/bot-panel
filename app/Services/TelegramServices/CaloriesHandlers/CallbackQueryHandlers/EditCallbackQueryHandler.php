@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
     public bool $blockAble = true;
-    public function handle($bot, $telegram, $callbackQuery, $locale)
+    public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
         $callbackData = $callbackQuery->getData();
         $parts = explode('_', $callbackData);
@@ -21,9 +21,6 @@ class EditCallbackQueryHandler implements CallbackQueryHandlerInterface
 
 
             $userProducts = Cache::get("user_products_{$userId}");
-
-//            Log::info('$userProducts: ');
-//            Log::info(print_r($userProducts, true));
 
             if ($userProducts && isset($userProducts[$productId])) {
                 $productData = $userProducts[$productId];

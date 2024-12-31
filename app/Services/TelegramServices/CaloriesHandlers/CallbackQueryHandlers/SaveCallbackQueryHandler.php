@@ -17,12 +17,13 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         $this->diaryApiService = new DiaryApiService();
     }
 
-    public function handle($bot, $telegram, $callbackQuery, $locale)
+    public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
         $userId = $callbackQuery->getFrom()->getId();
         $chatId = $callbackQuery->getMessage()->getChat()->getId();
         $callbackData = $callbackQuery->getData();
-
+        $locale = $botUser->locale;
+        $calories_id = $botUser->calories_id;
         $parts = explode('_', $callbackData);
 
         if(count($parts) > 1){
@@ -51,9 +52,9 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             $total['carbohydrates'] += round($product['carbohydrates'] * $product['quantity_grams'] / 100);
 
             if (isset($product['edited']) && $product['edited'] == 1) {
-                $this->saveProduct($product, $productTranslation, $diaryUserId, $partOfTheDay, $chatId, $locale);
+                $this->saveProduct($product, $productTranslation, $diaryUserId, $partOfTheDay, $calories_id, $locale, $chatId);
             } else {
-                $this->saveFoodConsumption($product, $diaryUserId, $partOfTheDay, $chatId, $locale);
+                $this->saveFoodConsumption($product, $diaryUserId, $partOfTheDay, $calories_id, $locale);
             }
 //            Log::info('before deleting');
 //            Log::info("product_click_count_{$userId}_{$productTranslation['id']}");
@@ -85,7 +86,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         ]);
     }
 
-    protected function saveProduct($product, $productTranslation, $diaryUserId, $partOfTheDay,$chat_id, $locale)
+    protected function saveProduct($product, $productTranslation, $diaryUserId, $partOfTheDay, $calories_id, $locale, $chat_id)
     {
         $postData = [
             'user_id' => $diaryUserId,
@@ -110,7 +111,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         }
     }
 
-    protected function saveFoodConsumption($product, $diaryUserId, $partOfTheDay, $chat_id, $locale)
+    protected function saveFoodConsumption($product, $diaryUserId, $partOfTheDay, $calories_id, $locale)
     {
 
 
@@ -124,7 +125,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         ];
 
 
-        $response = $this->diaryApiService->saveFoodConsumption($postData, $chat_id, $locale);
+        $response = $this->diaryApiService->saveFoodConsumption($postData, $calories_id, $locale);
 
         if (isset($response['error'])) {
             Log::error('Error saving food consumption: ' . $response['error']);

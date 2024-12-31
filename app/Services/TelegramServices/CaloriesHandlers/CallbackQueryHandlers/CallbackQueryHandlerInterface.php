@@ -4,6 +4,6 @@ namespace App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers;
 
 interface CallbackQueryHandlerInterface
 {
-    public function handle($bot, $telegram, $callbackQuery, $locale);
+    public function handle($bot, $telegram, $callbackQuery, $botUser);
 }
 

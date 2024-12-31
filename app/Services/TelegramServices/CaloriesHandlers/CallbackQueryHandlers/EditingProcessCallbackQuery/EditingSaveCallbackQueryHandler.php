@@ -4,7 +4,7 @@ namespace App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\E
 
 class EditingSaveCallbackQueryHandler extends EditingBaseCallbackQueryHandler
 {
-    protected function process($bot, $telegram, $callbackQuery)
+    protected function process($bot, $telegram, $callbackQuery, $botUser)
     {
         $this->saveEditing(
             $telegram,
@@ -13,6 +13,7 @@ class EditingSaveCallbackQueryHandler extends EditingBaseCallbackQueryHandler
             $this->userProducts,
             $this->productId,
             $this->messageId,
+            $botUser,
             $callbackQuery->getId()
         );
     }

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
     public bool $blockAble = true;
-    public function handle($bot, $telegram, $callbackQuery, $locale)
+    public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
         $userId = $callbackQuery->getFrom()->getId();
         $chatId = $callbackQuery->getMessage()->getChat()->getId();

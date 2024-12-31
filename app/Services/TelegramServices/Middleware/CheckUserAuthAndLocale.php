@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Services\TelegramServices\Middleware;
+
+use Closure;
+use Illuminate\Support\Facades\Log;
+use App\Models\BotUser;
+use Illuminate\Support\Facades\App;
+use Telegram\Bot\Objects\Update;
+
+class CheckUserAuthAndLocale
+{
+    /**
+     * @param array   $passable ['botTypeName','bot','telegram','update','excludedCommands', ...]
+     * @param Closure $next
+     * @return mixed
+     */
+    public function handle($passable, Closure $next)
+    {
+        $bot      = $passable['bot'];
+        $telegram = $passable['telegram'];
+        /** @var Update $update */
+        $update   = $passable['update'];
+
+        $excludedCommands = $passable['excludedCommands'] ?? [];
+
+        $text = $update->getMessage()?->getText();
+
+        $userId = $update->getMessage()?->getChat()?->getId()
+            ?: $update->getCallbackQuery()?->getChat()?->getId();
+
+        $botUser = BotUser::where('telegram_id', $userId)->first();
+
+        foreach ($excludedCommands as $excluded) {
+            if (str_starts_with($text, $excluded)) {
+                $passable['botUser'] = $botUser;
+                return $next($passable);
+            }
+        }
+
+        if (!$userId) {
+            $telegram->sendMessage([
+                'chat_id' => $userId,
+                'text'    => "Вы должны быть авторизированны!"
+            ]);
+            return $next($passable);
+        }
+
+        if (!$botUser) {
+            $telegram->sendMessage([
+                'chat_id' => $userId,
+                'text'    => "Вы должны быть авторизированны!",
+            ]);
+            return null;
+        }
+
+        if (!$botUser->calories_id) {
+            $telegram->sendMessage([
+                'chat_id' => $userId,
+                'text'    => "Вы должны быть авторизированны!",
+            ]);
+            return null;
+        }
+
+        if ($botUser->locale) {
+            App::setLocale($botUser->locale);
+        }
+
+        $passable['botUser'] = $botUser;
+
+        return $next($passable);
+    }
+}

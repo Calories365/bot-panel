@@ -31,20 +31,10 @@ class AudioMessageHandler implements MessageHandlerInterface
         $this->chatGPTService = $chatGPTService;
     }
 
-    public function handle($bot, $telegram, $message)
+    public function handle($bot, $telegram, $message, $botUser)
     {
         $commonData = self::extractCommonData($message);
         $userId = $commonData['userId'];
-
-        $botUser = Utilities::hasCaloriesId($userId);
-
-        if (!$botUser){
-            $telegram->sendMessage([
-                'chat_id' => $userId,
-                'text'    => "Вы должны быть авторизированны!"
-            ]);
-            return;
-        }
 
         $chatId = $commonData['chatId'];
 
@@ -56,8 +46,9 @@ class AudioMessageHandler implements MessageHandlerInterface
                 Log::info('Product list: ' . $text);
 
                 $locale = $botUser->locale;
+                $caloriesId = $botUser->calories_id;
 
-                $responseArray = $this->diaryApiService->sendText($text, $chatId, $locale);
+                $responseArray = $this->diaryApiService->sendText($text, $caloriesId, $locale);
 
                 if (isset($responseArray['error'])) {
                     $telegram->sendMessage([

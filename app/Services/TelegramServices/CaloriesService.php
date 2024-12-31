@@ -23,6 +23,16 @@ use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMess
 class CaloriesService extends BaseService
 {
     protected bool $auth = true;
+
+    protected array $excludedCommands = [
+        '/start',
+        '/language'
+    ];
+
+    public function getExcludedCommands(): array
+    {
+        return $this->excludedCommands;
+    }
     protected function getUpdateHandlers(): array
     {
         $updateHandlers = parent::getUpdateHandlers();

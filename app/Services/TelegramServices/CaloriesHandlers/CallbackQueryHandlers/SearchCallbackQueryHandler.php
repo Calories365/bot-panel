@@ -24,12 +24,13 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
         $this->speechToTextService = $speechToTextService;
     }
 
-    public function handle($bot, $telegram, $callbackQuery, $locale)
+    public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
         $callbackData = $callbackQuery->getData();
         $parts = explode('_', $callbackData);
         $messageId = $callbackQuery->getMessage()->getMessageId();
-
+        $locale = $botUser->locale;
+        $calories_id = $botUser->calories_id;
         if (isset($parts[1])) {
             $productId = $parts[1];
             $chatId = $callbackQuery->getMessage()->getChat()->getId();
@@ -58,7 +59,7 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
 //                        Log::info('$saidName != $originalName');
 //                        Log::info($saidName. ', ' . $originalName);
                         if ($saidName != $originalName) {
-                            $response = $this->diaryApiService->getTheMostRelevantProduct($formattedText,$chatId, $locale);
+                            $response = $this->diaryApiService->getTheMostRelevantProduct($formattedText, $calories_id, $locale);
 //                            Log::info('$response');
 //                            Log::info(print_r($response, true));
                             if (isset($response['product'])) {

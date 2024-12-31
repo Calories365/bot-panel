@@ -7,14 +7,14 @@ use App\Models\BotUser;
 class MyChatMemberUpdateHandler implements UpdateHandlerInterface
 {
 
-    public function handle($bot, $telegram, $update)
+    public function handle($bot, $telegram, $update, $botUser)
     {
         $myChatMember = $update->getMyChatMember();
         $newStatus = $myChatMember['new_chat_member']['status'];
         $userId = $myChatMember['from']['id'];
 
 
-        $userModel = BotUser::where('telegram_id', $userId)->first();
+        $userModel = $botUser;
 
         if ($userModel) {
             if ($newStatus === 'kicked') {

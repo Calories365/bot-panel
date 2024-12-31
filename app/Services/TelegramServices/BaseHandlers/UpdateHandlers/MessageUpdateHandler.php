@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
  * This service implements UpdateHandlerInterface to handle Telegram bot messages
  * and distribute them to the appropriate handlers.
  */
-class MessageUpdateHandler implements UpdateHandlerInterface
+class MessageUpdateHandler
 {
     protected array $messageHandlers;
 
@@ -27,12 +27,12 @@ class MessageUpdateHandler implements UpdateHandlerInterface
      * MessageUpdateHandler handle.
      * starts the required Handler for the message.
      */
-    public function handle($bot, $telegram, $update)
+    public function handle($bot, $telegram, $update, $botUser)
     {
         $message = $update->getMessage();
         foreach ($this->messageHandlers as $type => $handler) {
             if (isset($message[$type])) {
-                $handler->handle($bot, $telegram, $message);
+                $handler->handle($bot, $telegram, $message, $botUser);
                 return;
             }
         }

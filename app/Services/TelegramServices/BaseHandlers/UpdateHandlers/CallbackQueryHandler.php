@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 class CallbackQueryHandler implements UpdateHandlerInterface
 {
 
-    public function handle($bot, $telegram, $update)
+    public function handle($bot, $telegram, $update, $botUser)
     {
         Log::info('CallbackQueryHandler');
         return true;

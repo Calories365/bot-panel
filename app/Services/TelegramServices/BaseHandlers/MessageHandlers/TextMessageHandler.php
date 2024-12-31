@@ -6,7 +6,7 @@ use App\Traits\BasicDataExtractor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-class TextMessageHandler implements MessageHandlerInterface
+class TextMessageHandler
 {
 
     use BasicDataExtractor;
@@ -18,7 +18,7 @@ class TextMessageHandler implements MessageHandlerInterface
         $this->textMessageHandlers = $textMessageHandlers;
     }
 
-    public function handle($bot, $telegram, $message): void
+    public function handle($bot, $telegram, $message, $botUser): void
     {
         $text = $message->getText();
         $userId = $message->getFrom()->getId();
@@ -36,7 +36,7 @@ class TextMessageHandler implements MessageHandlerInterface
         if (isset($this->textMessageHandlers[$text])) {
             $isBlocked = Cache::get("command_block{$userId}", 0);
             if (!$isBlocked){
-                $this->textMessageHandlers[$text]->handle($bot, $telegram, $message);
+                $this->textMessageHandlers[$text]->handle($bot, $telegram, $message, $botUser);
             } else {
                 $sentMessage = $telegram->sendMessage([
                     'chat_id' => $chatId,
@@ -46,7 +46,7 @@ class TextMessageHandler implements MessageHandlerInterface
                 return;
             }
         } else {
-            $this->textMessageHandlers['default']->handle($bot, $telegram, $message);
+            $this->textMessageHandlers['default']->handle($bot, $telegram, $message, $botUser);
         }
     }
 }

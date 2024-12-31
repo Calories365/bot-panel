@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\Cache;
 
 class EditingSkipCallbackQueryHandler extends EditingBaseCallbackQueryHandler
 {
-    protected function process($bot, $telegram, $callbackQuery)
+    protected function process($bot, $telegram, $callbackQuery, $botUser)
     {
 
-        $this->processSkip($telegram, $this->chatId, $this->userId, $this->editingState, $this->userProducts, $this->productId, $this->messageId);
+        $this->processSkip($telegram, $this->chatId, $this->userId, $this->editingState, $this->userProducts, $this->productId, $this->messageId, $botUser);
 
         $telegram->answerCallbackQuery([
             'callback_query_id' => $callbackQuery->getId(),
@@ -18,7 +18,7 @@ class EditingSkipCallbackQueryHandler extends EditingBaseCallbackQueryHandler
         ]);
     }
 
-    protected function processSkip($telegram, $chatId, $userId, &$editingState, &$userProducts, $productId, $messageId)
+    protected function processSkip($telegram, $chatId, $userId, &$editingState, &$userProducts, $productId, $messageId, $botUser)
     {
         switch ($editingState['step']) {
             case 'awaiting_name':
@@ -42,7 +42,7 @@ class EditingSkipCallbackQueryHandler extends EditingBaseCallbackQueryHandler
                 $nextPrompt = 'Пожалуйста, введите новое количество углеводов.';
                 break;
             case 'awaiting_carbohydrates':
-                $this->saveEditing($telegram, $chatId, $userId, $userProducts, $productId, $messageId);
+                $this->saveEditing($telegram, $chatId, $userId, $userProducts, $productId, $messageId, $botUser);
                 return;
             default:
                 $this->clearEditingState($userId);

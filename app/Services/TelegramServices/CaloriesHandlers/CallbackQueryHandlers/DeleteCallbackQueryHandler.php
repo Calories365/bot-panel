@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 class DeleteCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
     public bool $blockAble = true;
-    public function handle($bot, $telegram, $callbackQuery, $locale)
+    public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
         $callbackData = $callbackQuery->getData();
         $parts = explode('_', $callbackData);

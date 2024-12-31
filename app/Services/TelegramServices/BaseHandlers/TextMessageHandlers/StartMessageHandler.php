@@ -3,18 +3,19 @@
 namespace App\Services\TelegramServices\BaseHandlers\TextMessageHandlers;
 
 use App\Models\BotUser;
+use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Telegram\Bot\FileUpload\InputFile;
 
-class StartMessageHandler
+class StartMessageHandler implements MessageHandlerInterface
 {
 
     use BasicDataExtractor;
 
-    public function handle($bot, $telegram, $message)
+    public function handle($bot, $telegram, $message, $botUser)
     {
         $text = $message->getText();
 
