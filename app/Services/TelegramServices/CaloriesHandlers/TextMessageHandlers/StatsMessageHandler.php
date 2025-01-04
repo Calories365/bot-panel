@@ -172,7 +172,6 @@ class StatsMessageHandler
     protected function formatStatsMessage($meals, $date, $partOfDay, $chatId, $telegram, $locale)
     {
         if (empty($meals)) {
-            // Текст «за *{$partOfDay}*» или «на дату *{$date}*»
             $partOfDayText = $partOfDay ? "*{$partOfDay}*" : "*{$date}*";
             $telegram->sendMessage([
                 'chat_id' => $chatId,
@@ -189,7 +188,6 @@ class StatsMessageHandler
             'carbohydrates' => 0,
         ];
 
-        // Выводим каждую добавленную еду
         foreach ($meals as $meal) {
             $quantityFactor = $meal['quantity'] / 100;
 
@@ -215,7 +213,6 @@ class StatsMessageHandler
                 $productArray
             );
 
-            // Кнопка «Удалить» => перевод
             $inlineKeyboard = [
                 [
                     [
@@ -235,7 +232,6 @@ class StatsMessageHandler
             ]);
         }
 
-        // Итоговая сводка по выбранной части дня
         $productArray = [
             [ __('calories365-bot.calories', [], $locale), round($total['calories']) ],
             [ __('calories365-bot.proteins', [], $locale), round($total['proteins']) ],
@@ -265,7 +261,6 @@ class StatsMessageHandler
             case 'supper':
                 return __('calories365-bot.dinner', [], $locale);
             default:
-                // Если вдруг нет совпадения — «день» или как-то иначе
                 return __('calories365-bot.total_for_day', [], $locale);
         }
     }
