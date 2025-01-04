@@ -101,7 +101,7 @@ class StartMessageHandler implements MessageHandlerInterface
 
     /**
      * Отправка «приветственного» сообщения (с картинкой/клавиатурой).
-     * Вынесена в отдельный метод, чтобы переиспользовать в разных условиях.
+     * Вынесена в отдельный метод123, чтобы переиспользовать в разных условиях.
      */
     protected function sendWelcome($bot, $telegram, $message, array $commonData): void
     {
