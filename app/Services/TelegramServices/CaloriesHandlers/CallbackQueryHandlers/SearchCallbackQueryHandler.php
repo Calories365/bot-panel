@@ -20,57 +20,55 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
 
     public function __construct(DiaryApiService $diaryApiService, SpeechToTextService $speechToTextService)
     {
-        $this->diaryApiService = $diaryApiService;
+        $this->diaryApiService     = $diaryApiService;
         $this->speechToTextService = $speechToTextService;
     }
 
     public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
         $callbackData = $callbackQuery->getData();
-        $parts = explode('_', $callbackData);
-        $messageId = $callbackQuery->getMessage()->getMessageId();
-        $locale = $botUser->locale;
-        $calories_id = $botUser->calories_id;
+        $parts        = explode('_', $callbackData);
+        $messageId    = $callbackQuery->getMessage()->getMessageId();
+        $locale       = $botUser->locale;
+        $calories_id  = $botUser->calories_id;
+
         if (isset($parts[1])) {
             $productId = $parts[1];
-            $chatId = $callbackQuery->getMessage()->getChat()->getId();
-            $userId = $callbackQuery->getFrom()->getId();
+            $chatId    = $callbackQuery->getMessage()->getChat()->getId();
+            $userId    = $callbackQuery->getFrom()->getId();
 
-            $products = Cache::get("user_products_{$userId}", []);
+            $products  = Cache::get("user_products_{$userId}", []);
 
             if (isset($products[$productId])) {
-//                Log::info('before searching');
-//                Log::info("product_click_count_{$userId}_{$productId}");
+                // Увеличиваем счётчик кликов для данного продукта
                 $clickCount = Cache::increment("product_click_count_{$userId}_{$productId}");
                 Cache::put("product_click_count_{$userId}_{$productId}", $clickCount, now()->addMinutes(30));
 
-                $saidName = $products[$productId]['product_translation']['said_name'];
+                $saidName      = $products[$productId]['product_translation']['said_name'];
                 $quantityGrams = $products[$productId]['product']['quantity_grams'] ?? '';
-                $originalName = $products[$productId]['product_translation']['original_name'] ?? '';
-                $formattedText = $saidName . " - " . $quantityGrams . " грамм";
+                $originalName  = $products[$productId]['product_translation']['original_name'] ?? '';
+
+                // Формируем текст для поиска, учитывая количество граммов (грамм можно также локализовать при необходимости)
+                $formattedText = $saidName . " - " . $quantityGrams . " " . __('calories365-bot.grams');
 
                 try {
-//                    Log::info('$clickCount');
-//                    Log::info($clickCount);
+                    // Если пользователь кликает по продукту второй раз и более — сразу генерируем данные
                     if ($clickCount > 1) {
-//                        Log::info('generating, $clickCount > 1');
                         $this->generateProductData($products, $productId, $userId, $telegram, $chatId, $callbackQuery);
                     } else {
-//                        Log::info('$saidName != $originalName');
-//                        Log::info($saidName. ', ' . $originalName);
-                        if ($saidName != $originalName) {
+                        // При первом нажатии проверяем, есть ли смысл уточнять продукт по API
+                        if ($saidName !== $originalName) {
                             $response = $this->diaryApiService->getTheMostRelevantProduct($formattedText, $calories_id, $locale);
-//                            Log::info('$response');
-//                            Log::info(print_r($response, true));
+
                             if (isset($response['product'])) {
                                 $product = $response['product'];
                             } else {
-//                                Log::info('generating, product not found');
+                                // Если из API ничего не вернулось, генерируем данные локально
                                 $this->generateProductData($products, $productId, $userId, $telegram, $chatId, $callbackQuery);
                                 return;
                             }
                         } else {
-//                            Log::info('generating, $saidName !== $originalName');
+                            // Если сказанное имя совпадает с оригинальным, тоже генерируем данные локально
                             $this->generateProductData($products, $productId, $userId, $telegram, $chatId, $callbackQuery);
                             return;
                         }
@@ -79,41 +77,51 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                     Log::error("Error generating product data: " . $e->getMessage());
                     $telegram->answerCallbackQuery([
                         'callback_query_id' => $callbackQuery->getId(),
-                        'text' => 'Произошла ошибка при обработке данных.',
-                        'show_alert' => false,
+                        'text'             => __('calories365-bot.error_processing_data'),
+                        'show_alert'       => false,
                     ]);
                     return;
                 }
 
+                // Если API вернул $product
                 if (isset($product)) {
-//                    Log::info('Product after search:', $product);
-
+                    // Удаляем старый продукт из массива
                     unset($products[$productId]);
+
+                    // В качестве нового ключа подставляем ID, который вернул API
                     $newProductId = $product['product_translation']['id'] ?? $productId;
 
                     $products[$newProductId] = $product;
+                    // Сохраняем message_id, чтобы при необходимости можно было удалить сообщение
                     $products[$newProductId]['message_id'] = $messageId;
 
+                    // Сохраняем обновлённые продукты в кеш
                     Cache::put("user_products_{$userId}", $products, now()->addMinutes(30));
 
+                    // Обновляем сообщение о продукте
                     $this->updateProductMessage($telegram, $chatId, $products[$newProductId]);
 
                     $telegram->answerCallbackQuery([
                         'callback_query_id' => $callbackQuery->getId(),
-                        'text' => 'Данные продукта обновлены.',
-                        'show_alert' => false,
+                        'text'             => __('calories365-bot.product_data_updated'),
+                        'show_alert'       => false,
                     ]);
                 } else {
                     $telegram->answerCallbackQuery([
                         'callback_query_id' => $callbackQuery->getId(),
-                        'text' => 'Продукт не найден.',
-                        'show_alert' => false,
+                        'text'             => __('calories365-bot.product_not_found'),
+                        // (Ранее уже использовалось в других кодах, поэтому в списке новых фраз можно не дублировать)
+                        'show_alert'       => false,
                     ]);
                 }
             }
         }
     }
 
+    /**
+     * Генерация (или уточнение) данных о продукте локально,
+     * если не удалось получить информацию из API.
+     */
     private function generateProductData(&$products, $productId, $userId, $telegram, $chatId, $callbackQuery)
     {
         $saidName = $products[$productId]['product_translation']['said_name'];
@@ -127,8 +135,8 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
             Log::error("Error generating product data: " . $e->getMessage());
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text' => 'Произошла ошибка генерации данных.',
-                'show_alert' => false,
+                'text'             => __('calories365-bot.error_generating_data'),
+                'show_alert'       => false,
             ]);
             return;
         }
@@ -142,27 +150,34 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                 }
             }
 
+            // Помечаем продукт как "отредактированный"
             $products[$productId]['product']['edited'] = 1;
+            // Обновляем название продукта
             $products[$productId]['product_translation']['name'] = $saidName;
 
             Cache::put("user_products_{$userId}", $products, now()->addMinutes(30));
 
+            // Обновляем сообщение (карточку продукта)
             $this->updateProductMessage($telegram, $chatId, $products[$productId]);
 
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text' => 'Данные продукта обновлены.',
-                'show_alert' => false,
+                'text'             => __('calories365-bot.product_data_updated'),
+                'show_alert'       => false,
             ]);
         } else {
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text' => 'Не удалось получить данные продукта.',
-                'show_alert' => false,
+                'text'             => __('calories365-bot.failed_to_get_product_data'),
+                'show_alert'       => false,
             ]);
         }
     }
 
+    /**
+     * Разбор сгенерированной/полученной строки вида:
+     *   "Калории - 100; Белки - 2; Жиры - 3; Углеводы - 10"
+     */
     private function parseNutritionalData($dataString): array
     {
         $nutritionalData = [];
@@ -170,25 +185,27 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
 
         foreach ($parts as $part) {
             $part = trim($part, " ;");
-            if (empty($part)) continue;
+            if (empty($part)) {
+                continue;
+            }
 
             $keyValue = explode('-', $part);
             if (count($keyValue) === 2) {
-                $key = trim($keyValue[0]);
+                $key   = trim($keyValue[0]);
                 $value = trim($keyValue[1]);
 
                 switch (mb_strtolower($key)) {
                     case 'калории':
-                        $nutritionalData['calories'] = (float)$value;
+                        $nutritionalData['calories'] = (float) $value;
                         break;
                     case 'белки':
-                        $nutritionalData['proteins'] = (float)$value;
+                        $nutritionalData['proteins'] = (float) $value;
                         break;
                     case 'жиры':
-                        $nutritionalData['fats'] = (float)$value;
+                        $nutritionalData['fats'] = (float) $value;
                         break;
                     case 'углеводы':
-                        $nutritionalData['carbohydrates'] = (float)$value;
+                        $nutritionalData['carbohydrates'] = (float) $value;
                         break;
                 }
             }

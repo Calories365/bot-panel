@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
     public bool $blockAble = true;
+
     public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
         $userId = $callbackQuery->getFrom()->getId();
@@ -20,7 +21,7 @@ class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
                 if (isset($productData['message_id'])) {
                     try {
                         $telegram->deleteMessage([
-                            'chat_id' => $chatId,
+                            'chat_id'    => $chatId,
                             'message_id' => $productData['message_id'],
                         ]);
                     } catch (\Exception $e) {
@@ -32,7 +33,7 @@ class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
             $finalMessageId = $callbackQuery->getMessage()->getMessageId();
             try {
                 $telegram->deleteMessage([
-                    'chat_id' => $chatId,
+                    'chat_id'    => $chatId,
                     'message_id' => $finalMessageId,
                 ]);
             } catch (\Exception $e) {
@@ -40,32 +41,29 @@ class CancelCallbackQueryHandler implements CallbackQueryHandlerInterface
             }
 
             Cache::forget("user_final_message_id_{$userId}");
-
             Cache::forget("user_products_{$userId}");
 
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text' => 'Действие отменено. Ваш список продуктов был очищен.',
+                'text'    => __('calories365-bot.action_canceled_product_list_cleared'),
             ]);
 
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text' => 'Отмена выполнена',
-                'show_alert' => false,
+                'text'             => __('calories365-bot.cancellation_completed'),
+                'show_alert'       => false,
             ]);
         } else {
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text' => 'Ваш список продуктов пуст или уже был очищен.',
+                'text'    => __('calories365-bot.product_list_is_empty_or_was_cleared'),
             ]);
 
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text' => 'Список уже пуст',
-                'show_alert' => false,
+                'text'             => __('calories365-bot.list_is_already_empty'),
+                'show_alert'       => false,
             ]);
         }
     }
-
-
 }

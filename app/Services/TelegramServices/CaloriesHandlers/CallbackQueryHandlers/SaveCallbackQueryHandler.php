@@ -19,36 +19,37 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
 
     public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
-        $userId = $callbackQuery->getFrom()->getId();
-        $chatId = $callbackQuery->getMessage()->getChat()->getId();
+        $userId       = $callbackQuery->getFrom()->getId();
+        $chatId       = $callbackQuery->getMessage()->getChat()->getId();
         $callbackData = $callbackQuery->getData();
-        $locale = $botUser->locale;
-        $calories_id = $botUser->calories_id;
-        $parts = explode('_', $callbackData);
+        $locale       = $botUser->locale;
+        $calories_id  = $botUser->calories_id;
+        $parts        = explode('_', $callbackData);
 
-        if(count($parts) > 1){
+        if (count($parts) > 1) {
             $partOfTheDay = $parts[1];
         }
 
         $data = Cache::get("user_products_{$userId}");
-        if (!$data){
+        if (!$data) {
             return;
         }
+
         $diaryUserId = 32;
         $total = [
-            'calories' => 0,
-            'proteins' => 0,
-            'fats' => 0,
+            'calories'      => 0,
+            'proteins'      => 0,
+            'fats'          => 0,
             'carbohydrates' => 0,
         ];
 
         foreach ($data as $productData) {
-            $product = $productData['product'];
+            $product            = $productData['product'];
             $productTranslation = $productData['product_translation'];
 
-            $total['calories'] += round($product['calories'] * $product['quantity_grams'] / 100);
-            $total['proteins'] += round($product['proteins'] * $product['quantity_grams'] / 100);
-            $total['fats'] += round($product['fats'] * $product['quantity_grams'] / 100);
+            $total['calories']      += round($product['calories']      * $product['quantity_grams'] / 100);
+            $total['proteins']      += round($product['proteins']      * $product['quantity_grams'] / 100);
+            $total['fats']          += round($product['fats']          * $product['quantity_grams'] / 100);
             $total['carbohydrates'] += round($product['carbohydrates'] * $product['quantity_grams'] / 100);
 
             if (isset($product['edited']) && $product['edited'] == 1) {
@@ -56,27 +57,31 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             } else {
                 $this->saveFoodConsumption($product, $diaryUserId, $partOfTheDay, $calories_id, $locale);
             }
-//            Log::info('before deleting');
-//            Log::info("product_click_count_{$userId}_{$productTranslation['id']}");
+
+            // Сбросить счётчики кликов по продукту
             Cache::forget("product_click_count_{$userId}_{$productTranslation['id']}");
         }
 
+        // Формируем таблицу с локализованными заголовками
         $productArray = [
-            [ "Калории", $total['calories']],
-            [ "Белки",$total['proteins']],
-            [ "Жиры", $total['fats']],
-            [ "Углеводы", $total['carbohydrates']],
+            [ __('calories365-bot.calories'),      $total['calories']      ],
+            [ __('calories365-bot.proteins'),      $total['proteins']      ],
+            [ __('calories365-bot.fats'),          $total['fats']          ],
+            [ __('calories365-bot.carbohydrates'), $total['carbohydrates'] ],
         ];
-        $messageText = Utilities::generateTableType2('Данные сохранены, Вы употребили' , $productArray) . "\n\n";
+
+        $messageText = Utilities::generateTableType2(
+                __('calories365-bot.data_saved_you_consumed'),
+                $productArray
+            ) . "\n\n";
 
         Cache::forget("user_products_{$userId}");
         Cache::forget("user_final_message_id_{$userId}");
 
         $telegram->sendMessage([
-            'chat_id' => $chatId,
-            'text' => $messageText,
+            'chat_id'    => $chatId,
+            'text'       => $messageText,
             'parse_mode' => 'Markdown',
-
         ]);
 
         $this->deleteProductMessages($telegram, $chatId, $data, $callbackQuery);
@@ -89,20 +94,19 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
     protected function saveProduct($product, $productTranslation, $diaryUserId, $partOfTheDay, $calories_id, $locale, $chat_id)
     {
         $postData = [
-            'user_id' => $diaryUserId,
-            'name' => $productTranslation['name'],
-            'calories' => $product['calories_per_100g'] ?? $product['calories'],
-            'carbohydrates' => $product['carbohydrates_per_100g'] ?? $product['carbohydrates'],
-            'fats' => $product['fats_per_100g'] ?? $product['fats'],
-            'fibers' => $product['fibers_per_100g'] ?? $product['fibers'] ?? 0,
-            'proteins' => $product['proteins_per_100g'] ?? $product['proteins'],
-            'quantity' => $product['quantity_grams'],
-            'consumed_at' => date('Y-m-d'),
-//            'consumed_at' =>  date('Y-m-d', strtotime('-1 day')),
-            'part_of_day' => $partOfTheDay,
+            'user_id'        => $diaryUserId,
+            'name'           => $productTranslation['name'],
+            'calories'       => $product['calories_per_100g']      ?? $product['calories'],
+            'carbohydrates'  => $product['carbohydrates_per_100g'] ?? $product['carbohydrates'],
+            'fats'           => $product['fats_per_100g']          ?? $product['fats'],
+            'fibers'         => $product['fibers_per_100g']        ?? $product['fibers'] ?? 0,
+            'proteins'       => $product['proteins_per_100g']      ?? $product['proteins'],
+            'quantity'       => $product['quantity_grams'],
+            'consumed_at'    => date('Y-m-d'),
+            'part_of_day'    => $partOfTheDay,
         ];
 
-        $response = $this->diaryApiService->saveProduct($postData,$chat_id, $locale);
+        $response = $this->diaryApiService->saveProduct($postData, $chat_id, $locale);
 
         if (isset($response['error'])) {
             Log::error('Error saving product: ' . $response['error']);
@@ -113,17 +117,13 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
 
     protected function saveFoodConsumption($product, $diaryUserId, $partOfTheDay, $calories_id, $locale)
     {
-
-
         $postData = [
             'user_id'      => $diaryUserId,
             'food_id'      => $product['id'],
             'quantity'     => $product['quantity_grams'],
             'consumed_at'  => date('Y-m-d'),
-//            'consumed_at' =>  date('Y-m-d', strtotime('-1 day')),
             'part_of_day'  => $partOfTheDay,
         ];
-
 
         $response = $this->diaryApiService->saveFoodConsumption($postData, $calories_id, $locale);
 
@@ -140,7 +140,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             if (isset($productData['message_id'])) {
                 try {
                     $telegram->deleteMessage([
-                        'chat_id' => $chatId,
+                        'chat_id'    => $chatId,
                         'message_id' => $productData['message_id'],
                     ]);
                 } catch (\Exception $e) {
@@ -152,17 +152,17 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         $finalMessageId = $callbackQuery->getMessage()->getMessageId();
         try {
             $telegram->deleteMessage([
-                'chat_id' => $chatId,
+                'chat_id'    => $chatId,
                 'message_id' => $finalMessageId,
             ]);
         } catch (\Exception $e) {
             Log::error("Error deleting final action message: " . $e->getMessage());
         }
     }
+
     private function getPartOfTheDay(): string
     {
-
-        $currentHour = (int)date('G');
+        $currentHour = (int) date('G');
 
         if ($currentHour >= 6 && $currentHour < 12) {
             $partOfDay = 'morning';
@@ -171,6 +171,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         } else {
             $partOfDay = 'supper';
         }
+
         return $partOfDay;
     }
 }

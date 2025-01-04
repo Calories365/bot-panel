@@ -66,7 +66,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
 
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
-                    'text' => 'Выйдите с режима редактирование(нажмите сохранить или отменить).',
+                    'text' => __('calories365-bot.exit_edit_mode'),
                     'show_alert' => true,
                 ]);
             }

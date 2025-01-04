@@ -39,7 +39,7 @@ class EditingBaseCallbackQueryHandler implements CallbackQueryHandlerInterface
         if (!$this->editingState) {
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text' => 'Сессия редактирования истекла или отсутствует.',
+                'text'       => __('calories365-bot.editing_session_expired'),
                 'show_alert' => true,
             ]);
             return false;
@@ -53,7 +53,7 @@ class EditingBaseCallbackQueryHandler implements CallbackQueryHandlerInterface
             $this->clearEditingState($this->userId);
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text' => 'Продукт не найден или истекло время сессии.',
+                'text'       => __('calories365-bot.product_not_found'),
                 'show_alert' => true,
             ]);
             return false;

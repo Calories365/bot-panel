@@ -65,13 +65,13 @@ class Utilities
 
     public static function generateTable($title, $quantity, $dataArray, $saidProduct)
     {
-        $youSaid = 'Вы сказали: ' . $saidProduct . "\n\n";
+        $youSaid = __('calories365-bot.you_said') . $saidProduct . "\n\n";
 
         $title = $title . "\n\n";
 
-        $col1Header = 'Параметр';
-        $col2Header = '100г';
-        $col3Header = $quantity . 'г';
+        $col1Header = __('calories365-bot.parameter');
+        $col2Header = __('calories365-bot.100g');
+        $col3Header = $quantity . __('calories365-bot.g');
 
         $maxLenCol1 = mb_strwidth($col1Header, 'UTF-8');
         $maxLenCol2 = mb_strwidth($col2Header, 'UTF-8');
@@ -136,11 +136,6 @@ class Utilities
     }
 
 
-
-
-
-
-//o1
     public static function generateTableType2($title, $dataArray)
     {
         $title = $title . ": \n\n";
@@ -185,19 +180,4 @@ class Utilities
 
         return $title . $partition . $body;
     }
-
-
-    public static function hasCaloriesId($chatId)
-    {
-        $botUser = BotUser::where('telegram_id', $chatId)->first();
-
-        if (!$botUser){
-            return false;
-        }
-
-        $calories_id = $botUser->calories_id;
-
-        return $calories_id ? $botUser : false;
-    }
-
 }

@@ -35,7 +35,7 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                 Log::error('Error deleting meal: ' . $response['error']);
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
-                    'text' => 'Ошибка при удалении продукта.',
+                    'text' => __('calories365-bot.error_deleting_product'),
                     'show_alert' => true,
                 ]);
             } else {
@@ -50,7 +50,7 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
 
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
-                    'text' => 'Продукт удалён.',
+                    'text' =>__('calories365-bot.product_deleted'),
                     'show_alert' => false,
                 ]);
             }

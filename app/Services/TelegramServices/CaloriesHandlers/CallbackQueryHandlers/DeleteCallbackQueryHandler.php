@@ -58,7 +58,7 @@ class DeleteCallbackQueryHandler implements CallbackQueryHandlerInterface
 
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
-                    'text' => 'Продукт удалён из списка.',
+                    'text' => __('calories365-bot.product_removed_from_list'),
                     'show_alert' => false,
                 ]);
             }
