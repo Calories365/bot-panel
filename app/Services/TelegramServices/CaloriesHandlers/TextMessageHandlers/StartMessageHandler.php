@@ -93,7 +93,7 @@ class StartMessageHandler implements MessageHandlerInterface
     protected function sendWelcome($bot, $telegram, $message, array $commonData): void
     {
         $imagePath = $bot->message_image;
-        $messageText = $bot->message;
+        $messageText = __('calories365-bot.welcome_guide');
 
         $keyboard = Keyboard::make([
             'resize_keyboard' => true,

@@ -6,6 +6,7 @@ use App\Models\BotUser;
 use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\Telegram;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Keyboard\Keyboard;
 
@@ -41,10 +42,11 @@ class LanguageMessageHandler
             if ($botUser) {
                 $botUser->locale = 'en';
                 $botUser->save();
+                App::setLocale('en');
             }
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text' => __('calories365-bot.language_set_english')
+                'text' => 'Your language has been set to Ukrainian.'
             ]);
             return;
         }
@@ -53,10 +55,11 @@ class LanguageMessageHandler
             if ($botUser) {
                 $botUser->locale = 'ru';
                 $botUser->save();
+                App::setLocale('ru');
             }
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text' => __('calories365-bot.language_set_russian')
+                'text' => 'Ваш язык установлен на русский.'
             ]);
             return;
         }
@@ -65,10 +68,11 @@ class LanguageMessageHandler
             if ($botUser) {
                 $botUser->locale = 'ua';
                 $botUser->save();
+                App::setLocale('ua');
             }
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text' => __('calories365-bot.language_set_ukrainian')
+                'text' => 'Вашу мову встановлено на українську.'
             ]);
             return;
         }

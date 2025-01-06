@@ -30,7 +30,7 @@ export const rows_default = [
         emit_name: null,
         placeholder: 'введите сообщение',
         action: null,
-        required: true
+        required: false
     },
     {label: 'Фото', key: 'message_image', type: 'picture', emit_name: null, placeholder: 'выберите фото', action: null},
     {label: 'Активен', key: 'active', type: 'checkbox', emit_name: null, placeholder: 'активен ли бот', action: null},

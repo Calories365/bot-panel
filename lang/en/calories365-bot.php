@@ -115,11 +115,11 @@ Examples of input text and the expected output:
    Tomato - 120 grams;
    Chicken221 - 200 grams;
 
-3. Input text: 'I ate 100 grams of potatoes, a tomato, and курица два два один.'
+3. Input text: 'I ate 100 grams of potatoes, a tomato, and chicken two two one.'
    Expected output:
    Potatoes - 100 grams;
    Tomato - 120 grams;
-   Курица два два один - 200 grams;
+   Chicken two two one - 200 grams;
 
 4. Input text: 'I ate boiled potato'
    Expected output:
@@ -131,23 +131,24 @@ Examples of input text and the expected output:
 EOT,
 
     'prompt_generate_new_product_data' => <<<EOT
-Here is a product: ":text". Provide Calories, Proteins, Fats, and Carbohydrates (the so-called macros) for 100 grams of the product.
+Here is a product: ":text". Provide the Calories, Proteins, Fats, and Carbohydrates (macros) for 100 grams of the product.
 The output format must strictly follow the example below, where each parameter is followed by a semicolon:
 
-Example: Калории - 890; Белки - 0.2; Жиры - 100; Углеводы - 0;
+Example:
+Calories - 890; Proteins - 0.2; Fats - 100; Carbohydrates - 0;
 
 Important:
-
 - All values must correspond to 100 grams of the product.
 - After each parameter, you must add a semicolon.
 - Do not add any extra information besides the macros.
-- Keep the product name unchanged, even if it has digits or non-standard characters.
-- Ensure each parameter and its value are separated by a dash and spaces, as in the example.
-- Also note that a user may give general or brand-specific product names (e.g., 'Halls' or 'Candy Bob and Snail'). This should also be recognized and returned with the appropriate information.
+- Keep the product name unchanged, even if it contains digits or non-standard characters.
+- Make sure each parameter and its value are separated by a dash and spaces, as in the example.
+- Also note that a user may mention general or brand-specific product names (e.g., 'Halls' or 'Candy Bob and Snail'). This should also be recognized and returned with the appropriate information.
 
 Example input:
-Калории - 890; Белки - 0.2; Жиры - 100; Углеводы - 0;
+Calories - 890; Proteins - 0.2; Fats - 100; Carbohydrates - 0;
 EOT,
+
 
     'prompt_choose_relevant_products_part' => <<<EOT
 Which product best matches the name ":name"? Here are the available options: :productNames.
@@ -162,5 +163,23 @@ product name - (its calories per 100 grams, proteins, fats, carbohydrates);
 EOT,
 
     'data_not_extracted' => 'Failed to extract data.',
+    'welcome_guide' => <<<EOT
+Welcome to the "Calories 365" bot! Here's how to use it:
+
+1) Voice input:
+Send a voice message describing what you ate for a meal. The bot will recognize the products and compile a list.
+
+2) Editing the list:
+Tap the “Edit” button to manually correct the name, calories, proteins, fats, or carbohydrates.
+Tap the “Search” button to find a new nutrient profile for the product. If you aren’t satisfied with the search result after the first click, tap again!
+
+3) Saving:
+Tap the “Save” button to store the data in your diary.
+
+4) Daily stats:
+Type the /stats command to see your daily stats.
+
+Start keeping your calorie diary easily and conveniently!
+EOT,
 
 ];
