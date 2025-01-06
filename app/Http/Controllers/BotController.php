@@ -29,7 +29,7 @@ class BotController extends BaseController
     {
         $this->botManagmentService = $botManagmentService;
     }
-
+//123
     public function index(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         $perPage = $request->input('per_page', 10);
