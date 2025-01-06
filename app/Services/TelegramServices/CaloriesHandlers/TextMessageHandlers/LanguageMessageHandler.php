@@ -16,24 +16,22 @@ class LanguageMessageHandler
     public function handle($bot, $telegram, $message)
     {
         $text = $message->getText();
-
         $commonData = self::extractCommonData($message);
-        $chatId     = $commonData['chatId'];
-
+        $chatId = $commonData['chatId'];
         $botUser = BotUser::where('telegram_id', $chatId)->first();
 
         if ($text === '/language') {
             $keyboard = Keyboard::make([
-                'keyboard'          => [
+                'keyboard' => [
                     ['English', 'Русский', 'Українська'],
                 ],
-                'resize_keyboard'   => true,
+                'resize_keyboard' => true,
                 'one_time_keyboard' => true,
             ]);
 
             $telegram->sendMessage([
-                'chat_id'      => $chatId,
-                'text'         => "Please choose your language / Пожалуйста, выберите язык / Будь ласка, оберіть мову",
+                'chat_id' => $chatId,
+                'text' => __('calories365-bot.please_choose_your_language'),
                 'reply_markup' => $keyboard
             ]);
             return;
@@ -44,10 +42,9 @@ class LanguageMessageHandler
                 $botUser->locale = 'en';
                 $botUser->save();
             }
-
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text'    => "Your language has been set to English."
+                'text' => __('calories365-bot.language_set_english')
             ]);
             return;
         }
@@ -57,10 +54,9 @@ class LanguageMessageHandler
                 $botUser->locale = 'ru';
                 $botUser->save();
             }
-
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text'    => "Ваш язык установлен на русский."
+                'text' => __('calories365-bot.language_set_russian')
             ]);
             return;
         }
@@ -70,10 +66,9 @@ class LanguageMessageHandler
                 $botUser->locale = 'ua';
                 $botUser->save();
             }
-
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text'    => "Ваша мова встановлена на українську."
+                'text' => __('calories365-bot.language_set_ukrainian')
             ]);
             return;
         }

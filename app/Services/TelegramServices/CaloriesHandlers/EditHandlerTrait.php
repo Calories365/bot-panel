@@ -10,19 +10,20 @@ trait EditHandlerTrait
 {
     protected $messageText;
     protected $replyMarkup;
+
     protected function saveEditing($telegram, $chatId, $userId, &$userProducts, $productId, $messageId, $botUser, $callbackQueryId = false)
     {
         $this->updateProductMessage($telegram, $chatId, $userProducts[$productId]);
 
-        if($callbackQueryId){
+        if ($callbackQueryId) {
             $telegram->answerCallbackQuery([
-            'callback_query_id' => $callbackQueryId,
-            'text' => 'Изменения сохранены.',
-            'show_alert' => false,
-        ]);}
+                'callback_query_id' => $callbackQueryId,
+                'text'       => __('calories365-bot.changes_saved'),
+                'show_alert' => false,
+            ]);
+        }
 
         $this->deleteEditingMessage($telegram, $chatId, $messageId);
-
         $this->clearEditingState($userId);
     }
 
@@ -36,14 +37,15 @@ trait EditHandlerTrait
 
         $this->updateProductMessage($telegram, $chatId, $userProducts[$productId]);
 
-        if($callbackQueryId){
+        if ($callbackQueryId) {
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQueryId,
-                'text' => 'Изменения отменены',
+                'text'       => __('calories365-bot.changes_canceled'),
                 'show_alert' => false,
-            ]);}
-        $this->deleteEditingMessage($telegram, $chatId, $messageId);
+            ]);
+        }
 
+        $this->deleteEditingMessage($telegram, $chatId, $messageId);
         $this->clearEditingState($userId);
     }
 
@@ -58,12 +60,11 @@ trait EditHandlerTrait
         Log::info(print_r($productData, true));
         $messageId = $productData['message_id'];
 
-
         $productTranslation = $productData['product_translation'];
         $product = $productData['product'];
         $productId = $productTranslation['id'];
 
-        $this->generateTableBody($product, $productTranslation,$productId);
+        $this->generateTableBody($product, $productTranslation, $productId);
 
         try {
             $telegram->editMessageText([
@@ -76,7 +77,7 @@ trait EditHandlerTrait
         } catch (\Telegram\Bot\Exceptions\TelegramResponseException $e) {
             $errorData = $e->getResponseData();
             if (isset($errorData['description']) && strpos($errorData['description'], 'message is not modified') !== false) {
-                Log::info('Сообщение не изменилось, обновление не требуется.');
+                Log::info(__('calories365-bot.message_not_modified'));
             } else {
                 Log::error("Error updating product message: " . $e->getMessage());
             }
@@ -102,9 +103,9 @@ trait EditHandlerTrait
         $replyMarkup = json_encode([
             'inline_keyboard' => [
                 [
-                    ['text' => 'Сохранить', 'callback_data' => 'editing_save'],
-                    ['text' => 'Пропустить шаг', 'callback_data' => 'editing_skip'],
-                    ['text' => 'Отменить', 'callback_data' => 'editing_cancel'],
+                    ['text' => __('calories365-bot.save'), 'callback_data' => 'editing_save'],
+                    ['text' => __('calories365-bot.skip_step'), 'callback_data' => 'editing_skip'],
+                    ['text' => __('calories365-bot.cancel'), 'callback_data' => 'editing_cancel'],
                 ]
             ]
         ]);
@@ -121,39 +122,45 @@ trait EditHandlerTrait
         }
     }
 
-    protected function generateTableBody($product, $productTranslation, $productId){
-
+    protected function generateTableBody($product, $productTranslation, $productId)
+    {
         $productArray = [
-            [ "Калории", $product['calories'],round($product['calories']/100*$product['quantity_grams'] ,1)],
-            [ "Белки", $product['proteins'],round($product['proteins']/100*$product['quantity_grams'] ,1)],
-            [ "Жиры", $product['fats'],round($product['fats']/100*$product['quantity_grams'] ,1)],
-            [ "Углеводы", $product['carbohydrates'],round($product['carbohydrates']/100*$product['quantity_grams'] ,1)],
+            [ __('calories365-bot.calories'),      $product['calories'],      round($product['calories'] / 100 * $product['quantity_grams'], 1) ],
+            [ __('calories365-bot.proteins'),      $product['proteins'],      round($product['proteins'] / 100 * $product['quantity_grams'], 1) ],
+            [ __('calories365-bot.fats'),          $product['fats'],          round($product['fats'] / 100 * $product['quantity_grams'], 1) ],
+            [ __('calories365-bot.carbohydrates'), $product['carbohydrates'], round($product['carbohydrates'] / 100 * $product['quantity_grams'], 1) ],
         ];
 
-
-        $this->messageText = Utilities::generateTable($productTranslation['name'] ,$product['quantity_grams'], $productArray , $productTranslation['said_name']);
+        $this->messageText = Utilities::generateTable(
+            $productTranslation['name'],
+            $product['quantity_grams'],
+            $productArray,
+            $productTranslation['said_name']
+        );
 
         $inlineKeyboard = [
             [
                 [
-                    'text' => 'Искать',
+                    'text' => __('calories365-bot.search'),
                     'callback_data' => 'search_' . $productId
                 ],
             ],
             [
                 [
-                    'text' => 'Изменить',
+                    'text' => __('calories365-bot.edit'),
                     'callback_data' => 'edit_' . $productId
                 ],
                 [
-                    'text' => 'Удалить',
+                    'text' => __('calories365-bot.delete'),
                     'callback_data' => 'destroy_' . $productId
                 ]
             ]
         ];
+
         $this->replyMarkup = json_encode([
             'inline_keyboard' => $inlineKeyboard
         ]);
+
         return true;
     }
- }
+}

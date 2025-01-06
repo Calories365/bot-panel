@@ -41,7 +41,7 @@ class CheckUserAuthAndLocale
         if (!$userId) {
             $telegram->sendMessage([
                 'chat_id' => $userId,
-                'text'    => "Вы должны быть авторизированны!"
+                'text'    => __('calories365-bot.you_must_be_authorized')
             ]);
             return $next($passable);
         }
@@ -49,7 +49,7 @@ class CheckUserAuthAndLocale
         if (!$botUser) {
             $telegram->sendMessage([
                 'chat_id' => $userId,
-                'text'    => "Вы должны быть авторизированны!",
+                'text'    => __('calories365-bot.you_must_be_authorized'),
             ]);
             return null;
         }
@@ -57,7 +57,7 @@ class CheckUserAuthAndLocale
         if (!$botUser->calories_id) {
             $telegram->sendMessage([
                 'chat_id' => $userId,
-                'text'    => "Вы должны быть авторизированны!",
+                'text'    => __('calories365-bot.you_must_be_authorized'),
             ]);
             return null;
         }

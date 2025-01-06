@@ -35,11 +35,9 @@ class AudioMessageHandler implements MessageHandlerInterface
     {
         $commonData = self::extractCommonData($message);
         $userId = $commonData['userId'];
-
         $chatId = $commonData['chatId'];
 
         if (isset($message['voice'])) {
-
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
 
             if ($text) {
@@ -53,7 +51,7 @@ class AudioMessageHandler implements MessageHandlerInterface
                 if (isset($responseArray['error'])) {
                     $telegram->sendMessage([
                         'chat_id' => $chatId,
-                        'text' => 'Произошла ошибка: ' . $responseArray['error']
+                        'text' => __('calories365-bot.error_occurred') . $responseArray['error']
                     ]);
                     return;
                 }
@@ -64,9 +62,7 @@ class AudioMessageHandler implements MessageHandlerInterface
                     $userProducts = [];
 
                     foreach ($products as $index => $productInfo) {
-
                         if (isset($productInfo['product_translation']) && isset($productInfo['product'])) {
-
                             $productTranslation = $productInfo['product_translation'];
                             $product = $productInfo['product'];
                             $productId = $productTranslation['id'];
@@ -84,9 +80,8 @@ class AudioMessageHandler implements MessageHandlerInterface
                                 'product' => $product,
                                 'message_id' => $sentMessage->getMessageId()
                             ];
-
                         } else {
-                            $messageText = ($index + 1) . ". Информация о продукте неполная.\n";
+                            $messageText = ($index + 1) . ". " . __('calories365-bot.incomplete_product_info') . "\n";
 
                             $telegram->sendMessage([
                                 'chat_id' => $chatId,
@@ -95,33 +90,33 @@ class AudioMessageHandler implements MessageHandlerInterface
                             ]);
                         }
                     }
+
                     Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30)); // Время хранения - 30 минут
 
-                    $finalMessageText = "Сохранить продукты на:\n";
+                    $finalMessageText = __('calories365-bot.save_products_for') . "\n";
 
                     $finalInlineKeyboard = [
                         [
                             [
-                                'text' => 'Завтрак',
+                                'text' => __('calories365-bot.breakfast'),
                                 'callback_data' => 'save_morning'
                             ],
                             [
-                                'text' => 'Oбед',
+                                'text' => __('calories365-bot.lunch'),
                                 'callback_data' => 'save_dinner'
                             ],
                         ],
                         [
                             [
-                                'text' => 'Ужин',
+                                'text' => __('calories365-bot.dinner'),
                                 'callback_data' => 'save_supper'
                             ],
                             [
-                                'text' => 'Отменить',
+                                'text' => __('calories365-bot.cancel'),
                                 'callback_data' => 'cancel'
                             ]
                         ]
                     ];
-
 
                     $finalReplyMarkup = json_encode([
                         'inline_keyboard' => $finalInlineKeyboard
@@ -139,18 +134,17 @@ class AudioMessageHandler implements MessageHandlerInterface
                 } else {
                     $telegram->sendMessage([
                         'chat_id' => $chatId,
-                        'text' => $responseArray['message'] ?? 'Продукты не найдены.'
+                        'text' => $responseArray['message'] ?? __('calories365-bot.products_not_found')
                     ]);
                 }
-
             } else {
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text' => 'Не удалось распознать аудио сообщение.'
+                    'text' => __('calories365-bot.failed_to_recognize_audio_message')
                 ]);
             }
         } else {
-            $text = $message->getText() ?: 'Получено не аудио сообщение.';
+            $text = $message->getText() ?: __('calories365-bot.not_an_audio_message_received');
             $telegram->sendMessage([
                 'chat_id' => $chatId,
                 'text' => $text,

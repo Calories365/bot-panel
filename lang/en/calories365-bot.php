@@ -53,13 +53,114 @@ return [
     'skip_step'                      => 'Skip step',
     'cancel'                         => 'Cancel',
     'invalid_request'                => 'Invalid request.',
+    'data_saved_you_consumed' => 'The data has been saved, you have consumed',
     'grams'                     => 'grams',
     'error_processing_data'     => 'An error occurred while processing data.',
     'error_generating_data'     => 'An error occurred while generating data.',
     'failed_to_get_product_data'=> 'Failed to get product data.',
     'product_data_updated'      => 'Product data updated.',
+    'value_too_long'                           => 'Value is too long',
+    'enter_valid_numeric_value_for_grams'      => 'Please enter a valid numeric value for grams.',
+    'enter_valid_numeric_value_for_calories'   => 'Please enter a valid numeric value for calories.',
+    'enter_valid_numeric_value_for_proteins'   => 'Please enter a valid numeric value for proteins.',
+    'enter_valid_numeric_value_for_fats'       => 'Please enter a valid numeric value for fats.',
+    'enter_valid_numeric_value_for_carbohydrates' => 'Please enter a valid numeric value for carbohydrates.',
+    'please_choose_your_language' => 'Please choose your language',
+    'language_set_english'        => 'Your language has been set to English.',
+    'language_set_russian'        => 'Your language has been set to Russian.',
+    'language_set_ukrainian'      => 'Your language has been set to Ukrainian.',
+    'invalid_or_used_code' => 'Invalid or used code. Please register again.',
+    'seems_you_are_new'    => 'It looks like you are new here. To link your account, use the "Connect" link from your personal account (https://calculator.calories365.com).',
+    'error_occurred' => 'An error occurred: ',
+    'incomplete_product_info' => 'Product information is incomplete.',
+    'save_products_for' => 'Save products for:',
+    'products_not_found' => 'No products found.',
+    'failed_to_recognize_audio_message' => 'Failed to recognize audio message.',
+    'not_an_audio_message_received' => 'Not an audio message received.',
+    'changes_saved' => 'Changes saved.',
+    'changes_canceled' => 'Changes canceled.',
+    'message_not_modified' => 'Message not modified, no update required.',
+    'search' => 'Search',
+    'edit' => 'Edit',
+    'you_must_be_authorized' => 'You must be authorized!',
+    'prompt_analyze_food_intake' => <<<EOT
+Analyze the text: ":text". Output only the list of products with their amount in grams. If the amount is not specified, use an average weight or portion. The output format must strictly follow the example below, where each product is followed by a semicolon:
 
+Example:
+Potato - 100 grams;
+Tomato - 120 grams;
+Chicken221 - 200 grams;
 
+If the text contains no products, output: 'no products'.
 
+Important:
+- All quantities must be in grams.
+- After each product, add a semicolon.
+- Do not add any extra information besides the list of products.
+- A product may contain letters and digits (e.g., chicken221 or курица два два один). Keep the full product names unchanged.
+- If a product has descriptive words (e.g., boiled potato), move the description after the name (e.g., 'boiled potato' → 'potato boiled').
+- Ensure each product and its amount are separated by a dash and spaces, as in the example.
+- Do not change the original product name, even if it contains digits or non-standard characters.
+
+Examples of input text and the expected output:
+
+1. Input text: 'I ate 100 grams of potatoes and a tomato.'
+   Expected output:
+   Potatoes - 100 grams;
+   Tomato - 120 grams;
+
+2. Input text: 'I ate 100 grams of potatoes, a tomato, and chicken221.'
+   Expected output:
+   Potatoes - 100 grams;
+   Tomato - 120 grams;
+   Chicken221 - 200 grams;
+
+3. Input text: 'I ate 100 grams of potatoes, a tomato, and курица два два один.'
+   Expected output:
+   Potatoes - 100 grams;
+   Tomato - 120 grams;
+   Курица два два один - 200 grams;
+
+4. Input text: 'I ate boiled potato'
+   Expected output:
+   Potato boiled - 200 grams;
+
+5. Input text: 'I haven’t eaten anything today.'
+   Expected output:
+   no products
+EOT,
+
+    'prompt_generate_new_product_data' => <<<EOT
+Here is a product: ":text". Provide Calories, Proteins, Fats, and Carbohydrates (the so-called macros) for 100 grams of the product.
+The output format must strictly follow the example below, where each parameter is followed by a semicolon:
+
+Example: Калории - 890; Белки - 0.2; Жиры - 100; Углеводы - 0;
+
+Important:
+
+- All values must correspond to 100 grams of the product.
+- After each parameter, you must add a semicolon.
+- Do not add any extra information besides the macros.
+- Keep the product name unchanged, even if it has digits or non-standard characters.
+- Ensure each parameter and its value are separated by a dash and spaces, as in the example.
+- Also note that a user may give general or brand-specific product names (e.g., 'Halls' or 'Candy Bob and Snail'). This should also be recognized and returned with the appropriate information.
+
+Example input:
+Калории - 890; Белки - 0.2; Жиры - 100; Углеводы - 0;
+EOT,
+
+    'prompt_choose_relevant_products_part' => <<<EOT
+Which product best matches the name ":name"? Here are the available options: :productNames.
+EOT,
+
+    'prompt_choose_relevant_products_footer' => <<<EOT
+Return the answer in the following format:
+product name1 - id;
+product name2 - id;
+if there is no suitable product, then the answer should be in the format
+product name - (its calories per 100 grams, proteins, fats, carbohydrates);
+EOT,
+
+    'data_not_extracted' => 'Failed to extract data.',
 
 ];

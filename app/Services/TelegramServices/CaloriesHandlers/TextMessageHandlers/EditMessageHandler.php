@@ -15,16 +15,13 @@ class EditMessageHandler implements MessageHandlerInterface
     {
         $userId = $message->getFrom()->getId();
         $chatId = $message->getChat()->getId();
-
-        $text = $message->getText();
+        $text   = $message->getText();
 
         $editingState = Cache::get("user_editing_{$userId}");
-
         if ($editingState) {
-            $productId = $editingState['product_id'];
-            $step = $editingState['step'];
-            $messageId = $editingState['message_id'];
-
+            $productId   = $editingState['product_id'];
+            $step        = $editingState['step'];
+            $messageId   = $editingState['message_id'];
             $userProducts = Cache::get("user_products_{$userId}");
 
             if (!$userProducts || !isset($userProducts[$productId])) {
@@ -32,16 +29,22 @@ class EditMessageHandler implements MessageHandlerInterface
 
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text' => 'Продукт не найден или истекло время сессии.',
+                    'text'    => __('calories365-bot.product_not_found'),
                 ]);
 
                 return;
             }
 
-            $productData = $userProducts[$productId];
-
-            $this->processInput($telegram, $chatId, $userId, $text, $editingState, $userProducts, $productId, $messageId);
-
+            $this->processInput(
+                $telegram,
+                $chatId,
+                $userId,
+                $text,
+                $editingState,
+                $userProducts,
+                $productId,
+                $messageId
+            );
 
             $this->deleteUserMessage($telegram, $chatId, $message->getMessageId());
 
@@ -54,83 +57,94 @@ class EditMessageHandler implements MessageHandlerInterface
     protected function processInput($telegram, $chatId, $userId, $text, &$editingState, &$userProducts, $productId, $messageId)
     {
         $currentStep = $editingState['step'];
-        $validInput = true;
+        $validInput  = true;
 
         switch ($currentStep) {
             case 'awaiting_name':
-                if (strlen($text) <= 50){
-                $userProducts[$productId]['product_translation']['name'] = $text;
-                $userProducts[$productId]['product_translation']['said_name'] = $text;
-                $userProducts[$productId]['product']['edited'] = 1;
-                Cache::forget("product_click_count_{$userId}_{$productId}");
-                $nextStep = 'awaiting_quantity';
-                $nextPrompt = 'Пожалуйста, введите новое количество грамм.';
+                if (strlen($text) <= 50) {
+                    $userProducts[$productId]['product_translation']['name']      = $text;
+                    $userProducts[$productId]['product_translation']['said_name'] = $text;
+                    $userProducts[$productId]['product']['edited']               = 1;
+
+                    Cache::forget("product_click_count_{$userId}_{$productId}");
+
+                    $nextStep   = 'awaiting_quantity';
+                    $nextPrompt = __('calories365-bot.please_enter_new_quantity_of_grams');
                 } else {
-                    $validInput = false;
-                    $errorMessage = 'Значение слишком длинное';
+                    $validInput   = false;
+                    $errorMessage = __('calories365-bot.value_too_long');
                 }
                 break;
+
             case 'awaiting_quantity':
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['quantity_grams'] = $text;
-                    $nextStep = 'awaiting_calories';
-                    $nextPrompt = 'Пожалуйста, введите новое количество калорий.';
+                    $nextStep   = 'awaiting_calories';
+                    $nextPrompt = __('calories365-bot.please_enter_new_calories');
                 } else {
-                    $validInput = false;
-                    $errorMessage = 'Пожалуйста, введите корректное числовое значение для грамм.';
-                    }
+                    $validInput   = false;
+                    $errorMessage = __('calories365-bot.enter_valid_numeric_value_for_grams');
+                }
                 break;
+
             case 'awaiting_calories':
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['calories'] = $text;
-                    $userProducts[$productId]['product']['edited'] = 1;
-                    $nextStep = 'awaiting_proteins';
-                    $nextPrompt = 'Пожалуйста, введите новое количество белков.';
+                    $userProducts[$productId]['product']['edited']   = 1;
+
+                    $nextStep   = 'awaiting_proteins';
+                    $nextPrompt = __('calories365-bot.please_enter_new_proteins');
                 } else {
-                    $validInput = false;
-                    $errorMessage = 'Пожалуйста, введите корректное числовое значение для калорий.';
+                    $validInput   = false;
+                    $errorMessage = __('calories365-bot.enter_valid_numeric_value_for_calories');
                 }
                 break;
+
             case 'awaiting_proteins':
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['proteins'] = $text;
-                    $userProducts[$productId]['product']['edited'] = 1;
-                    $nextStep = 'awaiting_fats';
-                    $nextPrompt = 'Пожалуйста, введите новое количество жиров.';
+                    $userProducts[$productId]['product']['edited']   = 1;
+
+                    $nextStep   = 'awaiting_fats';
+                    $nextPrompt = __('calories365-bot.please_enter_new_fats');
                 } else {
-                    $validInput = false;
-                    $errorMessage = 'Пожалуйста, введите корректное числовое значение для белков.';
+                    $validInput   = false;
+                    $errorMessage = __('calories365-bot.enter_valid_numeric_value_for_proteins');
                 }
                 break;
+
             case 'awaiting_fats':
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
-                    $userProducts[$productId]['product']['fats'] = $text;
+                    $userProducts[$productId]['product']['fats']   = $text;
                     $userProducts[$productId]['product']['edited'] = 1;
-                    $nextStep = 'awaiting_carbohydrates';
-                    $nextPrompt = 'Пожалуйста, введите новое количество углеводов.';
+
+                    $nextStep   = 'awaiting_carbohydrates';
+                    $nextPrompt = __('calories365-bot.please_enter_new_carbohydrates');
                 } else {
-                    $validInput = false;
-                    $errorMessage = 'Пожалуйста, введите корректное числовое значение для жиров.';
+                    $validInput   = false;
+                    $errorMessage = __('calories365-bot.enter_valid_numeric_value_for_fats');
                 }
                 break;
+
             case 'awaiting_carbohydrates':
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['carbohydrates'] = $text;
-                    $userProducts[$productId]['product']['edited'] = 1;
+                    $userProducts[$productId]['product']['edited']        = 1;
 
                     $this->saveEditing($telegram, $chatId, $userId, $userProducts, $productId, $messageId, $botUser);
                     Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));
                     return;
                 } else {
-                    $validInput = false;
-                    $errorMessage = 'Пожалуйста, введите корректное числовое значение для углеводов.';
+                    $validInput   = false;
+                    $errorMessage = __('calories365-bot.enter_valid_numeric_value_for_carbohydrates');
                 }
                 break;
+
             default:
                 $this->clearEditingState($userId);
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text' => 'Произошла ошибка при редактировании продукта.',
+                    'text'    => __('calories365-bot.error_editing_product'),
                 ]);
                 return;
         }
@@ -151,15 +165,12 @@ class EditMessageHandler implements MessageHandlerInterface
 
     protected function deleteUserMessage($telegram, $chatId, $messageId)
     {
-        // В личных чатах бот не может удалять сообщения пользователя
-        // Если бот в группе и является администратором с правами удаления сообщений, то можно попытаться удалить
         try {
             $telegram->deleteMessage([
-                'chat_id' => $chatId,
+                'chat_id'    => $chatId,
                 'message_id' => $messageId,
             ]);
         } catch (\Exception $e) {
         }
     }
-
 }

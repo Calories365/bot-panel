@@ -37,15 +37,6 @@ class StartMessageHandler implements MessageHandlerInterface
 
         $caloires_id = $botUser->calories_id;
 
-//        if (!$caloires_id){
-//            $telegram->sendMessage([
-//                'chat_id' => $chatId,
-//                'text'    => "Вы должны быть авторизированны!"
-//            ]);
-//            return;
-//        }
-
-
         $parts = explode(' ', $text);
         $code = $parts[1] ?? null;
 
@@ -74,7 +65,7 @@ class StartMessageHandler implements MessageHandlerInterface
             } else {
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text'    => "Код недействителен или уже использован. Пожалуйста, зарегистрируйтесь заново."
+                    'text'    => __('calories365-bot.invalid_or_used_code')
                 ]);
                 return;
             }
@@ -94,21 +85,16 @@ class StartMessageHandler implements MessageHandlerInterface
         } else {
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text'    => "Похоже, вы здесь впервые. Чтобы связать аккаунт, используйте ссылку «Подключить» из личного кабинета (https://calculator.calories365.com)."
+                'text'    => __('calories365-bot.seems_you_are_new')
             ]);
         }
     }
 
-    /**
-     * Отправка «приветственного» сообщения (с картинкой/клавиатурой).
-     * Вынесена в отдельный метод123, чтобы переиспользовать в разных условиях.
-     */
     protected function sendWelcome($bot, $telegram, $message, array $commonData): void
     {
         $imagePath = $bot->message_image;
         $messageText = $bot->message;
 
-        // Формируем клавиатуру
         $keyboard = Keyboard::make([
             'resize_keyboard' => true,
         ])->row([
@@ -123,7 +109,6 @@ class StartMessageHandler implements MessageHandlerInterface
             ['text' => 'English']
         ]);
 
-        // Если есть картинка
         if ($imagePath) {
             $relativeImagePath = str_replace('/images', 'public/bots', parse_url($imagePath, PHP_URL_PATH));
             if (Storage::exists($relativeImagePath)) {
@@ -138,7 +123,6 @@ class StartMessageHandler implements MessageHandlerInterface
                         'reply_markup' => $keyboard
                     ]);
                 } catch (\Telegram\Bot\Exceptions\TelegramOtherException $e) {
-                    // Если бот заблокирован
                     if ($e->getMessage() === 'Forbidden: bot was blocked by the user') {
                         $userModel = BotUser::where('telegram_id', $commonData['chatId'])->firstOrFail();
                         $userModel->is_banned = 1;
@@ -151,7 +135,6 @@ class StartMessageHandler implements MessageHandlerInterface
                 Log::error("Image file not found: " . $relativeImagePath);
             }
         } else {
-            // Если картинки нет, отправляем обычное сообщение
             $telegram->sendMessage([
                 'chat_id'      => $commonData['chatId'],
                 'text'         => $messageText,
@@ -160,4 +143,3 @@ class StartMessageHandler implements MessageHandlerInterface
         }
     }
 }
-

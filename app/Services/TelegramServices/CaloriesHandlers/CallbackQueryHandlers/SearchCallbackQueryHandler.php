@@ -110,7 +110,6 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                     $telegram->answerCallbackQuery([
                         'callback_query_id' => $callbackQuery->getId(),
                         'text'             => __('calories365-bot.product_not_found'),
-                        // (Ранее уже использовалось в других кодах, поэтому в списке новых фраз можно не дублировать)
                         'show_alert'       => false,
                     ]);
                 }
