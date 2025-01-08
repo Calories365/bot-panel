@@ -180,4 +180,17 @@ class Utilities
 
         return $title . $partition . $body;
     }
+
+    public static function applySynonyms(array &$handlers, array $synonyms): void
+    {
+        foreach ($synonyms as $mainKey => $words) {
+            if (isset($handlers[$mainKey])) {
+                $handler = $handlers[$mainKey];
+
+                foreach ($words as $word) {
+                    $handlers[$word] = $handler;
+                }
+            }
+        }
+    }
 }

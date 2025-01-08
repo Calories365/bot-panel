@@ -181,5 +181,10 @@ Type the /stats command to see your daily stats.
 
 Start keeping your calorie diary easily and conveniently!
 EOT,
-
+    'menu'             => 'Menu',
+    'statistics'       => 'Statistics',
+    'choose_language'  => 'Choose language',
+    'feedback'         => 'Feedback',
+    'whole_day' => 'Whole day',
+    'send_feedback_email' => 'You can send your feedback to the email: mostlysunny1488@gmail.com',
 ];

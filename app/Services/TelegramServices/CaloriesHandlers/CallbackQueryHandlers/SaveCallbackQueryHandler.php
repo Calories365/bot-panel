@@ -106,7 +106,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             'part_of_day'    => $partOfTheDay,
         ];
 
-        $response = $this->diaryApiService->saveProduct($postData, $chat_id, $locale);
+        $response = $this->diaryApiService->saveProduct($postData, $calories_id, $locale);
 
         if (isset($response['error'])) {
             Log::error('Error saving product: ' . $response['error']);

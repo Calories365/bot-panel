@@ -28,10 +28,6 @@ class StartMessageHandler implements MessageHandlerInterface
     {
         $text = $message->getText();
 
-        if (!str_starts_with($text, '/start')) {
-            return;
-        }
-
         $commonData = self::extractCommonData($message);
         $chatId = $commonData['chatId'];
 
@@ -97,17 +93,15 @@ class StartMessageHandler implements MessageHandlerInterface
 
         $keyboard = Keyboard::make([
             'resize_keyboard' => true,
-        ])->row([
-            ['text' => '/stats_morning'],
-            ['text' => '/stats_dinner']
-        ])->row([
-            ['text' => '/stats_supper'],
-            ['text' => '/stats']
-        ])->row([
-            ['text' => 'Русский'],
-            ['text' => 'Українська'],
-            ['text' => 'English']
-        ]);
+        ])
+            ->row([
+                ['text' => __('calories365-bot.menu')],
+                ['text' => __('calories365-bot.statistics')]
+            ])
+            ->row([
+                ['text' => __('calories365-bot.choose_language')],
+                ['text' => __('calories365-bot.feedback')]
+            ]);
 
         if ($imagePath) {
             $relativeImagePath = str_replace('/images', 'public/bots', parse_url($imagePath, PHP_URL_PATH));

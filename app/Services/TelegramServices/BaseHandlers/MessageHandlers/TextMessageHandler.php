@@ -24,14 +24,12 @@ class TextMessageHandler
         $userId = $message->getFrom()->getId();
         $chatId = $message->getChat()->getId();
 
-         $commandParts = explode('_', $text);
-//         if (isset($commandParts[1])) {
-//             $text = $commandParts[0];
-//         }
 
-        $parts = explode(' ', $commandParts[0]);
-        $text = $parts[0];
+         $commandParts = explode(' ', $text);
 
+         if ($commandParts[0] == '/start'){
+             $text = $commandParts[0];
+         }
 
         if (isset($this->textMessageHandlers[$text])) {
             $isBlocked = Cache::get("command_block{$userId}", 0);

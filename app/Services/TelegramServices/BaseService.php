@@ -38,7 +38,7 @@ class BaseService implements BotHandlerStrategy
     {
         $messageUpdateHandler = new MessageUpdateHandler($this->getMessageHandlers());
         $myChatMemberUpdateHandler = new MyChatMemberUpdateHandler();
-        $callbackQueryHandler = new CallbackQueryHandler();
+        $callbackQueryHandler = new CallbackQueryHandler($this->getCallbackQueryHandlers());
 
         return [
             'message' => $messageUpdateHandler,
@@ -75,6 +75,19 @@ class BaseService implements BotHandlerStrategy
         return [
             '/start' => $startTextMessageHandler,
             '/default' => $startTextMessageHandler
+        ];
+    }
+
+    /**
+     * BaseService getCallbackQueryHandlers.
+     * collects and returns all basic CallbackQueryHandlers
+     */
+    protected function getCallbackQueryHandlers(): array{
+
+        $callbackQueryHandler = new CallbackQueryHandler();
+
+        return [
+
         ];
     }
 

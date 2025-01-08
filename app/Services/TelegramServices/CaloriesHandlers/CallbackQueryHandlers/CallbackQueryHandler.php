@@ -3,10 +3,6 @@
 namespace App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers;
 
 use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\UpdateHandlerInterface;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingCancelCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSaveCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSkipCallbackQueryHandler;
-use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -14,30 +10,11 @@ class CallbackQueryHandler implements UpdateHandlerInterface
 {
     protected array $callbackQueryHandlers;
 
-    public function __construct(
-        CancelCallbackQueryHandler        $cancelCallbackQuery,
-        SaveCallbackQueryHandler          $saveCallbackQuery,
-        EditCallbackQueryHandler          $editCallbackQuery,
-        DeleteCallbackQueryHandler        $deleteCallbackQuery,
-        EditingSaveCallbackQueryHandler   $editingSaveCallbackQueryHandler,
-        EditingCancelCallbackQueryHandler $editingCancelCallbackQueryHandler,
-        EditingSkipCallbackQueryHandler   $editingSkipCallbackQueryHandler,
-        SearchCallbackQueryHandler      $searchCallbackQueryHandler,
-        DeleteMealCallbackQueryHandler $deleteMealCallbackQueryHandler,
-    )
+    public function __construct(array $callbackQueryHandlers)
     {
-        $this->callbackQueryHandlers = [
-            'cancel' => $cancelCallbackQuery,
-            'save' => $saveCallbackQuery,
-            'edit' => $editCallbackQuery,
-            'destroy' => $deleteCallbackQuery,
-            'editing_save' => $editingSaveCallbackQueryHandler,
-            'editing_cancel' => $editingCancelCallbackQueryHandler,
-            'editing_skip' => $editingSkipCallbackQueryHandler,
-            'search' => $searchCallbackQueryHandler,
-            'delete_meal' => $deleteMealCallbackQueryHandler,
-        ];
+        $this->callbackQueryHandlers = $callbackQueryHandlers;
     }
+
 
     public function handle($bot, $telegram, $update, $botUser)
     {

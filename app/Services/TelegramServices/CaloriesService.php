@@ -2,8 +2,6 @@
 
 namespace App\Services\TelegramServices;
 
-use App\Services\ChatGPTServices\SpeechToTextService;
-use App\Services\DiaryApiService;
 use App\Services\TelegramServices\CaloriesHandlers\AudioMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CancelCallbackQueryHandler;
@@ -13,12 +11,18 @@ use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditCal
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingCancelCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSaveCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSkipCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\LanguageCallbackHandlers\SetEnglishLanguageCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\LanguageCallbackHandlers\SetRussianLanguageCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\LanguageCallbackHandlers\SetUkrainianLanguageCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SaveCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SearchCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\StatsCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\EditMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FeedbackMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\LanguageMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMessageHandler;
+use App\Utilities\Utilities;
 
 class CaloriesService extends BaseService
 {
@@ -33,30 +37,17 @@ class CaloriesService extends BaseService
     {
         return $this->excludedCommands;
     }
+
     protected function getUpdateHandlers(): array
     {
         $updateHandlers = parent::getUpdateHandlers();
 
-        $updateHandlers['callback_query'] = new CallbackQueryHandler(
-            new CancelCallbackQueryHandler(),
-            new SaveCallbackQueryHandler(),
-            new EditCallbackQueryHandler(),
-            new DeleteCallbackQueryHandler(),
-            new EditingSaveCallbackQueryHandler(),
-            new EditingCancelCallbackQueryHandler(),
-            new EditingSkipCallbackQueryHandler(),
-            new SearchCallbackQueryHandler(
-                new DiaryApiService(),
-                new SpeechToTextService()
-            ),
-            new DeleteMealCallbackQueryHandler(
-                new DiaryApiService(),
-            ),
-        );
+        $updateHandlers['callback_query'] = app(CallbackQueryHandler::class, [
+            'callbackQueryHandlers' => $this->getCallbackQueryHandlers()
+        ]);
 
         return $updateHandlers;
     }
-
 
     protected function getMessageHandlers(): array
     {
@@ -72,20 +63,68 @@ class CaloriesService extends BaseService
         $textMessageHandlers = parent::getTextMessageHandlers();
 
         $textMessageHandlers['default'] = app(EditMessageHandler::class);
-        $textMessageHandlers['/stats'] = new StatsMessageHandler(
-            new DiaryApiService()
-        );
-        $textMessageHandlers['/start'] = new StartMessageHandler(
-            new DiaryApiService(),
-        );
-        $textMessageHandlers['/language'] = new LanguageMessageHandler();
-        $textMessageHandlers['Русский'] = new LanguageMessageHandler();
-        $textMessageHandlers['English'] = new LanguageMessageHandler();
-        $textMessageHandlers['Українська'] = new LanguageMessageHandler();
 
+        $textMessageHandlers['/stats'] = app(StatsMessageHandler::class);
 
+        $textMessageHandlers['/start'] = app(StartMessageHandler::class);
+
+        $synonyms = [
+            '/start' => ['Меню', 'Menu'],
+        ];
+
+        Utilities::applySynonyms($textMessageHandlers, $synonyms);
+
+        $textMessageHandlers['/language'] = app(LanguageMessageHandler::class);
+
+        $synonyms = [
+            '/stats' => ['Statistics', 'Статистика'],
+        ];
+        Utilities::applySynonyms($textMessageHandlers, $synonyms);
+
+        $synonyms = [
+            '/language' => ['Choose language', 'Выбор языка', 'Вибір мови'],
+        ];
+        Utilities::applySynonyms($textMessageHandlers, $synonyms);
+
+        $textMessageHandlers['feedback'] = app(FeedbackMessageHandler::class);
+
+        $synonyms = [
+            'feedback' => ['Feedback','Обратная связь','Зворотний зв\'язок',],
+        ];
+
+        Utilities::applySynonyms($textMessageHandlers, $synonyms);
 
         return $textMessageHandlers;
     }
 
+    protected function getCallbackQueryHandlers(): array
+    {
+        $callbackQueryHandlers = parent::getCallbackQueryHandlers();
+
+        $callbackQueryHandlers['cancel'] = app(CancelCallbackQueryHandler::class);
+        $callbackQueryHandlers['save'] = app(SaveCallbackQueryHandler::class);
+        $callbackQueryHandlers['edit'] = app(EditCallbackQueryHandler::class);
+        $callbackQueryHandlers['destroy'] = app(DeleteCallbackQueryHandler::class);
+
+        $callbackQueryHandlers['editing_save'] = app(EditingSaveCallbackQueryHandler::class);
+        $callbackQueryHandlers['editing_cancel'] = app(EditingCancelCallbackQueryHandler::class);
+        $callbackQueryHandlers['editing_skip'] = app(EditingSkipCallbackQueryHandler::class);
+
+        $callbackQueryHandlers['search'] = app(SearchCallbackQueryHandler::class);
+        $callbackQueryHandlers['delete_meal'] = app(DeleteMealCallbackQueryHandler::class);
+
+        $callbackQueryHandlers['English'] = app(SetEnglishLanguageCallbackQueryHandler::class);
+        $callbackQueryHandlers['Russian'] = app(SetRussianLanguageCallbackQueryHandler::class);
+        $callbackQueryHandlers['Ukrainian'] = app(SetUkrainianLanguageCallbackQueryHandler::class);
+
+        $callbackQueryHandlers['Stats'] = app(StatsCallbackQueryHandler::class);
+
+        $synonyms = [
+            'Stats' => ['Breakfast', 'Dinner', 'Supper', 'AllDay'],
+        ];
+
+        Utilities::applySynonyms($callbackQueryHandlers, $synonyms);
+
+        return $callbackQueryHandlers;
+    }
 }
