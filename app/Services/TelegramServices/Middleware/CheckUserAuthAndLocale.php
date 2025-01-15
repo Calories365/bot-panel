@@ -29,7 +29,22 @@ class CheckUserAuthAndLocale
         $userId = $update->getMessage()?->getChat()?->getId()
             ?: $update->getCallbackQuery()?->getChat()?->getId();
 
+        $language = $update->getMessage()?->getFrom()?->getLanguageCode()
+            ?: $update->getCallbackQuery()?->getFrom()?->getLanguageCode();
+
         $botUser = BotUser::where('telegram_id', $userId)->first();
+
+        if ($botUser && $botUser->locale) {
+            App::setLocale($botUser->locale);
+        } else {
+            if ($language) {
+                if ($language == 'uk') {
+                    $language = 'ua';
+                }
+                App::setLocale($language);
+            }
+        }
+
 
         foreach ($excludedCommands as $excluded) {
             if (str_starts_with($text, $excluded)) {
@@ -60,10 +75,6 @@ class CheckUserAuthAndLocale
                 'text'    => __('calories365-bot.you_must_be_authorized'),
             ]);
             return null;
-        }
-
-        if ($botUser->locale) {
-            App::setLocale($botUser->locale);
         }
 
         $passable['botUser'] = $botUser;

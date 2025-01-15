@@ -6,6 +6,7 @@ use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInt
 use App\Services\TelegramServices\CaloriesHandlers\EditHandlerTrait;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class EditMessageHandler implements MessageHandlerInterface
 {
@@ -43,7 +44,8 @@ class EditMessageHandler implements MessageHandlerInterface
                 $editingState,
                 $userProducts,
                 $productId,
-                $messageId
+                $messageId,
+                $botUser
             );
 
             $this->deleteUserMessage($telegram, $chatId, $message->getMessageId());
@@ -54,7 +56,7 @@ class EditMessageHandler implements MessageHandlerInterface
         }
     }
 
-    protected function processInput($telegram, $chatId, $userId, $text, &$editingState, &$userProducts, $productId, $messageId)
+    protected function processInput($telegram, $chatId, $userId, $text, &$editingState, &$userProducts, $productId, $messageId, $botUser)
     {
         $currentStep = $editingState['step'];
         $validInput  = true;

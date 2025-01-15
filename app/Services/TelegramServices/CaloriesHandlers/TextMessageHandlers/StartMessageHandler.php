@@ -31,8 +31,6 @@ class StartMessageHandler implements MessageHandlerInterface
         $commonData = self::extractCommonData($message);
         $chatId = $commonData['chatId'];
 
-        $caloires_id = $botUser->calories_id;
-
         $parts = explode(' ', $text);
         $code = $parts[1] ?? null;
 
@@ -67,7 +65,7 @@ class StartMessageHandler implements MessageHandlerInterface
             }
         }
 
-        if ($botUser->calories_id) {
+        if ($botUser && $botUser->calories_id) {
             $this->sendWelcome($bot, $telegram, $message, $commonData);
 
             Utilities::saveAndNotify(

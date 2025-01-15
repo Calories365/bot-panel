@@ -30,7 +30,8 @@ class CaloriesService extends BaseService
 
     protected array $excludedCommands = [
         '/start',
-        '/language'
+        'Menu',
+        'Меню',
     ];
 
     public function getExcludedCommands(): array
