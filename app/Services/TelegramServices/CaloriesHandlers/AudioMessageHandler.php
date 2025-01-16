@@ -3,7 +3,6 @@
 namespace App\Services\TelegramServices\CaloriesHandlers;
 
 use App\Services\AudioConversionService;
-use App\Services\ChatGPTService;
 use App\Services\DiaryApiService;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
@@ -18,17 +17,14 @@ class AudioMessageHandler implements MessageHandlerInterface
 
     protected AudioConversionService $audioConversionService;
     protected DiaryApiService $diaryApiService;
-    protected ChatGPTService $chatGPTService;
 
     public function __construct(
         AudioConversionService $audioConversionService,
         DiaryApiService        $diaryApiService,
-        ChatGPTService         $chatGPTService
     )
     {
         $this->audioConversionService = $audioConversionService;
         $this->diaryApiService = $diaryApiService;
-        $this->chatGPTService = $chatGPTService;
     }
 
     public function handle($bot, $telegram, $message, $botUser)

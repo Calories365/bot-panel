@@ -128,6 +128,10 @@ Examples of input text and the expected output:
 5. Input text: 'I haven’t eaten anything today.'
    Expected output:
    no products
+
+ 6. Input text: 'I ate two eggs'
+    Expected output:
+    Egg - 120 grams;
 EOT,
 
     'prompt_generate_new_product_data' => <<<EOT

@@ -194,22 +194,21 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                 $value = trim($keyValue[1]);
 
                 switch (mb_strtolower($key)) {
-                    case 'калории':
+                    case mb_strtolower(__('calories365-bot.calories')):
                         $nutritionalData['calories'] = (float) $value;
                         break;
-                    case 'белки':
+                    case mb_strtolower(__('calories365-bot.proteins')):
                         $nutritionalData['proteins'] = (float) $value;
                         break;
-                    case 'жиры':
-                        $nutritionalData['fats'] = (float) $value;
+                    case mb_strtolower(__('calories365-bot.fats')):
+                    $nutritionalData['fats'] = (float) $value;
                         break;
-                    case 'углеводы':
-                        $nutritionalData['carbohydrates'] = (float) $value;
+                    case mb_strtolower(__('calories365-bot.carbohydrates')):
+                    $nutritionalData['carbohydrates'] = (float) $value;
                         break;
                 }
             }
         }
-
         return $nutritionalData;
     }
 }

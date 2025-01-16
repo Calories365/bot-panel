@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Services\AudioConversionService;
-use App\Services\ChatGPTService;
 use App\Services\ChatGPTServices\SpeechToTextService;
 use App\Services\DiaryApiService;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -18,10 +17,6 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(AudioConversionService::class, function ($app) {
             return new AudioConversionService($app->make(SpeechToTextService::class));
-        });
-
-        $this->app->singleton(ChatGPTService::class, function ($app) {
-            return new ChatGPTService();
         });
 
         $this->app->singleton(DiaryApiService::class, function ($app) {

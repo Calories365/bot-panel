@@ -7,8 +7,6 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Log;
-use Monolog\Logger;
-
 class SpeechToTextService
 {
     private Client $client;
@@ -18,10 +16,7 @@ class SpeechToTextService
     {
         $this->client = new Client();
 
-        // Смотрим текущую локаль (можно использовать $botUser->locale или app()->getLocale() и т.д.)
         $locale = app()->getLocale();
-        // Для теста явно установлено 'en'; можете убрать/изменить по необходимости.
-        $locale = 'en';
 
         switch ($locale) {
             case 'ua':
@@ -37,6 +32,7 @@ class SpeechToTextService
 
     public function convertSpeechToText(string $filePath)
     {
+        Log::info($this->apiKey);
         $multipartBody = new MultipartStream([
             [
                 'name'     => 'file',
@@ -66,7 +62,6 @@ class SpeechToTextService
             $data = json_decode($response->getBody()->getContents(), true);
 
             if (isset($data['text'])) {
-                // Передаём распознанный текст на дальнейший анализ
                 return $this->analyzeFoodIntake($data['text']);
             }
             return false;
@@ -79,7 +74,6 @@ class SpeechToTextService
     {
         Log::info('prompt: ' . $text);
 
-        // Вместо «сырого» текста — используем языковую фразу
         $prompt = __('calories365-bot.prompt_analyze_food_intake', [
             'text' => $text,
         ]);
@@ -103,7 +97,6 @@ class SpeechToTextService
         try {
             $result = json_decode($response->getBody()->getContents(), true);
 
-            // Если отсутствует нужная часть — выводим фразу из локали
             return $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
         } catch (GuzzleException $e) {
@@ -116,7 +109,6 @@ class SpeechToTextService
      */
     public function generateNewProductData(string $text)
     {
-        // Выносим длинный промт в локаль
         $prompt = __('calories365-bot.prompt_generate_new_product_data', [
             'text' => $text,
         ]);
@@ -163,22 +155,17 @@ class SpeechToTextService
                         return $detail['id'] . ' - ' . $detail['name'];
                     }, $details);
 
-                    // Здесь можно собрать часть промта через локаль, например:
-                    // prompt_choose_relevant_products_part
                     $prompt .= __('calories365-bot.prompt_choose_relevant_products_part', [
                             'name'         => $name,
                             'productNames' => implode(', ', $productNames),
                         ]) . ' ';
                 }
 
-                // Добавим «footer» — формат вывода
                 $prompt .= __('calories365-bot.prompt_choose_relevant_products_footer');
 
-                // Вызываем наш метод для отправки промта
                 $chosenProductName .= $this->askGPTForRelevance($prompt);
             }
 
-            // Можете здесь Log::info("Chosen products: ".$chosenProductName); если нужно
         } catch (\Exception $e) {
             Log::error("Error in choosing product: " . $e->getMessage());
             return ['error' => $e->getMessage()];
