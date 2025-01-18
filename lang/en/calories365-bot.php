@@ -184,6 +184,8 @@ Tap the “Save” button to store the data in your diary.
 4) Daily stats:
 Type the /stats command to see your daily stats.
 
+Link to the application: https://calculator.calories365.com
+
 Start keeping your calorie diary easily and conveniently!
 EOT,
     'menu'             => 'Menu',
@@ -191,5 +193,5 @@ EOT,
     'choose_language'  => 'Choose language',
     'feedback'         => 'Feedback',
     'whole_day' => 'Whole day',
-    'send_feedback_email' => 'You can send your feedback to the email: mostlysunny1488@gmail.com',
+    'send_feedback_email' => 'You can send your feedback to the administrator:  @calories365_admin',
 ];
