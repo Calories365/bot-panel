@@ -67,6 +67,7 @@ class EditMessageHandler implements MessageHandlerInterface
                     $userProducts[$productId]['product_translation']['name']      = $text;
                     $userProducts[$productId]['product_translation']['said_name'] = $text;
                     $userProducts[$productId]['product']['edited']               = 1;
+                    $userProducts[$productId]['product']['verified']   = 0;
 
                     Cache::forget("product_click_count_{$userId}_{$productId}");
 
@@ -93,6 +94,7 @@ class EditMessageHandler implements MessageHandlerInterface
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['calories'] = $text;
                     $userProducts[$productId]['product']['edited']   = 1;
+                    $userProducts[$productId]['product']['verified']   = 0;
 
                     $nextStep   = 'awaiting_proteins';
                     $nextPrompt = __('calories365-bot.please_enter_new_proteins');
@@ -106,6 +108,7 @@ class EditMessageHandler implements MessageHandlerInterface
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['proteins'] = $text;
                     $userProducts[$productId]['product']['edited']   = 1;
+                    $userProducts[$productId]['product']['verified']   = 0;
 
                     $nextStep   = 'awaiting_fats';
                     $nextPrompt = __('calories365-bot.please_enter_new_fats');
@@ -119,6 +122,7 @@ class EditMessageHandler implements MessageHandlerInterface
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['fats']   = $text;
                     $userProducts[$productId]['product']['edited'] = 1;
+                    $userProducts[$productId]['product']['verified']   = 0;
 
                     $nextStep   = 'awaiting_carbohydrates';
                     $nextPrompt = __('calories365-bot.please_enter_new_carbohydrates');
@@ -132,6 +136,7 @@ class EditMessageHandler implements MessageHandlerInterface
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['carbohydrates'] = $text;
                     $userProducts[$productId]['product']['edited']        = 1;
+                    $userProducts[$productId]['product']['verified']   = 0;
 
                     $this->saveEditing($telegram, $chatId, $userId, $userProducts, $productId, $messageId, $botUser);
                     Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));

@@ -149,14 +149,12 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                 }
             }
 
-            // Помечаем продукт как "отредактированный"
             $products[$productId]['product']['edited'] = 1;
-            // Обновляем название продукта
+            $products[$productId]['product']['verified'] = 1;
             $products[$productId]['product_translation']['name'] = $saidName;
 
             Cache::put("user_products_{$userId}", $products, now()->addMinutes(30));
 
-            // Обновляем сообщение (карточку продукта)
             $this->updateProductMessage($telegram, $chatId, $products[$productId]);
 
             $telegram->answerCallbackQuery([

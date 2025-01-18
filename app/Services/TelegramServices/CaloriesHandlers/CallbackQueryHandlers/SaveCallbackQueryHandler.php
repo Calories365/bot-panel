@@ -104,6 +104,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             'quantity'       => $product['quantity_grams'],
             'consumed_at'    => date('Y-m-d'),
             'part_of_day'    => $partOfTheDay,
+            'verified'       => $product['verified'],
         ];
 
         $response = $this->diaryApiService->saveProduct($postData, $calories_id, $locale);

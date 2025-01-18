@@ -22,6 +22,7 @@ use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FeedbackM
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\LanguageMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\TestMessageHandler;
 use App\Utilities\Utilities;
 
 class CaloriesService extends BaseService
@@ -68,6 +69,8 @@ class CaloriesService extends BaseService
         $textMessageHandlers['/stats'] = app(StatsMessageHandler::class);
 
         $textMessageHandlers['/start'] = app(StartMessageHandler::class);
+
+        $textMessageHandlers['/test'] = app(TestMessageHandler::class);
 
         $synonyms = [
             '/start' => ['Меню', 'Menu'],
