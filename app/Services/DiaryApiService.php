@@ -28,7 +28,7 @@ class DiaryApiService
      * @param string|null $locale
      * @return array
      */
-    private function getHeaders($caloriesId = null, $locale = null): array
+    private function getHeaders($caloriesId = null, $locale = null, $admin = null): array
     {
         $headers = [
             'Content-Type' => 'application/json',
@@ -43,6 +43,10 @@ class DiaryApiService
 
         if (!empty($locale)) {
             $headers['X-Locale'] = $locale;
+        }
+
+        if (!empty($admin)) {
+            $headers['X-admin'] = true;
         }
 
         return $headers;
@@ -187,4 +191,43 @@ class DiaryApiService
             return ['error' => $e->getMessage()];
         }
     }
+    public function showUsersInfoForBot($calories_id,  string $locale = 'en')
+    {
+        try {
+            $response = $this->client->get($this->apiUrl . '/caloriesEndPoint/user-for-bot', [
+                'headers' => $this->getHeaders($calories_id, $locale),
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            Log::error("Error verifying telegram code: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Получить данные сразу по нескольким calories_id
+     *
+     * @param array  $caloriesIds
+     * @param string $locale
+     * @return array
+     */
+    public function showUsersInfoForBotMultiple(array $caloriesIds, string $locale = 'en'): array
+    {
+        $idsParam = implode(',', $caloriesIds);
+
+        $url = $this->apiUrl . '/caloriesEndPoint/users-for-bot-multiple?ids=' . $idsParam;
+
+        try {
+            $response = $this->client->get($url, [
+                'headers' => $this->getHeaders(null, null, true),
+            ]);
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            Log::error("Error retrieving multiple users info: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
+
 }

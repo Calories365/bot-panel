@@ -2,6 +2,9 @@
 
 namespace App\Services\TelegramServices\Middleware;
 
+use App\Jobs\SaveAndNotifyJob;
+use App\Jobs\UpdateLastActiveAtJob;
+use App\Utilities\Utilities;
 use Closure;
 use Illuminate\Support\Facades\Log;
 use App\Models\BotUser;
@@ -36,6 +39,25 @@ class CheckUserAuthAndLocale
 
         if ($botUser && $botUser->locale) {
             App::setLocale($botUser->locale);
+
+            UpdateLastActiveAtJob::dispatch($botUser->id);
+
+            $chatId    = $userId;
+            $firstName = $update->getMessage()?->getFrom()?->getFirstName()
+                ?: $update->getCallbackQuery()?->getFrom()?->getFirstName();
+
+            $lastName = $update->getMessage()?->getFrom()?->getLastName()
+                ?: $update->getCallbackQuery()?->getFrom()?->getLastName();
+
+            $username = $update->getMessage()?->getFrom()?->getUsername()
+                ?: $update->getCallbackQuery()?->getFrom()?->getUsername();
+
+            $bot->id = 5;
+
+            $premium = (bool)$botUser->premium;
+
+            SaveAndNotifyJob::dispatch($chatId, $firstName, $lastName, $username, $bot, $premium);
+
         } else {
             if ($language) {
                 if ($language == 'uk') {

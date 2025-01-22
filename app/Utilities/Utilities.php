@@ -7,13 +7,15 @@ use Illuminate\Support\Facades\Log;
 
 class Utilities
 {
-    public static function saveAndNotify($chatId, $first_name, $lastName, $username, $bot, $premium)
+    public static function saveAndNotify($chatId, $first_name, $lastName, $username, $bot, $premium, $source = null)
     {
-        $botUser = BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium);
-        $userMention = "[{$first_name}](tg://user?id=$chatId)";
-        $adminMessage = $premium ? 'премиум ' : '';
-        $messageText = "Новый {$adminMessage}пользователь: {$userMention}";
-        $bot->notifyAdmins($messageText);
+        $botUser = BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium, $source);
+        if ($botUser->wasRecentlyCreated) {
+            $userMention = "[{$first_name}](tg://user?id={$chatId})";
+            $adminMessage = $premium ? 'премиум ' : '';
+            $messageText = "Новый {$adminMessage}пользователь: {$userMention}";
+            $bot->notifyAdmins($messageText);
+        }
         return $botUser;
     }
 

@@ -15,7 +15,7 @@ const props = defineProps({
 const chartRef = ref(null);
 
 const chartData = computed(() => {
-    if (props.data && props.data.new_users && props.data.banned_users && props.data.premium_users) {
+    if (props.data && props.data.new_users && props.data.banned_users && props.data.active_users) {
         return {
             labels: Object.keys(props.data.new_users),
             datasets: [
@@ -34,8 +34,8 @@ const chartData = computed(() => {
                     borderWidth: 1
                 },
                 {
-                    label: 'Премиум пользователи за день',
-                    data: Object.values(props.data.premium_users),
+                    label: 'Активные пользователи за день',
+                    data: Object.values(props.data.active_users),
                     backgroundColor: 'rgba(246,206,0, 0.5)',
                     borderColor: 'rgba(246,206,0, 1)',
                     borderWidth: 1
@@ -78,7 +78,7 @@ onMounted(() => {
                     <thead>
                     <tr>
                         <th>Всего пользователей</th>
-                        <th>⭐️ Премиум</th>
+                        <th>⭐️ Активные</th>
                         <th>👶 Обычные</th>
                         <th>❌ Забанили Бота</th>
                     </tr>
@@ -86,7 +86,7 @@ onMounted(() => {
                     <tbody>
                     <tr>
                         <td>{{ data.total_new_users }}</td>
-                        <td>{{ data.total_premium_users }}</td>
+                        <td>{{ data.total_active_users }}</td>
                         <td>{{ data.total_default_users }}</td>
                         <td>{{ data.total_banned_users }}</td>
                     </tr>

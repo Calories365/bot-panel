@@ -14,10 +14,8 @@ class BotUserResource extends JsonResource
      */
     public function toArray($request)
     {
-        // Собираем только ID ботов из связи
         $botIds = $this->bots->pluck('id');
 
-        // Возвращаем данные пользователя с ID ботов
         return [
             'id' => $this->id,
             'name' => $this->name,

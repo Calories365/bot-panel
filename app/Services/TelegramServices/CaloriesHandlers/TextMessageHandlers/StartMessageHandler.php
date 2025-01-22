@@ -38,6 +38,9 @@ class StartMessageHandler implements MessageHandlerInterface
             $result = $this->diaryApiService->checkTelegramCode($code, $chatId);
 
             if (!empty($result['success']) && $result['success'] === true) {
+
+                //заход с калорий
+
                 $caloriesUserId = $result['user_id'];
 
                 $botUser = Utilities::saveAndNotify(
@@ -46,7 +49,8 @@ class StartMessageHandler implements MessageHandlerInterface
                     $commonData['lastName'],
                     $commonData['username'],
                     $bot,
-                    $commonData['premium']
+                    $commonData['premium'],
+                    'calories'
                 );
 
                 $botUser->calories_id = $caloriesUserId;
@@ -66,17 +70,24 @@ class StartMessageHandler implements MessageHandlerInterface
         }
 
         if ($botUser && $botUser->calories_id) {
+
+            //уже существует аккич
+
             $this->sendWelcome($bot, $telegram, $message, $commonData);
 
-            Utilities::saveAndNotify(
+        } else {
+
+            //заход по ссылке на бота
+           Utilities::saveAndNotify(
                 $commonData['chatId'],
                 $commonData['firstName'],
                 $commonData['lastName'],
                 $commonData['username'],
                 $bot,
-                $commonData['premium']
+                $commonData['premium'],
+               'bot_link'
             );
-        } else {
+
             $telegram->sendMessage([
                 'chat_id' => $chatId,
                 'text'    => __('calories365-bot.seems_you_are_new')

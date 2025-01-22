@@ -8,6 +8,7 @@ use App\Models\BotUserBan;
 use App\Models\BotUserBot;
 use DateInterval;
 use DatePeriod;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -63,6 +64,8 @@ class BotUsersService
         $newUsersStats = $dates;
         $bannedUsersStats = $dates;
         $premiumUsersStats = $dates;
+        $activeUsersStats  = $dates;
+
         $botId = $bot->id;
 
         $newUsersData = BotUserBot::getNewUsersStatistics($botId, $startDate, $endDate);
@@ -80,9 +83,23 @@ class BotUsersService
             $premiumUsersStats[$data->date] = $data->count;
         }
 
+        foreach ($dates as $date => $zero) {
+            if ($date === now()->format('Y-m-d')) {
+                $activeCount = BotUser::query()
+                    ->whereDate('last_active_at', $date)
+                    ->count();
+            } else {
+                $activeCount = DB::table('daily_activity')
+                    ->whereDate('date', $date)
+                    ->value('count') ?? 0;
+            }
+            $activeUsersStats[$date] = $activeCount;
+        }
+
         $totalNewUsers = array_sum($newUsersStats);
         $totalBannedUsers = array_sum($bannedUsersStats);
         $totalPremiumUsers = array_sum($premiumUsersStats);
+        $totalActiveUsers  = array_sum($activeUsersStats);
         $totalDefaultUsers = array_sum($newUsersStats) - array_sum($premiumUsersStats);
 
 //        Log::info(print_r([
@@ -99,6 +116,8 @@ class BotUsersService
             'new_users' => $newUsersStats,
             'banned_users' => $bannedUsersStats,
             'premium_users' => $premiumUsersStats,
+            'active_users'          => $activeUsersStats,
+            'total_active_users'    => $totalActiveUsers,
             'total_new_users' => $totalNewUsers,
             'total_banned_users' => $totalBannedUsers,
             'total_premium_users' => $totalPremiumUsers,

@@ -8,7 +8,8 @@ import {useRoute} from "vue-router";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import Loader from "@/Components/UI/Loader.vue";
 import BotsButtonWarning from "@/Components/UI/BotsButtonWarning.vue";
-import {users_table} from "@/ComponentConfigs/Table/users_table.js";
+import { users_table } from "@/ComponentConfigs/Table/users_table.js";
+import {users_calories_table} from "@/ComponentConfigs/Table/users_calories_table.js";
 import usePagination from "@/Composables/usePagination.js";
 
 const store = useStore();
@@ -24,6 +25,11 @@ const emit = defineEmits(['handle']);
 const showModal = ref(false);
 const selectedUserId = ref(null);
 const { currentPage, pageSize, handlePageChange, handlePageSizeChange } = usePagination(store.dispatch, fetchData, route.params.id);
+
+const columns = computed(() => {
+    return route.params.id === '5' ? users_calories_table : users_table;
+});
+
 function fetchData(botId) {
     const params = {
         page: currentPage.value,
@@ -108,7 +114,7 @@ const confirmDelete = () => {
             <botsTable
                 :users=true
                 :per-page-text="prePageText"
-                :columns="users_table"
+                :columns="columns"
                 :data="users"
                 :total-pages="pagination.totalPages"
                 :current-page="pagination.currentPage"

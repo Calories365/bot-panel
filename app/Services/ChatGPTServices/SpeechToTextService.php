@@ -7,32 +7,39 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Log;
+
 class SpeechToTextService
 {
     private Client $client;
-    private string $apiKey;
 
     public function __construct()
     {
         $this->client = new Client();
+    }
 
+    /**
+     * Определяем нужный ключ в зависимости от текущей локали
+     */
+    private function getApiKey(): string
+    {
         $locale = app()->getLocale();
+
+        Log::info('$locale: ' . $locale);
 
         switch ($locale) {
             case 'ua':
-                $this->apiKey = env('OPENAI_API_KEY_UK');
-                break;
+                return env('OPENAI_API_KEY_UK');
+
             case 'en':
-                $this->apiKey = env('OPENAI_API_KEY_EN');
-                break;
+                return env('OPENAI_API_KEY_EN');
+
             default:
-                $this->apiKey = env('OPENAI_API_KEY_RU');
+                return env('OPENAI_API_KEY_RU');
         }
     }
 
     public function convertSpeechToText(string $filePath)
     {
-        Log::info($this->apiKey);
         $multipartBody = new MultipartStream([
             [
                 'name'     => 'file',
@@ -46,7 +53,7 @@ class SpeechToTextService
         ]);
 
         $headers = [
-            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Authorization' => 'Bearer ' . $this->getApiKey(),
             'Content-Type'  => 'multipart/form-data; boundary=' . $multipartBody->getBoundary()
         ];
 
@@ -78,23 +85,23 @@ class SpeechToTextService
             'text' => $text,
         ]);
 
-        $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type'  => 'application/json'
-            ],
-            'json' => [
-                'model'    => 'gpt-4o',
-                'messages' => [
-                    [
-                        'role'    => 'user',
-                        'content' => $prompt,
+        try {
+            $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->getApiKey(),
+                    'Content-Type'  => 'application/json'
+                ],
+                'json' => [
+                    'model'    => 'gpt-4o',
+                    'messages' => [
+                        [
+                            'role'    => 'user',
+                            'content' => $prompt,
+                        ]
                     ]
                 ]
-            ]
-        ]);
+            ]);
 
-        try {
             $result = json_decode($response->getBody()->getContents(), true);
 
             return $result['choices'][0]['message']['content']
@@ -113,23 +120,23 @@ class SpeechToTextService
             'text' => $text,
         ]);
 
-        $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type'  => 'application/json'
-            ],
-            'json' => [
-                'model'    => 'gpt-4o',
-                'messages' => [
-                    [
-                        'role'    => 'user',
-                        'content' => $prompt
+        try {
+            $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->getApiKey(),
+                    'Content-Type'  => 'application/json'
+                ],
+                'json' => [
+                    'model'    => 'gpt-4o',
+                    'messages' => [
+                        [
+                            'role'    => 'user',
+                            'content' => $prompt
+                        ]
                     ]
                 ]
-            ]
-        ]);
+            ]);
 
-        try {
             $result = json_decode($response->getBody()->getContents(), true);
 
             return $result['choices'][0]['message']['content']
@@ -175,23 +182,23 @@ class SpeechToTextService
 
     private function askGPTForRelevance($prompt)
     {
-        $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type'  => 'application/json'
-            ],
-            'json' => [
-                'model'    => 'gpt-4o',
-                'messages' => [
-                    [
-                        'role'    => 'user',
-                        'content' => $prompt
+        try {
+            $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->getApiKey(),
+                    'Content-Type'  => 'application/json'
+                ],
+                'json' => [
+                    'model'    => 'gpt-4o',
+                    'messages' => [
+                        [
+                            'role'    => 'user',
+                            'content' => $prompt
+                        ]
                     ]
                 ]
-            ]
-        ]);
+            ]);
 
-        try {
             $result = json_decode($response->getBody()->getContents(), true);
 
             return $result['choices'][0]['message']['content']

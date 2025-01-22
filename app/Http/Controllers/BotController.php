@@ -97,6 +97,7 @@ class BotController extends BaseController
     public function getBotUserData(Bot $bot, BotUsersService $botUsersService): \Illuminate\Http\JsonResponse
     {
         $data = $botUsersService->getBotUserData($bot);
+        Log::info(print_r($data, true));
         return response()->json($data);
     }
 
