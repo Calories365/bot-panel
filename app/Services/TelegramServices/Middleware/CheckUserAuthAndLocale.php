@@ -52,7 +52,7 @@ class CheckUserAuthAndLocale
             $username = $update->getMessage()?->getFrom()?->getUsername()
                 ?: $update->getCallbackQuery()?->getFrom()?->getUsername();
 
-            $bot->id = 5;
+            $bot->id = 6;
 
             $premium = (bool)$botUser->premium;
 
