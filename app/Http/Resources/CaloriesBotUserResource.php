@@ -42,9 +42,9 @@ class CaloriesBotUserResource extends ResourceCollection
                 'premium_calories' => $botUser->premium,
                 'created_at'     => $botUser->created_at->format('d.m.Y H:i:s'),
                 'source'         => $botUser->source,
-
                 'email'             => $email,
                 'username_calories' => $calName,
+                'bot_type_id' => 6
             ];
         });
     }

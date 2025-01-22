@@ -92,7 +92,8 @@ onMounted(() => {
                     </tr>
                     </tbody>
                 </table>
-                <BotsButton @click="navigateToUsers">
+                <BotsButton @click="navigateToUsers"
+                >
                     Список пользователей
                 </BotsButton>
             </div>

@@ -36,9 +36,9 @@ class SendAdminNotification implements ShouldQueue
                 'chat_id' => $this->admin->telegram_id,
                 'text' => $this->message,
             ]);
-            Log::info('Sent message to admin: ' . $this->admin->name);
+//            Log::info('Sent message to admin: ' . $this->admin->name);
         } catch (\Exception $e) {
-            Log::error('Error sending message to ' . $this->admin->telegram_id . ': ' . $e->getMessage());
+//            Log::error('Error sending message to ' . $this->admin->telegram_id . ': ' . $e->getMessage());
         }
     }
 }

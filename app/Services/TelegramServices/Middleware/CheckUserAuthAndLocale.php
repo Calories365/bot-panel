@@ -52,8 +52,6 @@ class CheckUserAuthAndLocale
             $username = $update->getMessage()?->getFrom()?->getUsername()
                 ?: $update->getCallbackQuery()?->getFrom()?->getUsername();
 
-            $bot->id = 6;
-
             $premium = (bool)$botUser->premium;
 
             SaveAndNotifyJob::dispatch($chatId, $firstName, $lastName, $username, $bot, $premium);
