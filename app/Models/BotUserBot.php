@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,14 @@ class BotUserBot extends Model
             ->get();
     }
 
+//    public static function getNewUsersStatisticsToday($botId)
+//    {
+//        return static::where('bot_id', $botId)
+//            ->whereDate('created_at', Carbon::today())
+//            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+//            ->groupBy('date')
+//            ->get();
+//    }
     public static function getPremiumUsersStatistics($botId, $startDate, $endDate)
     {
         return static::where('bot_id', $botId)

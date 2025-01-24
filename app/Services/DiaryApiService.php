@@ -16,9 +16,9 @@ class DiaryApiService
     public function __construct()
     {
         $this->diaryApiKey = config('services.diary_api.key');
-        $this->apiUrl      = config('services.diary_api.url');
+        $this->apiUrl      = config('services.diary_api.url'); //http://nginx/api
         $this->client      = new Client();
-        $this->host        = config('services.diary_api.host');
+        $this->host        = config('services.diary_api.host'); //calories365.org
     }
 
     /**
@@ -229,5 +229,20 @@ class DiaryApiService
             return ['error' => $e->getMessage()];
         }
     }
+    public function fetchAllCaloriesUsers(string $locale = 'en'): array
+    {
+        $url = $this->apiUrl . '/caloriesEndPoint/all-users';
+
+        try {
+            $response = $this->client->get($url, [
+                'headers' => $this->getHeaders(null, null, true),
+            ]);
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            Log::error("Error retrieving all users info: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
+
 
 }

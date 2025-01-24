@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Log;
 
 class Utilities
 {
-    public static function saveAndNotify($chatId, $first_name, $lastName, $username, $bot, $premium, $source = null)
+    public static function saveAndNotify($chatId, $first_name, $lastName, $username, $bot, $premium, $source = null, $result = null)
     {
-        $botUser = BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium, $source);
+        $botUser = BotUser::addOrUpdateUser($chatId, $first_name, $lastName, $username, $bot->id, $premium, $source, $result);
         if ($botUser->wasRecentlyCreated) {
             $userMention = "[{$first_name}](tg://user?id={$chatId})";
             $adminMessage = $premium ? 'премиум ' : '';

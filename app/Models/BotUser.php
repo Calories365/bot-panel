@@ -45,45 +45,11 @@ class BotUser extends Model
         return $query->paginate($perPage);
     }
 
-//    public static function addOrUpdateUser($chatId, $firstName, $lastName, $username, $botId, $premium, $source = null)
-//    {
-//        $fullName = $firstName . ($lastName ? " {$lastName}" : '');
-//
-//        Log::info('fullname: ' . $fullName);
-//
-//        $botUser = self::firstOrCreate(
-//            ['telegram_id' => $chatId],
-//            [
-//                'name' => $fullName,
-//                'username' => $username,
-//                'premium' => $premium ? 1 : 0,
-//                'is_banned' => 0
-//            ]
-//        );
-//
-//        if ($botUser->wasRecentlyCreated && $source) {
-//            $botUser->source = $source;
-//            $botUser->save();
-//        }
-//
-//        $botUser->loadMissing('bots');
-//
-//        if ($botUser->bots->contains($botId)) {
-//            $botUser->bots()->detach($botId);
-//        }
-//
-//        $botUser->bots()->syncWithoutDetaching([$botId]);
-//
-//        return $botUser;
-//    }
-
-
-    public static function addOrUpdateUser($chatId, $firstName, $lastName, $username, $botId, $premium, $source = null)
+    public static function addOrUpdateUser($chatId, $firstName, $lastName, $username, $botId, $premium, $source = null, $result = null)
     {
         $fullName = $firstName . ($lastName ? " {$lastName}" : '');
 
         $botUser = self::firstOrNew(['telegram_id' => $chatId]);
-
         $wasExists = $botUser->exists;
 
         $botUser->name     = $fullName;
@@ -96,20 +62,57 @@ class BotUser extends Model
 
         $botUser->save();
 
-
         if (!$wasExists && $source) {
             $botUser->source = $source;
             $botUser->save();
         }
 
         $botUser->loadMissing('bots');
-
         if ($botUser->bots->contains($botId)) {
             $botUser->bots()->detach($botId);
         }
         $botUser->bots()->syncWithoutDetaching([$botId]);
 
+        if ($source == 'bot_link'){
+            CaloriesUser::updateOrCreate(
+                ['telegram_id' => $chatId],
+
+                [
+                    'name'              => $botUser->name,
+                    'username'          => $botUser->username,
+                    'telegram_id'       => $botUser->telegram_id,
+                    'is_banned'         => $botUser->is_banned,
+                    'phone'             => $botUser->phone,
+                    'premium'           => $botUser->premium,
+                    'premium_calories'  => false,
+                    'source'            => $botUser->source ?: 'bot_only',
+                    'email'             => null,
+                    'username_calories' => null,
+                ]
+            );
+        } elseif($source == 'calories'){
+
+            CaloriesUser::where('calories_id', $result['user_id'])->delete();
+
+            $caloriesUser = CaloriesUser::firstOrNew(['telegram_id' => $chatId]);
+
+            $caloriesUser->name              = $botUser->name;
+            $caloriesUser->username          = $botUser->username;
+            $caloriesUser->telegram_id       = $botUser->telegram_id;
+            $caloriesUser->is_banned         = $botUser->is_banned;
+            $caloriesUser->phone             = $botUser->phone;
+            $caloriesUser->premium           = $botUser->premium;
+            $caloriesUser->premium_calories  = $result['premium'];
+            $caloriesUser->email             = $result['email'];
+            $caloriesUser->username_calories = $result['name'];
+
+            if (!$caloriesUser->exists) {
+                $caloriesUser->source = $source;
+            }
+
+            $caloriesUser->save();
+        }
+
         return $botUser;
     }
-
 }

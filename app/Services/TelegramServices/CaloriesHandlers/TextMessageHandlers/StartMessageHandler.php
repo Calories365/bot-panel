@@ -50,7 +50,8 @@ class StartMessageHandler implements MessageHandlerInterface
                     $commonData['username'],
                     $bot,
                     $commonData['premium'],
-                    'calories'
+                    'calories',
+                    $result,
                 );
 
                 $botUser->calories_id = $caloriesUserId;
@@ -78,6 +79,7 @@ class StartMessageHandler implements MessageHandlerInterface
         } else {
 
             //заход по ссылке на бота
+            Log::info('заход по ссылке на бота');
            Utilities::saveAndNotify(
                 $commonData['chatId'],
                 $commonData['firstName'],

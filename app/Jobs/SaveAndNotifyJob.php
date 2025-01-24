@@ -3,16 +3,13 @@
 namespace App\Jobs;
 
 use App\Utilities\Utilities;
+use App\Models\CaloriesUser;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
-/**
- * Класс для асинхронного вызова Utilities::saveAndNotify
- */
 class SaveAndNotifyJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -43,11 +40,11 @@ class SaveAndNotifyJob implements ShouldQueue
     }
 
     /**
-     * Выполнение джобы
+     * Выполнение джобы.
      */
     public function handle()
     {
-        Utilities::saveAndNotify(
+        $botUser = Utilities::saveAndNotify(
             $this->chatId,
             $this->firstName,
             $this->lastName,
@@ -55,5 +52,17 @@ class SaveAndNotifyJob implements ShouldQueue
             $this->bot,
             $this->premium
         );
+
+        $caloriesUser = CaloriesUser::where('telegram_id', $this->chatId)->first();
+
+        if ($caloriesUser) {
+            $caloriesUser->name     = $botUser->name;
+            $caloriesUser->username = $botUser->username;
+            $caloriesUser->phone    = $botUser->phone;
+            $caloriesUser->premium  = $botUser->premium;
+
+            $caloriesUser->save();
+        }
+
     }
 }

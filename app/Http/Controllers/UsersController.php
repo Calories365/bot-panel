@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\BotUserResource;
 use App\Models\BotUser;
+use App\Models\CaloriesUser;
 use App\Services\BotUsersService;
 use App\Services\DiaryApiService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
@@ -17,19 +19,6 @@ class UsersController extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
-//    public function index(Request $request, DiaryApiService $diaryApiService): \Illuminate\Http\Resources\Json\ResourceCollection
-//    {
-//        $perPage = $request->input('per_page', 10);
-//        $botId = $request->input('botId');
-//
-//        $botUsers = BotUser::getPaginatedUsers($perPage, $botId);
-//
-//        if ($botId->type_id == 6){
-//            $result = $diaryApiService->showUsersInfoForBot();
-//        }
-//
-//        return BotUserResource::collection($botUsers);
-//    }
     public function index(Request $request, DiaryApiService $diaryApiService)
     {
         $perPage = $request->input('per_page', 10);
@@ -37,9 +26,20 @@ class UsersController extends BaseController
 
         $bot = \App\Models\Bot::find($botId);
 
+        if (!$botId) {
+            $caloriesUsers = \App\Models\CaloriesUser::orderBy('created_at', 'desc')
+                ->paginate($perPage);
+
+            return new \App\Http\Resources\CaloriesBotUserResource($caloriesUsers, []);
+        }
+
         $botUsers = BotUser::getPaginatedUsers($perPage, $botId);
 
-        if ($bot && $bot->type_id == 6) {
+       if ($bot->type_id != 6) {
+           return \App\Http\Resources\BotUserResource::collection($botUsers);
+
+       } elseif (($bot && $bot->type_id == 6))
+         {
             $caloriesIds = $botUsers
                 ->pluck('calories_id')
                 ->filter()
@@ -69,8 +69,6 @@ class UsersController extends BaseController
 
             return new \App\Http\Resources\CaloriesBotUserResource($botUsers, $diaryData);
         }
-
-        return \App\Http\Resources\BotUserResource::collection($botUsers);
     }
 
 

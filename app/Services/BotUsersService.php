@@ -68,7 +68,8 @@ class BotUsersService
 
         $botId = $bot->id;
 
-        $newUsersData = BotUserBot::getNewUsersStatistics($botId, $startDate, $endDate);
+        $newUsersData = BotUserBot::getNewUsersStatistics($botId,$startDate,$endDate);
+
         foreach ($newUsersData as $data) {
             $newUsersStats[$data->date] = $data->count;
         }
@@ -102,15 +103,6 @@ class BotUsersService
         $totalActiveUsers  = array_sum($activeUsersStats);
         $totalDefaultUsers = array_sum($newUsersStats) - array_sum($premiumUsersStats);
 
-//        Log::info(print_r([
-//            'new_users' => $newUsersStats,
-//            'banned_users' => $bannedUsersStats,
-//            'premium_users' => $premiumUsersStats,
-//            'total_new_users' => $totalNewUsers,
-//            'total_banned_users' => $totalBannedUsers,
-//            'total_premium_users' => $totalPremiumUsers,
-//            'total_default_users' => $totalDefaultUsers,
-//        ], true));
 
         return [
             'new_users' => $newUsersStats,

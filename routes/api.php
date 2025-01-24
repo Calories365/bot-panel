@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BotController;
 use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\SyncController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
@@ -76,3 +77,7 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
 
 });
 
+Route::group(['middleware' => 'check.api.key', 'namespace' => 'App\Http\Controllers'], function () {
+    Route::post('/sync-calories-user', [SyncController::class, 'storeNewUser'])
+        ->name('sync-calories-user.store');
+});

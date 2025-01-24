@@ -25,12 +25,6 @@ class CaloriesBotUserResource extends ResourceCollection
     public function toArray($request)
     {
         return $this->collection->transform(function ($botUser) {
-            $calId = $botUser->calories_id;
-            $external = $this->diaryData[$calId] ?? null;
-
-            $email   = $external['email'] ?? null;
-            $calName = $external['name']  ?? null;
-
             return [
                 'id'             => $botUser->id,
                 'name'           => $botUser->name,
@@ -42,8 +36,8 @@ class CaloriesBotUserResource extends ResourceCollection
                 'premium_calories' => $botUser->premium,
                 'created_at'     => $botUser->created_at->format('d.m.Y H:i:s'),
                 'source'         => $botUser->source,
-                'email'             => $email,
-                'username_calories' => $calName,
+                'email'             => $botUser->email,
+                'username_calories' => $botUser->username_calories,
                 'bot_type_id' => 6
             ];
         });
