@@ -105,17 +105,10 @@ class BotController extends BaseController
         try {
             $telegramHandler->handle($bot, $request);
             return response()->json(['status' => 'success']);
-        } catch (\Exception $e) {
-            Log::error(sprintf(
-                "Error in handle: %s in %s on line %d\nStack trace:\n%s",
-                $e->getMessage(),
-                $e->getFile(),
-                $e->getLine(),
-                $e->getTraceAsString()
-            ));
-
+        } catch
+        (\Exception $e) {
+            Log::error('Error in handle: ' . $e->getMessage());
             return response()->json(['status' => 'success']);
         }
     }
-
 }
