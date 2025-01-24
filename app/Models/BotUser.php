@@ -96,13 +96,16 @@ class BotUser extends Model
 
             $caloriesUser = CaloriesUser::firstOrNew(['telegram_id' => $chatId]);
 
+            Log::info('result: ');
+            Log::info(print_r($result['premium'], true));
+
             $caloriesUser->name              = $botUser->name;
             $caloriesUser->username          = $botUser->username;
             $caloriesUser->telegram_id       = $botUser->telegram_id;
             $caloriesUser->is_banned         = $botUser->is_banned;
             $caloriesUser->phone             = $botUser->phone;
             $caloriesUser->premium           = $botUser->premium;
-            $caloriesUser->premium_calories  = $result['premium'];
+            $caloriesUser->premium_calories  = $result['premium'] ?? 0;
             $caloriesUser->email             = $result['email'];
             $caloriesUser->username_calories = $result['name'];
 
