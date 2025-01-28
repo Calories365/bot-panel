@@ -27,6 +27,11 @@ class BotUser extends Model
         return $this->belongsToMany(Bot::class, 'bot_user_bots')->withTimestamps();
     }
 
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class, 'user_id');
+    }
+
     public function banned_bots()
     {
         return $this->belongsToMany(Bot::class, 'bot_user_bans')->withTimestamps();
@@ -96,9 +101,6 @@ class BotUser extends Model
 
             $caloriesUser = CaloriesUser::firstOrNew(['telegram_id' => $chatId]);
 
-            Log::info('result: ');
-            Log::info(print_r($result['premium'], true));
-
             $caloriesUser->name              = $botUser->name;
             $caloriesUser->username          = $botUser->username;
             $caloriesUser->telegram_id       = $botUser->telegram_id;
@@ -108,6 +110,7 @@ class BotUser extends Model
             $caloriesUser->premium_calories  = $result['premium'] ?? 0;
             $caloriesUser->email             = $result['email'];
             $caloriesUser->username_calories = $result['name'];
+            $caloriesUser->calories_id = $result['user_id'];
 
             if (!$caloriesUser->exists) {
                 $caloriesUser->source = $source;

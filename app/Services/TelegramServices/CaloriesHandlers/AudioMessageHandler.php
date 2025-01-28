@@ -2,6 +2,7 @@
 
 namespace App\Services\TelegramServices\CaloriesHandlers;
 
+use App\Models\Subscription;
 use App\Services\AudioConversionService;
 use App\Services\DiaryApiService;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
@@ -34,6 +35,24 @@ class AudioMessageHandler implements MessageHandlerInterface
         $chatId = $commonData['chatId'];
 
         if (isset($message['voice'])) {
+
+            $subscription = Subscription::firstOrCreate(
+                ['user_id' => $botUser->calories_id],
+            );
+            Log::info(print_r($subscription, true));
+            if (!$subscription->canTranscribeAudio()) {
+                $telegram->sendMessage([
+                    'chat_id' => $chatId,
+                    'text' => __('calories365-bot.subscription_required_message')
+                ]);
+                return;
+            }
+
+            if (!$subscription->isPremium()) {
+                    $subscription->incrementTranscribeCounter();
+            }
+
+
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
 
             if ($text) {

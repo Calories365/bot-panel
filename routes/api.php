@@ -80,4 +80,6 @@ Route::group(['namespace' => 'App\Http\Controllers'], function () {
 Route::group(['middleware' => 'check.api.key', 'namespace' => 'App\Http\Controllers'], function () {
     Route::post('/sync-calories-user', [SyncController::class, 'storeNewUser'])
         ->name('sync-calories-user.store');
+    Route::post('/update-premium-status', [SyncController::class, 'updatePremiumStatus'])
+        ->name('update-premium-status.store');
 });

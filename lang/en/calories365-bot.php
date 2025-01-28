@@ -84,6 +84,7 @@ return [
     'edit' => 'Edit',
     'you_must_be_authorized' => 'You must be authorized!',
     'no_entries_remain' => "There's no products left",
+    'subscription_required_message' => "Request limit reached, to save meals without restrictions — purchase premium in the personal account (https://calculator.calories365.com)",
     'prompt_analyze_food_intake' => <<<EOT
 Analyze the text: ":text". Output only the list of products with their amount in grams. If the amount is not specified, use an average weight or portion. The output format must strictly follow the example below, where each product is followed by a semicolon:
 

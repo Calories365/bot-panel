@@ -33,7 +33,7 @@ class CaloriesBotUserResource extends ResourceCollection
                 'is_banned'      => $botUser->is_banned,
                 'phone'          => $botUser->phone,
                 'premium'        => $botUser->premium,
-                'premium_calories' => $botUser->premium,
+                'premium_calories' => $botUser->premium_calories,
                 'created_at'     => $botUser->created_at->format('d.m.Y H:i:s'),
                 'source'         => $botUser->source,
                 'email'             => $botUser->email,
