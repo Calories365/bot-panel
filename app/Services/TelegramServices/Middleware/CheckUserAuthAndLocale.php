@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Closure;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Objects\Update;
 
 class CheckUserAuthAndLocale
@@ -159,6 +160,11 @@ class CheckUserAuthAndLocale
      */
     private function checkAndUpdateUserData(Update $update, BotUser $botUser, $bot): void
     {
+
+        if ($update->getCallbackQuery()) {
+            return;
+        }
+
         $firstName = $update->getMessage()?->getFrom()?->getFirstName()
             ?: $update->getCallbackQuery()?->getFrom()?->getFirstName();
 
@@ -179,6 +185,14 @@ class CheckUserAuthAndLocale
 
         $cacheKey   = 'bot_user_' . $botUser->id;
         $cachedData = Cache::get($cacheKey);
+
+        Log::info('$cachedData: ');
+        Log::info(print_r($cachedData, true));
+
+        Log::info('$latestData: ');
+        Log::info(print_r($latestData, true));
+
+
 
         if (!$cachedData || $cachedData != $latestData) {
             Cache::put($cacheKey, $latestData, now()->addDays(7));
