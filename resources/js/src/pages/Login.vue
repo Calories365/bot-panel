@@ -11,6 +11,7 @@ const router = useRouter();
 const formState = reactive({
     email: '',
     password: '',
+    //
 });
 
 const isSubmitting = computed(() => store.state.auth.isSybmiting);
