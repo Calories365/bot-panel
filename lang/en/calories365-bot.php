@@ -103,6 +103,7 @@ Important:
 - If a product has descriptive words (e.g., boiled potato), move the description after the name (e.g., 'boiled potato' → 'potato boiled').
 - Ensure each product and its amount are separated by a dash and spaces, as in the example.
 - Do not change the original product name, even if it contains digits or non-standard characters.
+- If the user says they ate two units of something, for example, two candies, the weight of both candies should be displayed as a single product.
 
 Examples of input text and the expected output:
 
@@ -134,6 +135,10 @@ Examples of input text and the expected output:
  6. Input text: 'I ate two eggs'
     Expected output:
     Egg - 120 grams;
+
+ 7. Input text: "I ate two candies"
+    Expected output:
+    Candy – 20 grams;
 EOT,
 
     'prompt_generate_new_product_data' => <<<EOT
