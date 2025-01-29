@@ -11,7 +11,6 @@ const router = useRouter();
 const formState = reactive({
     email: '',
     password: '',
-    remember: true,
 });
 
 const isSubmitting = computed(() => store.state.auth.isSybmiting);
@@ -24,6 +23,7 @@ const onSubmit = () => {
     store.dispatch(actionTypes.login, {
         email: formState.email,
         password: formState.password,
+        remember: true,
     }).then(() => {
         router.push({name: 'showBots'});
         formState.email = '';
