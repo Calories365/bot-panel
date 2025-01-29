@@ -33,7 +33,7 @@ class SetUkrainianLanguageCallbackQueryHandler implements CallbackQueryHandlerIn
 
         $telegram->answerCallbackQuery([
             'callback_query_id' => $callbackQuery->getId(),
-            'text'    => 'Мова встановлена на украiнську',
+            'text'    => 'Мова встановлена на українську',
             'show_alert' => true
         ]);
 
