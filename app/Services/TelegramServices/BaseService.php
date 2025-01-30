@@ -36,7 +36,7 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getUpdateHandlers(): array
     {
-        $messageUpdateHandler = new MessageUpdateHandler($this->getMessageHandlers());
+        $messageUpdateHandler = new ($this->getMessageHandlers());
         $myChatMemberUpdateHandler = new MyChatMemberUpdateHandler();
         $callbackQueryHandler = new CallbackQueryHandler($this->getCallbackQueryHandlers());
 

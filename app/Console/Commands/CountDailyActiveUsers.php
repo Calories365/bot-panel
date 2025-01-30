@@ -28,8 +28,7 @@ class CountDailyActiveUsers extends Command
      */
     public function handle()
     {
-//        $today = Carbon::today();
-        $today = Carbon::yesterday();
+        $today = Carbon::today();
         $count = BotUser::where('last_active_at', '>=', $today)->count();
 
         DB::table('daily_activity')->updateOrInsert(

@@ -186,14 +186,6 @@ class CheckUserAuthAndLocale
         $cacheKey   = 'bot_user_' . $botUser->id;
         $cachedData = Cache::get($cacheKey);
 
-        Log::info('$cachedData: ');
-        Log::info(print_r($cachedData, true));
-
-        Log::info('$latestData: ');
-        Log::info(print_r($latestData, true));
-
-
-
         if (!$cachedData || $cachedData != $latestData) {
             Cache::put($cacheKey, $latestData, now()->addDays(7));
 
