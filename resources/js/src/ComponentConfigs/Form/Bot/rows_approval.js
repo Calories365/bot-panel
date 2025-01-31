@@ -1,39 +1,39 @@
 export const rows_approval = [
     {
-        label: 'Имя', key: 'name', type: 'default', emit_name: null, placeholder: 'введите имя', action: null,
+        label: 'Name', key: 'name', type: 'default', emit_name: null, placeholder: 'enter name', action: null,
         required: true
     },
     {
-        label: 'Токен', key: 'token', type: 'default', emit_name: null, placeholder: 'введите токен', action: null,
+        label: 'Token', key: 'token', type: 'default', emit_name: null, placeholder: 'enter token', action: null,
         required: true
     },
     {
-        label: 'Вебхук', key: 'web_hook', type: 'default', emit_name: null, placeholder: 'введите вебхук', action: null,
+        label: 'Webhook', key: 'web_hook', type: 'default', emit_name: null, placeholder: 'enter webhook', action: null,
         required: true
     },
     {
-        label: 'Тип бота',
+        label: 'Bot Type',
         key: 'type_id',
         type: 'dropdown',
         emit_name: null,
-        placeholder: 'выберите тип',
+        placeholder: 'select type',
         action: null
     },
     {
-        label: 'Вордпресс эндпоинт',
+        label: 'WordPress Endpoint',
         key: 'wordpress_endpoint',
         type: 'default',
         emit_name: null,
-        placeholder: 'введите вордпресс эндпоинт',
+        placeholder: 'enter WordPress endpoint',
         action: null,
         required: true
     },
-    {label: 'Активен', key: 'active', type: 'checkbox', emit_name: null, placeholder: 'активен ли бот', action: null},
+    {label: 'Active', key: 'active', type: 'checkbox', emit_name: null, placeholder: 'is the bot active', action: null},
     {
-        label: 'Действия', key: 'actions', type: 'buttons', emit_name: null, placeholder: null,
+        label: 'Actions', key: 'actions', type: 'buttons', emit_name: null, placeholder: null,
         options: [
-            {text: 'Сохранить', button_type: 'default', action: 'submit'},
-            {text: 'Удалить', button_type: 'danger', action: 'delete'},
+            {text: 'Save', button_type: 'default', action: 'submit'},
+            {text: 'Delete', button_type: 'danger', action: 'delete'},
         ]
     }
 ];

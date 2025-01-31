@@ -1,44 +1,45 @@
 export const rows_default = [
     {
-        label: 'Имя',
+        label: 'Name',
         key: 'name',
         type: 'default',
         emit_name: null,
-        placeholder: 'введите имя',
+        placeholder: 'enter name',
         action: null,
         required: true
     },
     {
-        label: 'Токен', key: 'token', type: 'default', emit_name: null, placeholder: 'введите токен', action: null,
-        required: true
-    }, {
-        label: 'Вебхук', key: 'web_hook', type: 'default', emit_name: null, placeholder: 'введите вебхук', action: null,
+        label: 'Token', key: 'token', type: 'default', emit_name: null, placeholder: 'enter token', action: null,
         required: true
     },
     {
-        label: 'Тип бота',
+        label: 'Webhook', key: 'web_hook', type: 'default', emit_name: null, placeholder: 'enter webhook', action: null,
+        required: true
+    },
+    {
+        label: 'Bot Type',
         key: 'type_id',
         type: 'dropdown',
         emit_name: null,
-        placeholder: 'выберите тип',
+        placeholder: 'select type',
         action: null
     },
     {
-        label: 'Сообщение',
+        label: 'Message',
         key: 'message',
         type: 'textarea',
         emit_name: null,
-        placeholder: 'введите сообщение',
+        placeholder: 'enter message',
         action: null,
         required: false
     },
-    {label: 'Фото', key: 'message_image', type: 'picture', emit_name: null, placeholder: 'выберите фото', action: null},
-    {label: 'Активен', key: 'active', type: 'checkbox', emit_name: null, placeholder: 'активен ли бот', action: null},
+    {label: 'Photo', key: 'message_image', type: 'picture', emit_name: null, placeholder: 'select photo', action: null},
+    {label: 'Active', key: 'active', type: 'checkbox', emit_name: null, placeholder: 'is the bot active', action: null},
     {
-        label: 'Действия', key: 'actions', type: 'buttons', emit_name: null, placeholder: null,
+        label: 'Actions', key: 'actions', type: 'buttons', emit_name: null, placeholder: null,
         options: [
-            {text: 'Сохранить', button_type: 'default', action: 'submit'},
-            {text: 'Удалить', button_type: 'danger', action: 'delete'},
+            {text: 'Save', button_type: 'default', action: 'submit'},
+            {text: 'Delete', button_type: 'danger', action: 'delete'},
         ]
     }
 ];

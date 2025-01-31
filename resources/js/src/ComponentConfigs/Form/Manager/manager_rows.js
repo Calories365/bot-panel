@@ -1,21 +1,21 @@
 export const manager_rows = [
     {
-        label: 'Имя', key: 'name', type: 'default', emit_name: null, placeholder: 'введите имя', action: null,
+        label: 'Name', key: 'name', type: 'default', emit_name: null, placeholder: 'enter name', action: null,
         required: true
     },
     {
-        label: 'Telegram id',
+        label: 'Telegram ID',
         key: 'telegram_id',
         type: 'default',
-        placeholder: 'введите telegram_id',
+        placeholder: 'enter telegram_id',
         action: null,
         required: true
     },
     {
-        label: 'Действия', key: 'actions', type: 'buttons', emit_name: null, placeholder: null,
+        label: 'Actions', key: 'actions', type: 'buttons', emit_name: null, placeholder: null,
         options: [
-            {text: 'Сохранить', button_type: 'default', action: 'submit'},
-            {text: 'Удалить', button_type: 'danger', action: 'delete'},
+            {text: 'Save', button_type: 'default', action: 'submit'},
+            {text: 'Delete', button_type: 'danger', action: 'delete'},
         ]
     }
 ];

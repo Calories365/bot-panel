@@ -3,5 +3,5 @@
 ## Select description language
 
 - [English](README.en.md)
-- [Русский](README.test.md)
+- [Русский](README.ru.md)
 - [Українська](README.ua.md)
