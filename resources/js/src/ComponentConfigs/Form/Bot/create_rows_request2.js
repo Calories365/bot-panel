@@ -1,11 +1,21 @@
-export const create_rows_request = [
+export const create_rows_request2 = [
     {
-        label: 'Name', key: 'name', type: 'default', emit_name: null, placeholder: 'enter name', action: null,
+        label: 'Name',
+        key: 'name',
+        type: 'default',
+        emit_name: null,
+        placeholder: 'enter name',
+        action: null,
         required: true
     },
     {label: 'Token', key: 'token', type: 'default', emit_name: null, placeholder: 'enter token', action: null},
     {
-        label: 'Webhook', key: 'web_hook', type: 'default', emit_name: null, placeholder: 'enter webhook', action: null,
+        label: 'Webhook',
+        key: 'web_hook',
+        type: 'default',
+        emit_name: null,
+        placeholder: 'enter webhook',
+        action: null,
         required: true
     },
     {
@@ -18,16 +28,21 @@ export const create_rows_request = [
         required: true
     },
     {
-        label: 'Managers',
-        key: 'managers',
-        type: 'multiple_dropdown',
+        label: 'Message',
+        key: 'message',
+        type: 'textarea',
         emit_name: null,
-        placeholder: 'select managers',
-        action: null
+        placeholder: 'enter message',
+        action: null,
+        required: true
     },
     {label: 'Active', key: 'active', type: 'checkbox', emit_name: null, placeholder: 'is the bot active', action: null},
     {
-        label: 'Actions', key: 'actions', type: 'buttons', emit_name: null, placeholder: null,
+        label: 'Actions',
+        key: 'actions',
+        type: 'buttons',
+        emit_name: null,
+        placeholder: null,
         options: [
             {text: 'Save', button_type: 'default', action: 'submit'},
         ]
