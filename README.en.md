@@ -2,6 +2,8 @@
 
 **Calories365** is a web application and Telegram bot that allow you to conveniently keep a food diary, automatically process voice messages, and obtain calorie statistics (using AI).
 
+## [Try the Calorie Diary Now!](https://calculator.calories365.com)
+
 ---
 
 ## 1. Project Essence
