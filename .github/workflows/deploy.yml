@@ -24,5 +24,5 @@ jobs:
             git pull
             cd ..
             docker-compose up -d --build
-            docker system prune -a
+            docker builder prune --all --force
             docker-compose exec bot_panel_php php artisan migrate --force
