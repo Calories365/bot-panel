@@ -187,9 +187,6 @@ Tap the “Search” button to find a new nutrient profile for the product. If y
 3) Saving:
 Tap the “Save” button to store the data in your diary.
 
-4) Daily stats:
-Type the /stats command to see your daily stats.
-
 Link to the application: https://calculator.calories365.com
 
 Start keeping your calorie diary easily and conveniently!
