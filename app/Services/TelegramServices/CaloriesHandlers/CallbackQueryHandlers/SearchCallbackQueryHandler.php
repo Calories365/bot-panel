@@ -40,7 +40,6 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
             $products  = Cache::get("user_products_{$userId}", []);
 
             if (isset($products[$productId])) {
-                // Увеличиваем счётчик кликов для данного продукта
                 $clickCount = Cache::increment("product_click_count_{$userId}_{$productId}");
                 Cache::put("product_click_count_{$userId}_{$productId}", $clickCount, now()->addMinutes(30));
 
@@ -48,27 +47,22 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                 $quantityGrams = $products[$productId]['product']['quantity_grams'] ?? '';
                 $originalName  = $products[$productId]['product_translation']['original_name'] ?? '';
 
-                // Формируем текст для поиска, учитывая количество граммов (грамм можно также локализовать при необходимости)
                 $formattedText = $saidName . " - " . $quantityGrams . " " . __('calories365-bot.grams');
 
                 try {
-                    // Если пользователь кликает по продукту второй раз и более — сразу генерируем данные
                     if ($clickCount > 1) {
                         $this->generateProductData($products, $productId, $userId, $telegram, $chatId, $callbackQuery);
                     } else {
-                        // При первом нажатии проверяем, есть ли смысл уточнять продукт по API
                         if ($saidName !== $originalName) {
                             $response = $this->diaryApiService->getTheMostRelevantProduct($formattedText, $calories_id, $locale);
 
                             if (isset($response['product'])) {
                                 $product = $response['product'];
                             } else {
-                                // Если из API ничего не вернулось, генерируем данные локально
                                 $this->generateProductData($products, $productId, $userId, $telegram, $chatId, $callbackQuery);
                                 return;
                             }
                         } else {
-                            // Если сказанное имя совпадает с оригинальным, тоже генерируем данные локально
                             $this->generateProductData($products, $productId, $userId, $telegram, $chatId, $callbackQuery);
                             return;
                         }
@@ -83,22 +77,16 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                     return;
                 }
 
-                // Если API вернул $product
                 if (isset($product)) {
-                    // Удаляем старый продукт из массива
                     unset($products[$productId]);
 
-                    // В качестве нового ключа подставляем ID, который вернул API
                     $newProductId = $product['product_translation']['id'] ?? $productId;
 
                     $products[$newProductId] = $product;
-                    // Сохраняем message_id, чтобы при необходимости можно было удалить сообщение
                     $products[$newProductId]['message_id'] = $messageId;
 
-                    // Сохраняем обновлённые продукты в кеш
                     Cache::put("user_products_{$userId}", $products, now()->addMinutes(30));
 
-                    // Обновляем сообщение о продукте
                     $this->updateProductMessage($telegram, $chatId, $products[$newProductId]);
 
                     $telegram->answerCallbackQuery([
@@ -117,10 +105,6 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
         }
     }
 
-    /**
-     * Генерация (или уточнение) данных о продукте локально,
-     * если не удалось получить информацию из API.
-     */
     private function generateProductData(&$products, $productId, $userId, $telegram, $chatId, $callbackQuery)
     {
         $saidName = $products[$productId]['product_translation']['said_name'];
@@ -171,10 +155,6 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
         }
     }
 
-    /**
-     * Разбор сгенерированной/полученной строки вида:
-     *   "Калории - 100; Белки - 2; Жиры - 3; Углеводы - 10"
-     */
     private function parseNutritionalData($dataString): array
     {
         $nutritionalData = [];

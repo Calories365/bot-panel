@@ -58,11 +58,9 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
                 $this->saveFoodConsumption($product, $diaryUserId, $partOfTheDay, $calories_id, $locale);
             }
 
-            // Сбросить счётчики кликов по продукту
             Cache::forget("product_click_count_{$userId}_{$productTranslation['id']}");
         }
 
-        // Формируем таблицу с локализованными заголовками
         $productArray = [
             [ __('calories365-bot.calories'),      $total['calories']      ],
             [ __('calories365-bot.proteins'),      $total['proteins']      ],

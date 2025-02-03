@@ -24,7 +24,6 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
         $messageId = $callbackQuery->getMessage()->getMessageId();
         $locale    = $botUser->locale ?? 'ru';
 
-        // Удаляем исходное сообщение с кнопками "Breakfast", "Dinner" и т.д.
         try {
             $telegram->deleteMessage([
                 'chat_id'    => $chatId,
@@ -56,7 +55,7 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
 
         $partOfDay = $dayPartMap[$callbackData] ?? null;
 
-        $date  = date('Y-m-d'); // Если нужно — берём текущую дату
+        $date  = date('Y-m-d');
         $meals = $this->diaryApiService->showUserStats($date, $partOfDay, $botUser->calories_id, $locale);
 
         if (empty($meals)) {
@@ -64,7 +63,6 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
             return;
         }
 
-        // В зависимости от наличия partOfDay — показываем статистику либо за часть дня, либо за весь день.
         if ($partOfDay) {
             $this->formatAndSendPartOfDay($telegram, $chatId, $meals, $date, $partOfDay, $locale);
         } else {
@@ -81,8 +79,6 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
             'carbohydrates' => 0,
         ];
 
-        // 1) Сначала выводим каждую запись отдельным сообщением
-        //    (тут, как и у вас сейчас, с кнопками "Удалить").
         foreach ($meals as $meal) {
             $quantityFactor = $meal['quantity'] / 100;
 
@@ -112,7 +108,7 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
                 [
                     [
                         'text'          => __('calories365-bot.delete', [], $locale),
-                        'callback_data' => 'delete_meal_' . $meal['id'] // обратите внимание, формат такой же
+                        'callback_data' => 'delete_meal_' . $meal['id']
                     ]
                 ]
             ];
@@ -125,7 +121,6 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
             ]);
         }
 
-        // 2) Затем одним сообщением выводим ИТОГО по этой части дня
         $productArray = [
             [ __('calories365-bot.calories', [], $locale), round($total['calories']) ],
             [ __('calories365-bot.proteins', [], $locale), round($total['proteins']) ],
@@ -145,19 +140,16 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
             $productArray
         );
 
-        // <-- ВАЖНО: надо сохранить результат вызова sendMessage,
-        // чтобы получить message_id.
+
         $sent = $telegram->sendMessage([
             'chat_id'    => $chatId,
             'text'       => $finalMessageText,
             'parse_mode' => 'Markdown',
         ]);
 
-        // Сохраняем в кэше (ключ можно придумать любой)
-        // Обратите внимание, что $sent — это объект, который Telegram SDK возвращает (Message).
+
         $finalMessageId = $sent->getMessageId();
 
-        // Например, кешируем на 30 минут
         Cache::put("stats_summary_{$chatId}", [
             'date'              => $date,
             'part_of_day'       => $partOfDay,
@@ -168,9 +160,7 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
 
     private function formatAndSendAllDay($telegram, $chatId, $meals, $date, $locale)
     {
-        // Логика аналогична: выводим всё по частям, считаем итоги,
-        // а в конце одним сообщением — итог.
-        // В конце делаем то же самое: сохраняем message_id в кэше.
+
 
         $partsOfDay = [
             'morning' => [
@@ -203,13 +193,9 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
             'carbohydrates' => 0,
         ];
 
-        // Если хотим по каждому продукту отдавать отдельное сообщение — можно это сделать
-        // тут тоже (как в части formatAndSendPartOfDay).
-        foreach ($meals as $meal) {
-            // ... Если хотите показывать каждую запись (по аналогии) ...
-            // Но обычно "AllDay" показывают итогово, без отдельных сообщений.
 
-            // Подсчитываем в нужной части дня:
+        foreach ($meals as $meal) {
+
             $part = $meal['part_of_day'];
             if (!isset($partsOfDay[$part])) {
                 continue;
@@ -233,7 +219,6 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
         }
 
         $messageText = __('calories365-bot.your_data_for_date', ['date' => $date], $locale) . "\n\n";
-        // Формируем вывод для утро/обед/ужин
         foreach ($partsOfDay as $partKey => $part) {
             if ($part['calories'] == 0 && $part['proteins'] == 0 && $part['fats'] == 0 && $part['carbohydrates'] == 0) {
                 continue;
@@ -249,7 +234,6 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
             $messageText .= Utilities::generateTableType2($part['name'], $productArray) . "\n\n";
         }
 
-        // Итог по всему дню
         $productArray = [
             [ __('calories365-bot.calories', [], $locale), round($total['calories']) ],
             [ __('calories365-bot.proteins', [], $locale), round($total['proteins']) ],
@@ -262,7 +246,6 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
             $productArray
         );
 
-        // <-- сохраняем MessageId
         $sent = $telegram->sendMessage([
             'chat_id'    => $chatId,
             'text'       => $messageText,
@@ -271,10 +254,9 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
 
         $finalMessageId = $sent->getMessageId();
 
-        // Кладём в кэш
         Cache::put("stats_summary_{$chatId}", [
             'date'              => $date,
-            'part_of_day'       => null, // null означает, что показывали весь день
+            'part_of_day'       => null,
             'final_message_id'  => $finalMessageId,
             'locale'            => $locale,
         ], 1800);

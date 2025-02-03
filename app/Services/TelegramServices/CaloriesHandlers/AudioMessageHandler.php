@@ -39,7 +39,6 @@ class AudioMessageHandler implements MessageHandlerInterface
             $subscription = Subscription::firstOrCreate(
                 ['user_id' => $botUser->calories_id],
             );
-            Log::info(print_r($subscription, true));
             if (!$subscription->canTranscribeAudio()) {
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
@@ -56,7 +55,6 @@ class AudioMessageHandler implements MessageHandlerInterface
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
 
             if ($text) {
-                Log::info('Product list: ' . $text);
 
                 $locale = $botUser->locale;
                 $caloriesId = $botUser->calories_id;

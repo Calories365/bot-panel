@@ -39,7 +39,7 @@ class StartMessageHandler implements MessageHandlerInterface
 
             if (!empty($result['success']) && $result['success'] === true) {
 
-                //заход с калорий
+                //from calories
 
                 $caloriesUserId = $result['user_id'];
 
@@ -72,13 +72,13 @@ class StartMessageHandler implements MessageHandlerInterface
 
         if ($botUser && $botUser->calories_id) {
 
-            //уже существует аккич
+            //already existed acc
 
             $this->sendWelcome($bot, $telegram, $message, $commonData);
 
         } else {
 
-            //заход по ссылке на бота
+            //from bot
            Utilities::saveAndNotify(
                 $commonData['chatId'],
                 $commonData['firstName'],

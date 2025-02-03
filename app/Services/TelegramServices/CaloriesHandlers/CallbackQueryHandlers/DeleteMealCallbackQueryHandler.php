@@ -31,7 +31,6 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
             $chatId = $callbackQuery->getMessage()->getChat()->getId();
             $messageId = $callbackQuery->getMessage()->getMessageId();
 
-            // 1) Удаляем сам продукт по API
             $response = $this->diaryApiService->deleteMeal($mealId, $calories_id, $locale);
             if (isset($response['error'])) {
                 Log::error('Error deleting meal: ' . $response['error']);
@@ -41,8 +40,6 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                     'show_alert' => true,
                 ]);
             } else {
-                // 2) Пробуем удалить сообщение, в котором был сам продукт
-                //    (каждый продукт у нас в отдельном сообщении).
                 try {
                     $telegram->deleteMessage([
                         'chat_id' => $chatId,
@@ -52,32 +49,25 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                     Log::error("Error deleting meal message: " . $e->getMessage());
                 }
 
-                // 3) Отвечаем на коллбэк, что всё ок
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
                     'text' => __('calories365-bot.product_deleted'),
                     'show_alert' => false,
                 ]);
 
-                // 4) Пытаемся найти в кэше данные об итоговом сообщении, чтобы его обновить
                 $cacheKey   = "stats_summary_{$chatId}";
                 $cacheValue = Cache::get($cacheKey);
 
                 if ($cacheValue) {
-                    // Извлекаем, что у нас там лежит
                     $date             = $cacheValue['date'];
-                    $partOfDay        = $cacheValue['part_of_day'];  // может быть null
+                    $partOfDay        = $cacheValue['part_of_day'];
                     $finalMessageId   = $cacheValue['final_message_id'];
                     $cachedLocale     = $cacheValue['locale'] ?? $locale;
 
-                    // Перезапрашиваем актуальные данные (без уже удалённого продукта)
-                    // Если у вас дата не всегда "сегодня" — используйте date, которая лежит в кэше.
                     $meals = $this->diaryApiService->showUserStats($date, $partOfDay, $calories_id, $cachedLocale);
 
-                    // Формируем новый текст итога
                     if (empty($meals)) {
-                        // Если продуктов не осталось, можно вывести сообщение «Ничего не осталось»
-                        // или вовсе удалить итоговое сообщение:
+
                         try {
                             $telegram->editMessageText([
                                 'chat_id'    => $chatId,
@@ -88,14 +78,11 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                             Log::error("Error editing final stats message: " . $e->getMessage());
                         }
 
-                        // Можем очистить кэш, раз ничего не осталось
                         Cache::forget($cacheKey);
                     } else {
-                        // Снова посчитаем итоги:
                         $newText = $this->generateUpdatedStatsText($meals, $date, $partOfDay, $cachedLocale);
 
                         try {
-                            // Редактируем старое итоговое сообщение
                             $telegram->editMessageText([
                                 'chat_id'    => $chatId,
                                 'message_id' => $finalMessageId,
@@ -111,13 +98,9 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
         }
     }
 
-    /**
-     * Пример метода для генерации итогового текста — похож на ваш formatAndSendPartOfDay
-     * или formatAndSendAllDay, но теперь мы просто возвращаем строку.
-     */
+
     private function generateUpdatedStatsText(array $meals, string $date, ?string $partOfDay, string $locale): string
     {
-        // Если partOfDay != null, значит показываем итоги за завтрак/обед/ужин
         if ($partOfDay) {
             $total = [
                 'calories' => 0,
@@ -153,7 +136,6 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                 $productArray
             );
         } else {
-            // Иначе считаем сразу за весь день (AllDay)
             $partsOfDay = [
                 'morning' => [
                     'name' => __('calories365-bot.breakfast', [], $locale),
@@ -207,7 +189,6 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                 $total['carbohydrates'] += $carb;
             }
 
-            // Собираем сообщение
             $text = __('calories365-bot.your_data_for_date', ['date' => $date], $locale) . "\n\n";
             foreach ($partsOfDay as $p) {
                 if ($p['calories'] == 0 && $p['proteins'] == 0 && $p['fats'] == 0 && $p['carbohydrates'] == 0) {
@@ -223,7 +204,6 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                 $text .= \App\Utilities\Utilities::generateTableType2($p['name'], $table) . "\n\n";
             }
 
-            // Итог по всему дню:
             $table = [
                 [ __('calories365-bot.calories', [], $locale), round($total['calories']) ],
                 [ __('calories365-bot.proteins', [], $locale), round($total['proteins']) ],

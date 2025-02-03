@@ -16,13 +16,13 @@ class DiaryApiService
     public function __construct()
     {
         $this->diaryApiKey = config('services.diary_api.key');
-        $this->apiUrl      = config('services.diary_api.url'); //http://nginx/api
+        $this->apiUrl      = config('services.diary_api.url');
         $this->client      = new Client();
-        $this->host        = config('services.diary_api.host'); //calories365.org
+        $this->host        = config('services.diary_api.host');
     }
 
     /**
-     * Унифицированный метод для формирования заголовков запроса.
+     *
      *
      * @param int|null    $caloriesId
      * @param string|null $locale
@@ -52,9 +52,7 @@ class DiaryApiService
         return $headers;
     }
 
-    /**
-     * Отправляем текст на сервис (пример).
-     */
+
     public function sendText(string $text, $calories_id, $locale)
     {
         try {
@@ -72,9 +70,7 @@ class DiaryApiService
         }
     }
 
-    /**
-     * Получаем наиболее релевантный продукт
-     */
+
     public function getTheMostRelevantProduct(string $text, $calories_id, $locale)
     {
         try {
@@ -92,9 +88,7 @@ class DiaryApiService
         }
     }
 
-    /**
-     * Сохранение продукта
-     */
+
     public function saveProduct(array $data, $calories_id, $locale)
     {
         try {
@@ -112,9 +106,7 @@ class DiaryApiService
         }
     }
 
-    /**
-     * Сохранение употреблённого продукта (приём пищи)
-     */
+
     public function saveFoodConsumption(array $data, $calories_id, $locale)
     {
         try {
@@ -132,9 +124,7 @@ class DiaryApiService
         }
     }
 
-    /**
-     * Показать статистику пользователя
-     */
+
     public function showUserStats($date, $partOfDay = false, $calories_id, $locale)
     {
         try {
@@ -154,9 +144,7 @@ class DiaryApiService
         }
     }
 
-    /**
-     * Удаление отдельного приёма пищи
-     */
+
     public function deleteMeal($mealId, $calories_id, $locale)
     {
         try {
@@ -171,9 +159,6 @@ class DiaryApiService
         }
     }
 
-    /**
-     * Проверка телеграм-кода
-     */
     public function checkTelegramCode(string $code, int $telegram_id, string $locale = 'en')
     {
         try {
@@ -206,7 +191,7 @@ class DiaryApiService
     }
 
     /**
-     * Получить данные сразу по нескольким calories_id
+     *
      *
      * @param array  $caloriesIds
      * @param string $locale
