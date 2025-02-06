@@ -15,7 +15,7 @@ const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const pagination = computed(() => store.getters[getterTypes.pagination]);
 
 const sizeOptions = [10, 20, 30, 40, 50];
-const prePageText = 'Количество ботов на странице';
+const prePageText = 'Number of bots on the page';
 const emit = defineEmits(['handle']);
 const showModal = ref(false);
 const selectedBotId = ref(null);
@@ -65,8 +65,8 @@ onMounted(() => {
     </div>
 
     <BotsConfirmatiomModal
-        title="Подтверждение действия"
-        message="Вы уверены, что хотите удалить этого бота?"
+        title="Confirmation of action"
+        message="Are you sure you want to remove this bot?"
         :showModal="showModal"
         @update:showModal="showModal = $event"
         @confirm="confirmDelete"

@@ -95,7 +95,7 @@ onUnmounted(() => {
             <div class="card card-primary">
                 <div class="card-header">
                     <h3 class="card-title">
-                        Статистика Бота
+                        Bot's stats
                     </h3>
                 </div>
                 <div v-if="isBotUserDataNotEmpty"
@@ -108,7 +108,7 @@ onUnmounted(() => {
             </div>
             <div class="card card-primary">
                 <div class="card-header">
-                    Бот
+                    Bot
                 </div>
 
                 <bots-form v-if="localBotData"
@@ -120,8 +120,8 @@ onUnmounted(() => {
     </div>
 
     <BotsConfirmatiomModal
-        title="Подтверждение действия"
-        message="Вы уверены, что хотите удалить этого бота?"
+        title="Confirmation of action"
+        message="Are you sure you want to remove this bot?"
         :showModal="showModal"
         @update:showModal="showModal = $event"
         @confirm="deleteBot"

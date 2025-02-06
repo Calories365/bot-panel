@@ -34,7 +34,7 @@ function createManager() {
         <div class="col-md-12">
             <div class="card card-primary">
                 <div class="card-header">
-                    Добавить Менеджера
+                    Add a Manager
                 </div>
                 <bots-form
                     :data="localManagerData"

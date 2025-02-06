@@ -38,11 +38,11 @@ export default {
         },
         cancelText: {
             type: String,
-            default: 'Отмена'
+            default: 'Cancellation'
         },
         confirmText: {
             type: String,
-            default: 'Подтвердить'
+            default: 'Confirm'
         }
     },
     methods: {

@@ -6,13 +6,13 @@ import store from "@/store/store.js";
 import {computed} from "vue";
 
 const menuItems = [
-  {text: "Боты", icon: ['fas', 'robot'], path: '/showBots'},
-  {text: "Добавить бота", icon: ['fas', 'plus-circle'], path: '/addBot'},
-  {text: "Пользователи", icon: ['fas', 'users'], path: '/showUsers'},
-    {text: "Админы", icon: ['fas', 'user-shield'], path: '/showAdmins'},
-    {text: "Добавить админа", icon: ['fas', 'user-plus'], path: '/addAdmin'},
-    {text: "Менеджеры", icon: ['fas', 'phone'], path: '/showManagers'},
-    {text: "Добавить менеджера", icon: ['fas', 'user-plus'], path: '/addManager'}
+    { text: "Bots", icon: ['fas', 'robot'], path: '/showBots' },
+    { text: "Add bot", icon: ['fas', 'plus-circle'], path: '/addBot' },
+    { text: "Users", icon: ['fas', 'users'], path: '/showUsers' },
+    { text: "Admins", icon: ['fas', 'user-shield'], path: '/showAdmins' },
+    { text: "Add admin", icon: ['fas', 'user-plus'], path: '/addAdmin' },
+    { text: "Managers", icon: ['fas', 'phone'], path: '/showManagers' },
+    { text: "Add manager", icon: ['fas', 'user-plus'], path: '/addManager' }
 ];
 const currentUser = computed(() => store.getters[getterTypes.currentUser]);
 

@@ -15,7 +15,7 @@ const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const pagination = computed(() => store.getters[getterTypes.pagination]);
 
 const sizeOptions = [10, 20, 30, 40, 50];
-const prePageText = 'Количество админов на странице';
+const prePageText = 'Number of admins on the page';
 const emit = defineEmits(['handle']);
 const showModal = ref(false);
 const selectedAdminId = ref(null);
@@ -64,8 +64,8 @@ const confirmDelete = () => {
     </div>
 
     <BotsConfirmatiomModal
-        title="Подтверждение действия"
-        message="Вы уверены, что хотите удалить этого админа?"
+        title="Confirmation of action"
+        message="Are you sure you want to remove this admin?"
         :showModal="showModal"
         @update:showModal="showModal = $event"
         @confirm="confirmDelete"

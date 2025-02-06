@@ -21,7 +21,7 @@ class CountDailyActiveUsers extends Command
      *
      * @var string
      */
-    protected $description = 'Подсчитывает количество активных пользователей за текущий день и записывает в таблицу daily_activity';
+    protected $description = 'Counts the number of active users for the current day and writes it to the daily_activity table';
 
     /**
      * Execute the console command.
@@ -40,6 +40,6 @@ class CountDailyActiveUsers extends Command
             ]
         );
 
-        $this->info("Записали в daily_activity: дата = {$today->format('Y-m-d')}, count = {$count}");
+        $this->info("Wrote in daily_activity: data = {$today->format('Y-m-d')}, count = {$count}");
     }
 }

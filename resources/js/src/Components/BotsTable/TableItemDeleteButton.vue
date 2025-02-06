@@ -31,7 +31,7 @@ function handle() {
 
 <template>
     <button type="button" class="btn btn-block btn-danger" @click="handle">
-        Удалить
+        Delete
     </button>
 </template>
 

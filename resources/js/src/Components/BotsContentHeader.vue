@@ -5,7 +5,6 @@ import { useRouter, useRoute } from 'vue-router';
 const router = useRouter();
 const route = useRoute();
 
-// Функция для сбора маршрутов для хлебных крошек
 const breadcrumbs = computed(() => {
     let matched = route.matched.filter(record => record.meta && record.meta.breadcrumb);
     let breadcrumbs = matched.map(record => ({
@@ -13,7 +12,6 @@ const breadcrumbs = computed(() => {
         path: record.path
     }));
 
-    // Добавляем "Home" как стартовую точку
     breadcrumbs.unshift({ text: 'Home', path: '/' });
 
     return breadcrumbs;

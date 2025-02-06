@@ -20,21 +20,21 @@ const chartData = computed(() => {
             labels: Object.keys(props.data.new_users),
             datasets: [
                 {
-                    label: 'Новые пользователи за день',
+                    label: 'New users for the day',
                     data: Object.values(props.data.new_users),
                     backgroundColor: 'rgba(0, 123, 255, 0.5)',
                     borderColor: 'rgba(0, 123, 255, 1)',
                     borderWidth: 1
                 },
                 {
-                    label: 'Забаненые пользователи за день',
+                    label: 'Banned users per day',
                     data: Object.values(props.data.banned_users),
                     backgroundColor: 'rgba(255, 99, 132, 0.5)',
                     borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 1
                 },
                 {
-                    label: 'Активные пользователи за день',
+                    label: 'Active users for the day',
                     data: Object.values(props.data.active_users),
                     backgroundColor: 'rgba(246,206,0, 0.5)',
                     borderColor: 'rgba(246,206,0, 1)',
@@ -77,10 +77,10 @@ onMounted(() => {
                 <table class="table table-hover text-nowrap">
                     <thead>
                     <tr>
-                        <th>Всего пользователей</th>
-                        <th>⭐️ Активные</th>
-                        <th>👶 Обычные</th>
-                        <th>❌ Забанили Бота</th>
+                        <th>Total Users</th>
+                        <th>⭐️ Active</th>
+                        <th>👶 Regular</th>
+                        <th>❌ Banned Bot</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -94,7 +94,7 @@ onMounted(() => {
                 </table>
                 <BotsButton @click="navigateToUsers"
                 >
-                    Список пользователей
+                    User list
                 </BotsButton>
             </div>
         </div>
@@ -102,5 +102,4 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-/* Ваши стили */
 </style>

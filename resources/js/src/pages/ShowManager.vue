@@ -56,7 +56,7 @@ onMounted(() => {
         <div class="col-md-12">
             <div class="card card-primary">
                 <div class="card-header">
-                    Менеджер
+                    Manager
                 </div>
                 <bots-form
                     :data="localManagerData"
@@ -67,8 +67,8 @@ onMounted(() => {
     </div>
 
     <BotsConfirmatiomModal
-        title="Подтверждение действия"
-        message="Вы уверены, что хотите удалить этого админа?"
+        title="Confirmation of action"
+        message="Are you sure you want to remove this admin?"
         :showModal="showModal"
         @update:showModal="showModal = $event"
         @confirm="deleteManager"

@@ -12,7 +12,7 @@ const routes = [
                 component: () => import('@/pages/ShowBots.vue'),
                 meta: {
                     needAuth: true,
-                    breadcrumb: 'Все боты',
+                    breadcrumb: 'All bots',
                 },
             }, {
                 path: '/',
@@ -29,7 +29,7 @@ const routes = [
                 component: () => import('@/pages/ShowBot.vue'),
                 meta: {
                     needAuth: true,
-                    breadcrumb: 'Бот',
+                    breadcrumb: 'Bot',
                 },
             },
             {
@@ -38,7 +38,7 @@ const routes = [
                 component: () => import('@/pages/AddBot.vue'),
                 meta: {
                     needAuth: true,
-                    breadcrumb: 'Добавить бота',
+                    breadcrumb: 'Add bot',
                 },
             }, {
                 path: '/showUsers/:id?',
@@ -46,7 +46,7 @@ const routes = [
                 component: () => import('@/pages/ShowUsers.vue'),
                 meta: {
                     needAuth: true,
-                    breadcrumb: 'Все пользователи',
+                    breadcrumb: 'All users',
                 },
             },
             {
@@ -55,7 +55,7 @@ const routes = [
                 component: () => import('@/pages/AddAdmin.vue'),
                 meta: {
                     needAuth: true,
-                    breadcrumb: 'Добавить Админа',
+                    breadcrumb: 'Add admin',
                 },
             }, {
                 path: '/showAdmins',
@@ -63,7 +63,7 @@ const routes = [
                 component: () => import('@/pages/ShowAdmins.vue'),
                 meta: {
                     needAuth: true,
-                    breadcrumb: 'Все Админы',
+                    breadcrumb: 'All Admins',
                 },
             }, {
                 path: '/showAdmins/:id',
@@ -71,25 +71,25 @@ const routes = [
                 component: () => import('@/pages/ShowAdmin.vue'),
                 meta: {
                     needAuth: true,
-                    breadcrumb: 'Админ',
+                    breadcrumb: 'Admin',
                 },
             }, {
                 path: '/addManager', name: 'addManager', component: () => import('@/pages/AddManager.vue'), meta: {
-                    needAuth: true, breadcrumb: 'Добавить Менеджара',
+                    needAuth: true, breadcrumb: 'Add a Manager',
                 },
             }, {
                 path: '/showManagers',
                 name: 'showManagers',
                 component: () => import('@/pages/ShowManagers.vue'),
                 meta: {
-                    needAuth: true, breadcrumb: 'Все Менеджеры',
+                    needAuth: true, breadcrumb: 'All Managers',
                 },
             }, {
                 path: '/showManagers/:id',
                 name: 'showManager',
                 component: () => import('@/pages/ShowManager.vue'),
                 meta: {
-                    needAuth: true, breadcrumb: 'Менеджер',
+                    needAuth: true, breadcrumb: 'Manager',
                 },
             },
         ]

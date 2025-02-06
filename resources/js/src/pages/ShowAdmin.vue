@@ -69,8 +69,8 @@ onMounted(() => {
     </div>
 
     <BotsConfirmatiomModal
-        title="Подтверждение действия"
-        message="Вы уверены, что хотите удалить этого админа?"
+        title="Confirmation of action"
+        message="Are you sure you want to remove this admin?"
         :showModal="showModal"
         @update:showModal="showModal = $event"
         @confirm="deleteAdmin"

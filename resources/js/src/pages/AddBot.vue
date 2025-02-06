@@ -63,7 +63,7 @@ onMounted(() => {
         <div class="col-md-12">
             <div class="card card-primary">
                 <div class="card-header">
-                    Добавить бота
+                    Add a bot
                 </div>
                 <bots-form
                     :data="localBotData"

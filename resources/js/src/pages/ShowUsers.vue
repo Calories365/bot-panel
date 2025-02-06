@@ -21,7 +21,7 @@ const pagination = computed(() => store.getters[getterTypes.pagination]);
 
 const downloadLink = ref('');
 const sizeOptions = [10, 20, 30, 40, 50];
-const prePageText = 'Количество пользователей на странице';
+const prePageText = 'Number of users on the page';
 const emit = defineEmits(['handle']);
 const showModal = ref(false);
 const selectedUserId = ref(null);
@@ -111,8 +111,8 @@ const confirmDelete = () => {
             <a :href="downloadLink" download>Скачать файл</a>
         </div>
         <bots-confirmatiom-modal
-            title="Подтверждение действия"
-            message="Вы уверены, что хотите удалить этого пользователя?"
+            title="Confirmation of action"
+            message="Are you sure you want to delete this user?"
             :showModal="showModal"
             @update:showModal="showModal = $event"
             @confirm="confirmDelete"
