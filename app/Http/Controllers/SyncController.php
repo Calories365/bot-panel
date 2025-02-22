@@ -39,9 +39,6 @@ class SyncController extends Controller
         $premiumUntil = $request->input('payload.premium_until');
 
         try {
-            Log::info('data: ');
-            Log::info(print_r($caloriesId, true));
-            Log::info(print_r($premiumUntil, true));
             DB::transaction(function () use ($caloriesId, $premiumUntil) {
                 $updated = CaloriesUser::where('calories_id', $caloriesId)
                     ->update(['premium_calories' => true]);

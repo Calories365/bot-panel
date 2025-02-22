@@ -21,40 +21,24 @@ class Subscription extends Model
         'premium_until' => 'datetime',
     ];
 
-    /**
-     * Связь "подписка принадлежит конкретному bot_user"
-     */
     public function botUser()
     {
         return $this->belongsTo(BotUser::class, 'user_id');
     }
 
-    /**
-     * Проверяем, действует ли у пользователя премиум.
-     * Если premium_until больше текущего момента, значит премиум ещё активен.
-     */
     public function isPremium(): bool
     {
-        return $this->premium_until && $this->premium_until->isFuture();
+        return $this->premium_until && $this->premium_until->copy()->addDay()->isFuture();
     }
 
-    /**
-     * Может ли пользователь расшифровать аудио:
-     * - если у пользователя премиум, то ограничений нет,
-     * - если не премиум, то пока счётчик < 10.
-     */
     public function canTranscribeAudio(): bool
     {
-        return $this->isPremium() || $this->counter < 2;
+        return $this->isPremium() || $this->counter < 11;
     }
 
-    /**
-     * Увеличиваем счётчик бесплатных расшифровок на 1 (если пользователь не премиум).
-     */
     public function incrementTranscribeCounter(): void
     {
         $this->counter++;
         $this->save();
     }
 }
-

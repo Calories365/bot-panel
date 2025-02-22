@@ -54,6 +54,8 @@ class AudioMessageHandler implements MessageHandlerInterface
 
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
 
+            Log::info(print_r($text, true));
+
             if ($text) {
 
                 $locale = $botUser->locale;
