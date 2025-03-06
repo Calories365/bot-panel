@@ -21,7 +21,7 @@ class LanguageMessageHandler
 
             $keyboard = [
                 [
-                    ['text' => 'Русский', 'callback_data' => 'Russian'],
+//                    ['text' => 'Русский', 'callback_data' => 'Russian'],
                     ['text' => 'Українська', 'callback_data' => 'Ukrainian'],
                     ['text' => 'English', 'callback_data' => 'English'],
                 ],

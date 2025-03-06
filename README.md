@@ -4,5 +4,6 @@
 
 - [Українська](README.ua.md)
 - [English](README.en.md)
-- [Русский](README.ru.md)
+
+[//]: # (- [Русский]&#40;README.ru.md&#41;)
 
