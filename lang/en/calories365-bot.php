@@ -191,6 +191,23 @@ Link to the application: https://calculator.calories365.com
 
 Start keeping your calorie diary easily and conveniently!
 EOT,
+    'welcome_guide_KNU' => <<<EOT
+Welcome to the "Calories 365" bot! Here's how to use it:
+
+1) Voice input:
+Send a voice message describing what you ate for a meal. The bot will recognize the products and compile a list.
+
+2) Editing the list:
+Tap the “Edit” button to manually correct the name, calories, proteins, fats, or carbohydrates.
+Tap the “Search” button to find a new nutrient profile for the product. If you aren’t satisfied with the search result after the first click, tap again!
+
+3) Saving:
+Tap the “Save” button to store the data in your diary.
+
+Link to the application: https://calculator.calories365.xyz
+
+Start keeping your calorie diary easily and conveniently!
+EOT,
     'menu'             => 'Menu',
     'statistics'       => 'Statistics',
     'choose_language'  => 'Choose language',
