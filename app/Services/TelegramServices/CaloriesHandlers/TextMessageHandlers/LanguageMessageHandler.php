@@ -14,11 +14,15 @@ class LanguageMessageHandler
 
     public function handle($bot, $telegram, $message)
     {
-        $text = $message->getText();
-
-        $commonData = self::extractCommonData($message);
-        $chatId = $commonData['chatId'];
-
+        //for academic usage
+        if ($bot->name === 'calories365KNU_bot'){
+            $keyboard = [
+                [
+                    ['text' => 'Українська', 'callback_data' => 'Ukrainian'],
+                    ['text' => 'English', 'callback_data' => 'English'],
+                ],
+            ];
+        } else {
             $keyboard = [
                 [
                     ['text' => 'Русский', 'callback_data' => 'Russian'],
@@ -26,6 +30,12 @@ class LanguageMessageHandler
                     ['text' => 'English', 'callback_data' => 'English'],
                 ],
             ];
+        }
+
+        $commonData = self::extractCommonData($message);
+        $chatId = $commonData['chatId'];
+
+
 
             $inlineKeyboard = Keyboard::make([
                 'inline_keyboard' => $keyboard

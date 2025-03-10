@@ -36,21 +36,24 @@ class AudioMessageHandler implements MessageHandlerInterface
 
         if (isset($message['voice'])) {
 
-            $subscription = Subscription::firstOrCreate(
-                ['user_id' => $botUser->calories_id],
-            );
-            if (!$subscription->canTranscribeAudio()) {
-                $telegram->sendMessage([
-                    'chat_id' => $chatId,
-                    'text' => __('calories365-bot.subscription_required_message')
-                ]);
-                return;
-            }
+            //for academic usage
+            if ($bot->name != 'calories365KNU_bot'){
 
-            if (!$subscription->isPremium()) {
+                $subscription = Subscription::firstOrCreate(
+                    ['user_id' => $botUser->calories_id],
+                );
+                if (!$subscription->canTranscribeAudio()) {
+                    $telegram->sendMessage([
+                        'chat_id' => $chatId,
+                        'text' => __('calories365-bot.subscription_required_message')
+                    ]);
+                    return;
+                }
+
+                if (!$subscription->isPremium()) {
                     $subscription->incrementTranscribeCounter();
+                }
             }
-
 
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
 
