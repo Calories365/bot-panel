@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BotController;
 use App\Http\Controllers\ManagerController;
+use App\Http\Controllers\NgrokController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
@@ -18,6 +19,11 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+// Only register the ngrok route if in local environment
+if (env('APP_ENV') === 'local') {
+    Route::post('/ngrok', [NgrokController::class, 'updateWebhook'])->name('ngrok.update');
+}
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::group(['namespace' => 'App\Http\Controllers'], function () {
