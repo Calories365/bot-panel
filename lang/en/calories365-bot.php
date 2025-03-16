@@ -70,7 +70,7 @@ return [
     'language_set_russian'        => 'Your language has been set to Russian.',
     'language_set_ukrainian'      => 'Your language has been set to Ukrainian.',
     'invalid_or_used_code' => 'Invalid or used code. Please register again.',
-    'seems_you_are_new'    => 'It looks like you are new here. To link your account, use the "Connect" link from your personal account (https://calculator.calories365.com).',
+    'seems_you_are_new'    => 'It looks like you are new here. To link your account, use the "Connect" link from your personal account (https://calculator.calories365.com?lang=en).',
     'error_occurred' => 'An error occurred: ',
     'incomplete_product_info' => 'Product information is incomplete.',
     'save_products_for' => 'Save products for:',
@@ -104,6 +104,7 @@ Important:
 - Ensure each product and its amount are separated by a dash and spaces, as in the example.
 - Do not change the original product name, even if it contains digits or non-standard characters.
 - If the user says they ate two units of something, for example, two candies, the weight of both candies should be displayed as a single product.
+- If the user says they ate or drank zero point five beer (0.5), you should also take this into account and add it to the output text.
 
 Examples of input text and the expected output:
 
@@ -128,7 +129,7 @@ Examples of input text and the expected output:
    Expected output:
    Potato boiled - 200 grams;
 
-5. Input text: 'I haven’t eaten anything today.'
+5. Input text: 'I haven't eaten anything today.'
    Expected output:
    no products
 
@@ -139,6 +140,10 @@ Examples of input text and the expected output:
  7. Input text: "I ate two candies"
     Expected output:
     Candy – 20 grams;
+
+ 8. Input text: "I drank zero point five beer"
+    Expected output:
+    Beer – 500 grams;
 EOT,
 
     'prompt_generate_new_product_data' => <<<EOT
@@ -181,11 +186,11 @@ Welcome to the "Calories 365" bot! Here's how to use it:
 Send a voice message describing what you ate for a meal. The bot will recognize the products and compile a list.
 
 2) Editing the list:
-Tap the “Edit” button to manually correct the name, calories, proteins, fats, or carbohydrates.
-Tap the “Search” button to find a new nutrient profile for the product. If you aren’t satisfied with the search result after the first click, tap again!
+Tap the "Edit" button to manually correct the name, calories, proteins, fats, or carbohydrates.
+Tap the "Search" button to find a new nutrient profile for the product. If you aren't satisfied with the search result after the first click, tap again!
 
 3) Saving:
-Tap the “Save” button to store the data in your diary.
+Tap the "Save" button to store the data in your diary.
 
 Link to the application: https://calculator.calories365.com
 
@@ -198,11 +203,11 @@ Welcome to the "Calories 365" bot! Here's how to use it:
 Send a voice message describing what you ate for a meal. The bot will recognize the products and compile a list.
 
 2) Editing the list:
-Tap the “Edit” button to manually correct the name, calories, proteins, fats, or carbohydrates.
-Tap the “Search” button to find a new nutrient profile for the product. If you aren’t satisfied with the search result after the first click, tap again!
+Tap the "Edit" button to manually correct the name, calories, proteins, fats, or carbohydrates.
+Tap the "Search" button to find a new nutrient profile for the product. If you aren't satisfied with the search result after the first click, tap again!
 
 3) Saving:
-Tap the “Save” button to store the data in your diary.
+Tap the "Save" button to store the data in your diary.
 
 Link to the application: https://calculator.calories365.xyz
 

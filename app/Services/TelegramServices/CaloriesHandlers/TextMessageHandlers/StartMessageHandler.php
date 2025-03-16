@@ -8,6 +8,7 @@ use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInt
 use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\Telegram;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Telegram\Bot\FileUpload\InputFile;
@@ -32,9 +33,20 @@ class StartMessageHandler implements MessageHandlerInterface
         $chatId = $commonData['chatId'];
 
         $parts = explode(' ', $text);
-        $code = $parts[1] ?? null;
+        $codePart = $parts[1] ?? null;
 
-        if ($code) {
+        $code = null;
+        $locale = null;
+
+        if ($codePart) {
+            $codeAndLang = explode('_', $codePart);
+            $code = $codeAndLang[0] ?? null;
+            $locale = $codeAndLang[1] ?? $commonData['locale'];
+
+            if ($locale) {
+                App::setLocale($locale);
+            }
+
             $result = $this->diaryApiService->checkTelegramCode($code, $chatId);
 
             if (!empty($result['success']) && $result['success'] === true) {
@@ -52,9 +64,11 @@ class StartMessageHandler implements MessageHandlerInterface
                     $commonData['premium'],
                     'calories',
                     $result,
+                    $locale
                 );
 
                 $botUser->calories_id = $caloriesUserId;
+                $botUser->locale = $locale;
                 $botUser->save();
 
                 Log::info("User {$chatId} linked with calories ID {$caloriesUserId}");
@@ -86,12 +100,16 @@ class StartMessageHandler implements MessageHandlerInterface
                 $commonData['username'],
                 $bot,
                 $commonData['premium'],
-               'bot_link'
+               'bot_link',
+               null,
+               $commonData['locale'],
             );
+
+            App::setLocale($commonData['locale']);
 
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text'    => __('calories365-bot.seems_you_are_new')
+                'text'    => __('calories365-bot.seems_you_are_new', ['lang' => App::getLocale()])
             ]);
         }
     }

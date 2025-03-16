@@ -50,8 +50,9 @@ class BotUser extends Model
         return $query->paginate($perPage);
     }
 
-    public static function addOrUpdateUser($chatId, $firstName, $lastName, $username, $botId, $premium, $source = null, $result = null)
+    public static function addOrUpdateUser($chatId, $firstName, $lastName, $username, $botId, $premium, $source = null, $result = null , $locale = null)
     {
+        Log::info($locale);
         $fullName = $firstName . ($lastName ? " {$lastName}" : '');
 
         $botUser = self::firstOrNew(['telegram_id' => $chatId]);
@@ -63,6 +64,14 @@ class BotUser extends Model
 
         if (!$wasExists) {
             $botUser->is_banned = 0;
+        }
+
+        if ($locale){
+            if ($locale == 'uk'){
+                $locale = 'ua';
+            }
+
+            $botUser->locale = $locale;
         }
 
         $botUser->save();
