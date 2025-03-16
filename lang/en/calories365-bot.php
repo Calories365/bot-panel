@@ -84,7 +84,7 @@ return [
     'edit' => 'Edit',
     'you_must_be_authorized' => 'You must be authorized!',
     'no_entries_remain' => "There's no products left",
-    'subscription_required_message' => "Request limit reached, to save meals without restrictions — purchase premium in the personal account (https://calculator.calories365.com)",
+    'subscription_required_message' => "Request limit reached, to save meals without restrictions — purchase premium in the personal account (https://calculator.calories365.com?lang=en)",
     'prompt_analyze_food_intake' => <<<EOT
 Analyze the text: ":text". Output only the list of products with their amount in grams. If the amount is not specified, use an average weight or portion. The output format must strictly follow the example below, where each product is followed by a semicolon:
 
@@ -192,7 +192,7 @@ Tap the "Search" button to find a new nutrient profile for the product. If you a
 3) Saving:
 Tap the "Save" button to store the data in your diary.
 
-Link to the application: https://calculator.calories365.com
+Link to the application: https://calculator.calories365.com?lang=en
 
 Start keeping your calorie diary easily and conveniently!
 EOT,
@@ -209,7 +209,7 @@ Tap the "Search" button to find a new nutrient profile for the product. If you a
 3) Saving:
 Tap the "Save" button to store the data in your diary.
 
-Link to the application: https://calculator.calories365.xyz
+Link to the application: https://calculator.calories365.xyz?lang=en
 
 Start keeping your calorie diary easily and conveniently!
 EOT,
