@@ -138,10 +138,31 @@ trait EditHandlerTrait
             $productTranslation['said_name']
         );
 
+        $userId = auth()->user()->id ?? request()->userId ?? null;
+        $clickCount = Cache::get("product_click_count_{$userId}_{$productId}", 0);
+
+        // Define the button text based on the scenario
+        $saidName = $productTranslation['said_name'] ?? '';
+        $originalName = $productTranslation['original_name'] ?? '';
+
+        // Check if the product was already generated using the OpenAI API
+        $wasGeneratedByOpenAI = isset($product['edited']) && $product['edited'] == 1 &&
+            isset($product['verified']) && $product['verified'] == 1 ||
+            isset($product['ai_generated']) && $product['ai_generated'] === true;
+
+        // If the product was already generated via OpenAI or the click counter > 0,
+        // show "Generate with AI"
+        // If this is the first click and the name differs from the original,
+        // show "Search"
+        $useSearchButton = !$wasGeneratedByOpenAI && $clickCount === 0 && $saidName !== $originalName && !empty($originalName);
+        $searchButtonText = $useSearchButton
+            ? __('calories365-bot.search')
+            : __('calories365-bot.generate_with_ai');
+
         $inlineKeyboard = [
             [
                 [
-                    'text' => __('calories365-bot.search'),
+                    'text' => $searchButtonText,
                     'callback_data' => 'search_' . $productId
                 ],
             ],

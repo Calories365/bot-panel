@@ -55,8 +55,7 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                     } else {
                         if ($saidName !== $originalName) {
                             $response = $this->diaryApiService->getTheMostRelevantProduct($formattedText, $calories_id, $locale);
-
-                            if (isset($response['product'])) {
+                            if ($response && isset($response['product'])) {
                                 $product = $response['product'];
                             } else {
                                 $this->generateProductData($products, $productId, $userId, $telegram, $chatId, $callbackQuery);
@@ -124,8 +123,39 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
             return;
         }
 
+        if ($productData && (
+            stripos($productData, 'извините') !== false ||
+            stripos($productData, 'sorry') !== false ||
+            stripos($productData, 'вибачте') !== false ||
+            stripos($productData, 'не могу') !== false ||
+            stripos($productData, 'cannot') !== false ||
+            stripos($productData, 'не можу') !== false ||
+            stripos($productData, 'error') !== false ||
+            stripos($productData, 'ошибка') !== false ||
+            stripos($productData, 'помилка') !== false
+        )) {
+            Log::error("OpenAI couldn't generate data for product: " . $saidName);
+            Log::error("Response: " . $productData);
+            $telegram->answerCallbackQuery([
+                'callback_query_id' => $callbackQuery->getId(),
+                'text'             => __('calories365-bot.cannot_generate_product_data'),
+                'show_alert'       => true,
+            ]);
+            return;
+        }
+
         if ($productData) {
             $newNutritionalData = $this->parseNutritionalData($productData);
+
+            if (empty($newNutritionalData)) {
+                Log::error("Failed to parse nutritional data from OpenAI response for product: " . $saidName);
+                $telegram->answerCallbackQuery([
+                    'callback_query_id' => $callbackQuery->getId(),
+                    'text'             => __('calories365-bot.cannot_generate_product_data'),
+                    'show_alert'       => true,
+                ]);
+                return;
+            }
 
             if (isset($products[$productId]['product'])) {
                 foreach ($newNutritionalData as $key => $value) {
@@ -135,6 +165,7 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
 
             $products[$productId]['product']['edited'] = 1;
             $products[$productId]['product']['verified'] = 1;
+            $products[$productId]['product']['ai_generated'] = true;
             $products[$productId]['product_translation']['name'] = $saidName;
 
             Cache::put("user_products_{$userId}", $products, now()->addMinutes(30));
@@ -150,7 +181,7 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
                 'text'             => __('calories365-bot.failed_to_get_product_data'),
-                'show_alert'       => false,
+                'show_alert'       => true,
             ]);
         }
     }
