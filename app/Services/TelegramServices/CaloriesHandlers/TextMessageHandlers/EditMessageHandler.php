@@ -68,6 +68,10 @@ class EditMessageHandler implements MessageHandlerInterface
                     $userProducts[$productId]['product_translation']['said_name'] = $text;
                     $userProducts[$productId]['product']['edited']               = 1;
                     $userProducts[$productId]['product']['verified']   = 0;
+                    
+                    if (isset($userProducts[$productId]['product']['ai_generated'])) {
+                        $userProducts[$productId]['product']['ai_generated'] = false;
+                    }
 
                     Cache::forget("product_click_count_{$userId}_{$productId}");
 

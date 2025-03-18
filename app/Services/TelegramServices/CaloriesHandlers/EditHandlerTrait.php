@@ -145,12 +145,12 @@ trait EditHandlerTrait
         $saidName = $productTranslation['said_name'] ?? '';
         $originalName = $productTranslation['original_name'] ?? '';
 
-        // Check if the product was already generated using the OpenAI API
-        $wasGeneratedByOpenAI = isset($product['edited']) && $product['edited'] == 1 &&
-            isset($product['verified']) && $product['verified'] == 1 ||
-            isset($product['ai_generated']) && $product['ai_generated'] === true;
+        /// Check if the product was already generated using the OpenAI API
+        $wasGeneratedByOpenAI = (isset($product['edited']) && $product['edited'] == 1 &&
+                isset($product['verified']) && $product['verified'] == 1) ||
+            (isset($product['ai_generated']) && $product['ai_generated'] === true);
 
-        // If the product was already generated via OpenAI or the click counter > 0,
+        // If the product was already generated via OpenAI or the click count > 0,
         // show "Generate with AI"
         // If this is the first click and the name differs from the original,
         // show "Search"
@@ -158,6 +158,7 @@ trait EditHandlerTrait
         $searchButtonText = $useSearchButton
             ? __('calories365-bot.search')
             : __('calories365-bot.generate_with_ai');
+
 
         $inlineKeyboard = [
             [
