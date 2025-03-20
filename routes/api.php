@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BotController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\NgrokController;
 use App\Http\Controllers\SyncController;
@@ -75,6 +76,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/managers/{manager}', [ManagerController::class, 'update'])->name('manager.update');
 
         Route::get('/bot-managers', [BotController::class, 'getManagers'])->name('bot.managers');
+        
+        Route::post('/language/toggle-russian', [LanguageController::class, 'toggleRussianLanguage'])->name('language.toggle-russian');
     });
 });
 Route::group(['namespace' => 'App\Http\Controllers'], function () {

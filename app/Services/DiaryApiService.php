@@ -229,5 +229,26 @@ class DiaryApiService
         }
     }
 
+    /**
+     * Toggle Russian language setting
+     *
+     * @param bool $enabled
+     * @return array
+     */
+    public function toggleRussianLanguage(bool $enabled): array
+    {
+        try {
+            $response = $this->client->post($this->apiUrl . '/caloriesEndPoint/toggleRussianLanguage', [
+                'headers' => $this->getHeaders(null, null, true),
+                'json'    => [
+                    'enabled' => $enabled,
+                ],
+            ]);
 
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (GuzzleException $e) {
+            Log::error("Error toggling Russian language: " . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
 }

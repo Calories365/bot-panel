@@ -4,6 +4,7 @@ import bots from "@/store/modules/bots.js";
 import users from "@/store/modules/users.js";
 import admins from "@/store/modules/admins.js";
 import managers from "@/store/modules/managers.js";
+import language from "@/store/modules/language.js";
 
 export default createStore({
     state: {
@@ -43,6 +44,6 @@ export default createStore({
         },
     },
     modules: {
-        auth, bots, users, admins, managers
+        auth, bots, users, admins, managers, language
     }
 });
