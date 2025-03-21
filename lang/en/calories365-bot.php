@@ -185,7 +185,7 @@ EOT,
 Send a voice message to the bot with what you’ve eaten to add an entry to your diary.
 
 Saved products will appear in the web application:
-https://calculator.calories365.com?lang=ru
+https://calculator.calories365.com?lang=en
 
 You can also watch an introduction video about the bot.
 
