@@ -3,6 +3,7 @@
 namespace App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers;
 
 use App\Models\BotUser;
+use App\Models\LanguageSetting;
 use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\Telegram;
 use App\Traits\BasicDataExtractor;
 use Illuminate\Support\Facades\Log;
@@ -14,8 +15,11 @@ class LanguageMessageHandler
 
     public function handle($bot, $telegram, $message)
     {
+
+        $setting = LanguageSetting::first();
+        $enabled = $setting->russian_language_enabled;
         //for academic usage
-        if ($bot->name === 'calories365KNU_bot'){
+        if ($bot->name === 'calories365KNU_bot' or !$enabled){
             $keyboard = [
                 [
                     ['text' => 'Українська', 'callback_data' => 'Ukrainian'],

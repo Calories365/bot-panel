@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LanguageSetting;
 use Illuminate\Http\Request;
 use App\Services\DiaryApiService;
 
@@ -22,6 +23,15 @@ class LanguageController extends Controller
 
         $response = $this->diaryApiService->toggleRussianLanguage($validated['enabled']);
 
+        $setting = LanguageSetting::firstOrCreate(
+            ['id' => 1],
+            ['russian_language_enabled' => $validated['enabled']]
+        );
+
+        if ($setting->russian_language_enabled !== $validated['enabled']) {
+            $setting->update(['russian_language_enabled' => $validated['enabled']]);
+        }
+
         if (isset($response['error'])) {
             return response()->json([
                 'success' => false,
@@ -32,4 +42,4 @@ class LanguageController extends Controller
 
         return response()->json($response);
     }
-} 
+}
