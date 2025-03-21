@@ -182,38 +182,26 @@ EOT,
 
     'data_not_extracted' => 'Failed to extract data.',
     'welcome_guide' => <<<EOT
-Welcome to the "Calories 365" bot! Here's how to use it:
+Send a voice message to the bot with what you’ve eaten to add an entry to your diary.
 
-1) Voice input:
-Send a voice message describing what you ate for a meal. The bot will recognize the products and compile a list.
+Saved products will appear in the web application:
+https://calculator.calories365.com?lang=ru
 
-2) Editing the list:
-Tap the "Edit" button to manually correct the name, calories, proteins, fats, or carbohydrates.
-Tap the "Search" button to find a new nutrient profile for the product. If you aren't satisfied with the search result after the first click, tap again!
+You can also watch an introduction video about the bot.
 
-3) Saving:
-Tap the "Save" button to store the data in your diary.
-
-Link to the application: https://calculator.calories365.com?lang=en
-
-Start keeping your calorie diary easily and conveniently!
+Start tracking your calories easily and conveniently!
 EOT,
+
+
     'welcome_guide_KNU' => <<<EOT
-Welcome to the "Calories 365" bot! Here's how to use it:
+Send a voice message to the bot with what you’ve eaten to add an entry to your diary.
 
-1) Voice input:
-Send a voice message describing what you ate for a meal. The bot will recognize the products and compile a list.
+Saved products will appear in the web application:
+https://calculator.calories365.xyz?lang=en
 
-2) Editing the list:
-Tap the "Edit" button to manually correct the name, calories, proteins, fats, or carbohydrates.
-Tap the "Search" button to find a new nutrient profile for the product. If you aren't satisfied with the search result after the first click, tap again!
+You can also watch an introduction video about the bot.
 
-3) Saving:
-Tap the "Save" button to store the data in your diary.
-
-Link to the application: https://calculator.calories365.xyz?lang=en
-
-Start keeping your calorie diary easily and conveniently!
+Start tracking your calories easily and conveniently!
 EOT,
     'menu'             => 'Menu',
     'statistics'       => 'Statistics',
