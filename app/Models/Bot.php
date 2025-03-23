@@ -21,7 +21,10 @@ class Bot extends Model
         'message_image',
         'type_id',
         'wordpress_endpoint',
-        'web_hook'
+        'web_hook',
+        'video_ru',
+        'video_ua',
+        'video_eng',
     ];
 
     public function users()

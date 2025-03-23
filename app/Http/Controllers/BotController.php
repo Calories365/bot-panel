@@ -58,22 +58,50 @@ class BotController extends BaseController
         $data = $request->validated();
 
         if ($request->hasFile('message_image')) {
-            $data['message_image'] = $this->botManagmentService->handleImageUpload($request);
+            $data['message_image'] = $this->botManagmentService->handleFileUpload($request, 'message_image');
         }
+
+        if ($request->hasFile('video_ru')) {
+            $data['video_ru'] = $this->botManagmentService->handleFileUpload($request, 'video_ru');
+        }
+
+        if ($request->hasFile('video_ua')) {
+            $data['video_ua'] = $this->botManagmentService->handleFileUpload($request, 'video_ua');
+        }
+
+        if ($request->hasFile('video_eng')) {
+            $data['video_eng'] = $this->botManagmentService->handleFileUpload($request, 'video_eng');
+        }
+
         $bot = Bot::create($data);
+
         $this->botManagmentService->syncManagers($request, $bot);
         $bot->updateWeebHook();
 
         return response()->json(['id' => $bot->id]);
     }
 
+
     public function update(BotDataRequest $request, Bot $bot): BotResource
     {
         $data = $request->validated();
 
         if ($request->hasFile('message_image')) {
-            $data['message_image'] = $this->botManagmentService->handleImageUpload($request);
+            $data['message_image'] = $this->botManagmentService->handleFileUpload($request, 'message_image');
         }
+
+        if ($request->hasFile('video_ru')) {
+            $data['video_ru'] = $this->botManagmentService->handleFileUpload($request, 'video_ru');
+        }
+
+        if ($request->hasFile('video_ua')) {
+            $data['video_ua'] = $this->botManagmentService->handleFileUpload($request, 'video_ua');
+        }
+
+        if ($request->hasFile('video_eng')) {
+            $data['video_eng'] = $this->botManagmentService->handleFileUpload($request, 'video_eng');
+        }
+
 
         $bot->update($data);
         $this->botManagmentService->syncManagers($request, $bot);

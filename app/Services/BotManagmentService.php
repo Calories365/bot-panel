@@ -7,12 +7,18 @@ use Illuminate\Support\Facades\Storage;
 
 class BotManagmentService
 {
-    public function handleImageUpload($request): ?string
+    public function handleFileUpload($request, string $fieldName): ?string
     {
-        $imagePath = $request->file('message_image')->store('public/bots');
-        $url = Storage::url($imagePath);
+        if (!$request->hasFile($fieldName)) {
+            return null;
+        }
+        $file = $request->file($fieldName);
+        $filePath = $file->store('public/bots');
+        $url = Storage::url($filePath);
         return str_replace('/storage/bots', '/images', $url);
     }
+
+
 
     public function syncManagers($request, $bot): void
     {

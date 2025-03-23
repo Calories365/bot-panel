@@ -34,6 +34,10 @@ export const rows_default = [
         required: false
     },
     {label: 'Photo', key: 'message_image', type: 'picture', emit_name: null, placeholder: 'select photo', action: null},
+    {label: 'Video_ru', key: 'video_ru', type: 'picture', emit_name: null, placeholder: 'select video', action: null},
+    {label: 'Video_ua', key: 'video_ua', type: 'picture', emit_name: null, placeholder: 'select video', action: null},
+    {label: 'Video_eng', key: 'video_eng', type: 'picture', emit_name: null, placeholder: 'select video', action: null},
+
     {label: 'Active', key: 'active', type: 'checkbox', emit_name: null, placeholder: 'is the bot active', action: null},
     {
         label: 'Actions', key: 'actions', type: 'buttons', emit_name: null, placeholder: null,

@@ -46,6 +46,18 @@ class BotResource extends JsonResource
             'image_url' => $this->message_image,
             'image_file' => null,
         ];
+        $video_engInfo = [
+            'image_url' => $this->video_eng,
+            'image_file' => null,
+        ];
+        $video_ruInfo = [
+        'image_url' => $this->video_ru,
+        'image_file' => null,
+        ];
+        $video_uaInfo = [
+        'image_url' => $this->video_ua,
+        'image_file' => null,
+         ];
 
         return [
             'id' => $this->id,
@@ -53,6 +65,9 @@ class BotResource extends JsonResource
             'token' => $this->token,
             'message' => $this->message,
             'message_image' => $imageInfo,
+            'video_eng' => $video_engInfo,
+            'video_ru' => $video_ruInfo,
+            'video_ua' => $video_uaInfo,
             'active' => (int)$this->active,
             'wordpress_endpoint' => $this->wordpress_endpoint,
             'web_hook' => $this->web_hook,

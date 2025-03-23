@@ -1,4 +1,5 @@
 import botsApi from "@/api/bots.js";
+import {isSet} from "lodash";
 
 const state = {
     bots: [],
@@ -333,11 +334,7 @@ async function handleBotData(commit, dispatch, botApiFunction, botData, botId = 
 
     try {
 
-        if (botData.message_image?.image_file) {
-            botData.message_image = botData.message_image?.image_file;
-        } else {
-            delete botData.message_image;
-        }
+        normalizeFiles(botData);
 
         botData.type_id = botData.type_id.type_id;
         botData.managers = botData.managers.managers;
@@ -347,7 +344,7 @@ async function handleBotData(commit, dispatch, botApiFunction, botData, botId = 
             if (botData.hasOwnProperty(key)) {
                 if (key === 'managers' && botData.managers && botData.managers.length > 0) {
                     formData.append('managers', JSON.stringify(botData.managers));
-                } else if (key === 'message_image' && botData[key] instanceof File) {
+                } else if (botData[key] instanceof File) {
                     formData.append(key, botData[key], botData[key].name);
                 } else {
                     formData.append(key, botData[key]);
@@ -363,6 +360,24 @@ async function handleBotData(commit, dispatch, botApiFunction, botData, botId = 
         const errorMessage = error.response ? error.response.data : error;
         commit(mutationTypes.upsertBotFailure, errorMessage);
         throw error;
+    }
+}
+function normalizeFiles(botData) {
+    for (const key in botData) {
+        if (botData.hasOwnProperty(key)) {
+            const value = botData[key];
+            if (value && typeof value === 'object' && 'image_file' in value)  {
+                if (value.image_file instanceof File) {
+                    botData[key] = value.image_file;
+                }
+                else if (value.file instanceof File) {
+                    botData[key] = value.file;
+                }
+                else {
+                    delete botData[key];
+                }
+            }
+        }
     }
 }
 
