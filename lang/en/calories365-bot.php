@@ -182,6 +182,8 @@ EOT,
 
     'data_not_extracted' => 'Failed to extract data.',
     'welcome_guide' => <<<EOT
+Vide instruction: https://t.me/calories_365/3
+
 Send a voice message to the bot with what you’ve eaten to add an entry to your diary.
 
 Saved products will appear in the web application:
@@ -194,6 +196,8 @@ EOT,
 
 
     'welcome_guide_KNU' => <<<EOT
+Vide instruction: https://t.me/calories_365/3
+
 Send a voice message to the bot with what you’ve eaten to add an entry to your diary.
 
 Saved products will appear in the web application:

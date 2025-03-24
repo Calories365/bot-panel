@@ -18,8 +18,6 @@ class BotManagmentService
         return str_replace('/storage/bots', '/images', $url);
     }
 
-
-
     public function syncManagers($request, $bot): void
     {
         $managerIdsJson = $request->input('managers');
