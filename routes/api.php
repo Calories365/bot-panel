@@ -76,7 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/managers/{manager}', [ManagerController::class, 'update'])->name('manager.update');
 
         Route::get('/bot-managers', [BotController::class, 'getManagers'])->name('bot.managers');
-        
+
         Route::post('/language/toggle-russian', [LanguageController::class, 'toggleRussianLanguage'])->name('language.toggle-russian');
     });
 });
@@ -91,4 +91,6 @@ Route::group(['middleware' => 'check.api.key', 'namespace' => 'App\Http\Controll
         ->name('sync-calories-user.store');
     Route::post('/update-premium-status', [SyncController::class, 'updatePremiumStatus'])
         ->name('update-premium-status.store');
+    Route::get('/subscription-check/{calories_id}', [UsersController::class, 'subscriptionCheck'])
+        ->name('subscription-check');
 });

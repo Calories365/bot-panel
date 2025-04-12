@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\BotUserResource;
 use App\Models\BotUser;
 use App\Models\CaloriesUser;
+use App\Models\Subscription;
 use App\Services\BotUsersService;
 use App\Services\DiaryApiService;
 use Carbon\Carbon;
@@ -100,6 +101,20 @@ class UsersController extends BaseController
         return response()->json([
             'message' => 'Export successful',
             'downloadUrl' => $downloadUrl
+        ]);
+    }
+
+    public function subscriptionCheck($calories_id): \Illuminate\Http\JsonResponse
+    {
+        $subscription = Subscription::firstOrCreate(
+            ['user_id' => $calories_id],
+        );
+        $subscription->increment('counter');
+
+        $canTranscribeAudio = $subscription->canTranscribeAudio();
+
+        return response()->json([
+            'canTranscribeAudio' => $canTranscribeAudio
         ]);
     }
 }
