@@ -33,7 +33,7 @@ function createAdmin() {
         <div class="col-md-12">
             <div class="card card-primary">
                 <div class="card-header">
-                    Add admin
+                    Add admin111
                 </div>
                 <bots-form
                     :data="localAdminData"
