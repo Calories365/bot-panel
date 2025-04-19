@@ -18,6 +18,7 @@ class TelegramHandler
         RequestService  $requestService,
         Request2Service $request2Service,
         CaloriesService $caloriesService,
+        TikTokService $tikTokService,
     ) {
         $this->strategies = [
             'Approval' => $approvalService,
@@ -25,6 +26,7 @@ class TelegramHandler
             'Request'  => $requestService,
             'Request2' => $request2Service,
             'Calories' => $caloriesService,
+            'TikTok' => $tikTokService,
         ];
     }
 
