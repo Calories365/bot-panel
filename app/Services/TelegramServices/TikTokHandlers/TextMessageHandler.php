@@ -17,10 +17,11 @@ class TextMessageHandler implements MessageHandlerInterface
     {
         $text = trim($message->getText());
 
-        if (!preg_match('#https?://(www\.)?(vm\.)?tiktok\.com#i', $text)) {
+        $host = parse_url($text, PHP_URL_HOST);
+        if (!$host || mb_stripos($host, 'tiktok.com') === false) {
             $telegram->sendMessage([
                 'chat_id' => $message->getChat()->getId(),
-                'text'    => 'Пожалуйста, отправьте действующую ссылку на видео TikTok.',
+                'text'    => 'Пожалуйста, пришлите ссылку на видео TikTok.',
             ]);
             return true;
         }
