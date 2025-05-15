@@ -40,16 +40,29 @@ class SpeechToTextService
 
     public function convertSpeechToText(string $filePath)
     {
+        $locale = app()->getLocale();
+
+        $languageCode = match ($locale) {
+            'ua' => 'uk',
+            'ru' => 'ru',
+            'en' => 'en',
+            default => 'uk',
+        };
+
         $multipartBody = new MultipartStream([
             [
                 'name'     => 'file',
                 'contents' => fopen($filePath, 'r'),
-                'filename' => basename($filePath)
+                'filename' => basename($filePath),
             ],
             [
                 'name'     => 'model',
-                'contents' => 'whisper-1'
-            ]
+                'contents' => 'whisper-1',
+            ],
+            [
+                'name'     => 'language',
+                'contents' => $languageCode,
+            ],
         ]);
 
         $headers = [

@@ -87,6 +87,7 @@ const handleExport = () => {
                     :data="data"
                     @handle="handleEvent"/>
             </div>
+
             <div class="row">
                 <table-pagination
                     :total-pages="totalPages"
