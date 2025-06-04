@@ -2,7 +2,7 @@
 
 namespace App\Services\TelegramServices;
 
-use App\Interfaces\BotHandlerStrategy;
+use App\Services\TelegramServices\BotHandlerStrategy;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\AudioMessageHandler;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\TextMessageHandler;
 use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\StartMessageHandler;
@@ -89,6 +89,15 @@ class BaseService implements BotHandlerStrategy
         return [
 
         ];
+    }
+
+    /**
+     * Get list of commands that should be excluded from middleware processing
+     * Default implementation returns empty array
+     */
+    public function getExcludedCommands(): array
+    {
+        return [];
     }
 
     /**

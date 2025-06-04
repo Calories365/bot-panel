@@ -76,9 +76,7 @@ class TelegramHandler
             'bot'               => $bot,
             'telegram'          => $telegram,
             'update'            => $update,
-            'excludedCommands'  => method_exists($strategy, 'getExcludedCommands')
-                ? $strategy->getExcludedCommands()
-                : [],
+            'excludedCommands'  => $strategy->getExcludedCommands(),
         ];
 
         if (!isset($middlewares[$botTypeName])) {
