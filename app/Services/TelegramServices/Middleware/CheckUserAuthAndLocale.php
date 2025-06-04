@@ -31,8 +31,19 @@ class CheckUserAuthAndLocale
         $userId    = $this->getUserId($update);
         $language  = $this->getUserLanguage($update);
 
-        $botUser = BotUser::where('telegram_id', $userId)->first();
+//        $botUser = BotUser::where('telegram_id', $userId)->first();
 
+        if ($userId) {
+            $botUser = Cache::remember(
+                'tg_bot_user_' . $userId,
+                300,
+                static function () use ($userId) {
+                    return BotUser::select('id', 'telegram_id', 'calories_id', 'locale', 'premium')
+                        ->where('telegram_id', $userId)
+                        ->first();
+                }
+            );
+        }
         $this->checkAndSetLocale($botUser, $language);
 
         if ($this->isExcludedCommand($text, $excludedCommands)) {

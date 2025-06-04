@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class BotUser extends Model
 {
@@ -21,6 +22,17 @@ class BotUser extends Model
         'locale',
         'last_active_at'
     ];
+
+    protected static function booted()
+    {
+        static::saved(static function (self $botUser) {
+            Cache::forget('tg_bot_user_' . $botUser->telegram_id);
+        });
+
+        static::deleted(static function (self $botUser) {
+            Cache::forget('tg_bot_user_' . $botUser->telegram_id);
+        });
+    }
 
     public function bots()
     {
