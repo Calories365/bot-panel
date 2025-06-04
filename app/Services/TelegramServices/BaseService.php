@@ -2,6 +2,8 @@
 
 namespace App\Services\TelegramServices;
 
+use App\Models\Bot;
+use App\Models\BotUser;
 use App\Services\TelegramServices\BotHandlerStrategy;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\AudioMessageHandler;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\TextMessageHandler;
@@ -10,6 +12,8 @@ use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\CallbackQueryHandl
 use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\MessageUpdateHandler;
 use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\MyChatMemberUpdateHandler;
 use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Api;
+use Telegram\Bot\Objects\Update;
 
 /**
  * Class BaseService
@@ -36,9 +40,13 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getUpdateHandlers(): array
     {
-        $messageUpdateHandler = new MessageUpdateHandler($this->getMessageHandlers());
-        $myChatMemberUpdateHandler = new MyChatMemberUpdateHandler();
-        $callbackQueryHandler = new CallbackQueryHandler($this->getCallbackQueryHandlers());
+        $messageUpdateHandler = app(MessageUpdateHandler::class, [
+            'messageHandlers' => $this->getMessageHandlers()
+        ]);
+        $myChatMemberUpdateHandler = app(MyChatMemberUpdateHandler::class);
+        $callbackQueryHandler = app(CallbackQueryHandler::class, [
+            'callbackQueryHandlers' => $this->getCallbackQueryHandlers()
+        ]);
 
         return [
             'message' => $messageUpdateHandler,
@@ -53,10 +61,10 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getMessageHandlers(): array
     {
-        $textMessageHandler = new TextMessageHandler(
-            $this->getTextMessageHandlers()
-        );
-        $audioMessageHandler = new AudioMessageHandler();
+        $textMessageHandler = app(TextMessageHandler::class, [
+            'textMessageHandlers' => $this->getTextMessageHandlers()
+        ]);
+        $audioMessageHandler = app(AudioMessageHandler::class);
 
         return [
             'text' => $textMessageHandler,
@@ -70,7 +78,7 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getTextMessageHandlers(): array
     {
-        $startTextMessageHandler = new StartMessageHandler();
+        $startTextMessageHandler = app(StartMessageHandler::class);
 
         return [
             '/start' => $startTextMessageHandler,
@@ -84,7 +92,7 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getCallbackQueryHandlers(): array{
 
-        $callbackQueryHandler = new CallbackQueryHandler();
+        $callbackQueryHandler = app(CallbackQueryHandler::class);
 
         return [
 
@@ -104,7 +112,7 @@ class BaseService implements BotHandlerStrategy
      * BaseService handle.
      * starts the required Handler for the event
      */
-    public function handle($bot, $telegram, $update, $botUser): void
+    public function handle(Bot $bot, Api $telegram, Update $update, BotUser $botUser): void
     {
         $updateType = $update->detectType();
         if (isset($this->updateHandlers[$updateType])) {

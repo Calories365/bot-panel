@@ -10,12 +10,10 @@ use App\Services\DiaryApiService;
 class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
     public bool $blockAble = true;
-    protected DiaryApiService $diaryApiService;
-
-    public function __construct()
-    {
-        $this->diaryApiService = new DiaryApiService();
-    }
+    
+    public function __construct(
+        protected DiaryApiService $diaryApiService
+    ) {}
 
     public function handle($bot, $telegram, $callbackQuery, $botUser)
     {

@@ -23,8 +23,8 @@ class ApprovalService extends BaseService
     {
         $messageHandlers = parent::getMessageHandlers();
 
-        $messageHandlers['text'] = new TextMessageHandler();
-        $messageHandlers['contact'] = new ContactMessageHandler();
+        $messageHandlers['text'] = app(TextMessageHandler::class);
+        $messageHandlers['contact'] = app(ContactMessageHandler::class);
 
         return $messageHandlers;
     }
