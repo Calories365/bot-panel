@@ -51,19 +51,10 @@ class CheckUserAuthAndLocale
             return $next($passable);
         }
 
-        if (!$userId) {
+        if (!$userId || !$botUser || !$botUser->calories_id) {
             $this->sendMustBeAuthorized($telegram, $userId);
-            return $next($passable);
-        }
 
-        if (!$botUser) {
-            $this->sendMustBeAuthorized($telegram, $userId);
-            return null;
-        }
-
-        if (!$botUser->calories_id) {
-            $this->sendMustBeAuthorized($telegram, $userId);
-            return null;
+            return !$userId ? $next($passable) : null;
         }
 
         $passable['botUser'] = $botUser;
