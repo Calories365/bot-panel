@@ -5,7 +5,6 @@ namespace App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers;
 use App\Models\BotUser;
 use App\Services\DiaryApiService;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
-use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\Telegram;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\App;
@@ -49,9 +48,9 @@ class StartMessageHandler implements MessageHandlerInterface
 
             $result = $this->diaryApiService->checkTelegramCode($code, $chatId);
 
-            if (!empty($result['success']) && $result['success'] === true) {
+            if (! empty($result['success']) && $result['success'] === true) {
 
-                //from calories
+                // from calories
 
                 $caloriesUserId = $result['user_id'];
 
@@ -74,42 +73,44 @@ class StartMessageHandler implements MessageHandlerInterface
                 Log::info("User {$chatId} linked with calories ID {$caloriesUserId}");
 
                 $this->sendWelcome($bot, $telegram, $message, $commonData);
+
                 return;
             } else {
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text'    => __('calories365-bot.invalid_or_used_code')
+                    'text' => __('calories365-bot.invalid_or_used_code'),
                 ]);
+
                 return;
             }
         }
 
         if ($botUser && $botUser->calories_id) {
 
-            //already existed acc
+            // already existed acc
 
             $this->sendWelcome($bot, $telegram, $message, $commonData);
 
         } else {
 
-            //from bot
-           Utilities::saveAndNotify(
+            // from bot
+            Utilities::saveAndNotify(
                 $commonData['chatId'],
                 $commonData['firstName'],
                 $commonData['lastName'],
                 $commonData['username'],
                 $bot,
                 $commonData['premium'],
-               'bot_link',
-               null,
-               $commonData['locale'],
+                'bot_link',
+                null,
+                $commonData['locale'],
             );
 
             App::setLocale($commonData['locale']);
 
             $telegram->sendMessage([
                 'chat_id' => $chatId,
-                'text'    => __('calories365-bot.seems_you_are_new', ['lang' => App::getLocale()])
+                'text' => __('calories365-bot.seems_you_are_new', ['lang' => App::getLocale()]),
             ]);
         }
     }
@@ -118,23 +119,22 @@ class StartMessageHandler implements MessageHandlerInterface
     {
         $imagePath = $bot->message_image;
 
-        if ($bot->name === 'calories365KNU_bot'){
+        if ($bot->name === 'calories365KNU_bot') {
             $messageText = __('calories365-bot.welcome_guide_KNU');
         } else {
             $messageText = __('calories365-bot.welcome_guide');
         }
-
 
         $keyboard = Keyboard::make([
             'resize_keyboard' => true,
         ])
             ->row([
                 ['text' => __('calories365-bot.menu')],
-                ['text' => __('calories365-bot.statistics')]
+                ['text' => __('calories365-bot.statistics')],
             ])
             ->row([
                 ['text' => __('calories365-bot.choose_language')],
-                ['text' => __('calories365-bot.feedback')]
+                ['text' => __('calories365-bot.feedback')],
             ]);
 
         if ($imagePath) {
@@ -146,29 +146,28 @@ class StartMessageHandler implements MessageHandlerInterface
                 try {
                     $telegram->sendPhoto([
                         'chat_id' => $commonData['chatId'],
-                        'photo'    => $photo,
-                        'caption'  => $messageText,
-                        'reply_markup' => $keyboard
+                        'photo' => $photo,
+                        'caption' => $messageText,
+                        'reply_markup' => $keyboard,
                     ]);
                 } catch (\Telegram\Bot\Exceptions\TelegramOtherException $e) {
                     if ($e->getMessage() === 'Forbidden: bot was blocked by the user') {
                         $userModel = BotUser::where('telegram_id', $commonData['chatId'])->firstOrFail();
-                        $userModel->is_banned = 1;
+                        $userModel->is_banned = true;
                         $userModel->save();
                     } else {
                         Log::info($e->getMessage());
                     }
                 }
             } else {
-                Log::error("Image file not found: " . $relativeImagePath);
+                Log::error('Image file not found: '.$relativeImagePath);
             }
         } else {
             $telegram->sendMessage([
-                'chat_id'      => $commonData['chatId'],
-                'text'         => $messageText,
-                'reply_markup' => $keyboard
+                'chat_id' => $commonData['chatId'],
+                'text' => $messageText,
+                'reply_markup' => $keyboard,
             ]);
         }
     }
-
 }

@@ -24,6 +24,7 @@ class ManagerController extends BaseController
         });
 
         $bots = Manager::paginate($perPage);
+
         return ManagerResource::collection($bots);
     }
 
@@ -36,18 +37,21 @@ class ManagerController extends BaseController
     {
         $data = $request->all();
         $manager = Manager::create($data);
+
         return response()->json(['id' => $manager->id]);
     }
 
     public function update(Request $request, Manager $manager): ManagerResource
     {
         $manager->update($request->only(['name', 'telegram_id']));
+
         return new ManagerResource($manager);
     }
 
     public function destroy(Manager $manager): \Illuminate\Http\JsonResponse
     {
         $manager->delete();
+
         return response()->json(['message' => 'Managerted successfully']);
     }
 }

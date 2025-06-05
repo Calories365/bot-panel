@@ -6,4 +6,3 @@ interface CallbackQueryHandlerInterface
 {
     public function handle($bot, $telegram, $callbackQuery, $botUser);
 }
-

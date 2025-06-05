@@ -9,33 +9,34 @@ use Carbon\Carbon;
 use Closure;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Objects\Update;
 
 class CheckUserAuthAndLocale
 {
     /**
-     * @param array   $passable ['botTypeName','bot','telegram','update','excludedCommands', ...]
-     * @param Closure $next
+     * @param  array  $passable  ['botTypeName','bot','telegram','update','excludedCommands', ...]
      * @return mixed
      */
     public function handle($passable, Closure $next)
     {
-        $bot        = $passable['bot'];
-        $telegram   = $passable['telegram'];
+        $bot = $passable['bot'];
+        $telegram = $passable['telegram'];
         /** @var Update $update */
-        $update     = $passable['update'];
+        $update = $passable['update'];
 
         $excludedCommands = $passable['excludedCommands'] ?? [];
-        $text      = $update->getMessage()?->getText();
-        $userId    = $this->getUserId($update);
-        $language  = $this->getUserLanguage($update);
+        $text = $update->getMessage()?->getText();
+        $userId = $this->getUserId($update);
+        $language = $this->getUserLanguage($update);
 
-//        $botUser = BotUser::where('telegram_id', $userId)->first();
+        // Initialize botUser to avoid undefined variable errors
+        $botUser = null;
+
+        //        $botUser = BotUser::where('telegram_id', $userId)->first();
 
         if ($userId) {
             $botUser = Cache::remember(
-                'tg_bot_user_' . $userId,
+                'tg_bot_user_'.$userId,
                 300,
                 static function () use ($userId) {
                     return BotUser::select('id', 'telegram_id', 'calories_id', 'locale', 'premium')
@@ -48,13 +49,14 @@ class CheckUserAuthAndLocale
 
         if ($this->isExcludedCommand($text, $excludedCommands)) {
             $passable['botUser'] = $botUser;
+
             return $next($passable);
         }
 
-        if (!$userId || !$botUser || !$botUser->calories_id) {
+        if (! $userId || ! $botUser || ! $botUser->calories_id) {
             $this->sendMustBeAuthorized($telegram, $userId);
 
-            return !$userId ? $next($passable) : null;
+            return ! $userId ? $next($passable) : null;
         }
 
         $passable['botUser'] = $botUser;
@@ -106,7 +108,7 @@ class CheckUserAuthAndLocale
      */
     private function isExcludedCommand(?string $text, array $excludedCommands): bool
     {
-        if (!$text) {
+        if (! $text) {
             return false;
         }
 
@@ -115,6 +117,7 @@ class CheckUserAuthAndLocale
                 return true;
             }
         }
+
         return false;
     }
 
@@ -126,7 +129,7 @@ class CheckUserAuthAndLocale
         if ($userId) {
             $telegram->sendMessage([
                 'chat_id' => $userId,
-                'text'    => __('calories365-bot.you_must_be_authorized')
+                'text' => __('calories365-bot.you_must_be_authorized'),
             ]);
         }
     }
@@ -136,11 +139,11 @@ class CheckUserAuthAndLocale
      */
     private function throttleLastActiveUpdate(BotUser $botUser, int $minutes = 5): void
     {
-        $cacheKey   = 'user_last_active_' . $botUser->id;
+        $cacheKey = 'user_last_active_'.$botUser->id;
         $lastActive = Cache::get($cacheKey);
 
         $needToUpdate = false;
-        if (!$lastActive) {
+        if (! $lastActive) {
             $needToUpdate = true;
         } else {
             $diff = Carbon::parse($lastActive)->diffInMinutes(now());
@@ -176,19 +179,19 @@ class CheckUserAuthAndLocale
         $username = $update->getMessage()?->getFrom()?->getUsername()
             ?: $update->getCallbackQuery()?->getFrom()?->getUsername();
 
-        $premium  = (bool) $botUser->premium;
-        $userId   = $botUser->telegram_id;
+        $premium = (bool) $botUser->premium;
+        $userId = $botUser->telegram_id;
 
         $latestData = [
-            'name'     => trim($firstName . ' ' . $lastName),
+            'name' => trim($firstName.' '.$lastName),
             'username' => $username,
-            'premium'  => $premium,
+            'premium' => $premium,
         ];
 
-        $cacheKey   = 'bot_user_' . $botUser->id;
+        $cacheKey = 'bot_user_'.$botUser->id;
         $cachedData = Cache::get($cacheKey);
 
-        if (!$cachedData || $cachedData != $latestData) {
+        if (! $cachedData || $cachedData != $latestData) {
             Cache::put($cacheKey, $latestData, now()->addDays(7));
 
             SaveAndNotifyJob::dispatch(

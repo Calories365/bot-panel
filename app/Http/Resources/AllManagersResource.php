@@ -10,7 +10,7 @@ class AllManagersResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return array
      */
     public function toArray($request)
@@ -22,12 +22,11 @@ class AllManagersResource extends JsonResource
             ];
         });
 
-
         $botManagers = [];
 
         return [
             'managers' => $botManagers,
-            'allManagers' => $allManagers
+            'allManagers' => $allManagers,
         ];
     }
 }

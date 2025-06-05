@@ -4,11 +4,9 @@ namespace App\Services\TelegramServices\BaseHandlers\MessageHandlers;
 
 use App\Traits\BasicDataExtractor;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class TextMessageHandler
 {
-
     use BasicDataExtractor;
 
     protected array $textMessageHandlers;
@@ -24,16 +22,15 @@ class TextMessageHandler
         $userId = $message->getFrom()->getId();
         $chatId = $message->getChat()->getId();
 
+        $commandParts = explode(' ', $text);
 
-         $commandParts = explode(' ', $text);
-
-         if ($commandParts[0] == '/start'){
-             $text = $commandParts[0];
-         }
+        if ($commandParts[0] == '/start') {
+            $text = $commandParts[0];
+        }
 
         if (isset($this->textMessageHandlers[$text])) {
             $isBlocked = Cache::get("command_block{$userId}", 0);
-            if (!$isBlocked){
+            if (! $isBlocked) {
                 $this->textMessageHandlers[$text]->handle($bot, $telegram, $message, $botUser);
             } else {
                 $sentMessage = $telegram->sendMessage([
@@ -41,6 +38,7 @@ class TextMessageHandler
                     'text' => 'действие невозможно',
                     'parse_mode' => 'Markdown',
                 ]);
+
                 return;
             }
         } else {

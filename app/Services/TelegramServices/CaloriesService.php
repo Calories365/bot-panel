@@ -45,7 +45,7 @@ class CaloriesService extends BaseService
         $updateHandlers = parent::getUpdateHandlers();
 
         $updateHandlers['callback_query'] = app(CallbackQueryHandler::class, [
-            'callbackQueryHandlers' => $this->getCallbackQueryHandlers()
+            'callbackQueryHandlers' => $this->getCallbackQueryHandlers(),
         ]);
 
         return $updateHandlers;
@@ -93,7 +93,7 @@ class CaloriesService extends BaseService
         $textMessageHandlers['feedback'] = app(FeedbackMessageHandler::class);
 
         $synonyms = [
-            'feedback' => ['Feedback','Обратная связь','Зворотний зв\'язок',],
+            'feedback' => ['Feedback', 'Обратная связь', 'Зворотний зв\'язок'],
         ];
 
         Utilities::applySynonyms($textMessageHandlers, $synonyms);

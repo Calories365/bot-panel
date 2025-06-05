@@ -12,7 +12,7 @@ interface BotHandlerStrategy
     /**
      * Handle incoming Telegram update
      */
-    public function handle(Bot $bot, Api $telegram, Update $update, BotUser $botUser): void;
+    public function handle(Bot $bot, Api $telegram, Update $update, ?BotUser $botUser): void;
 
     /**
      * Get list of commands that should be excluded from middleware processing

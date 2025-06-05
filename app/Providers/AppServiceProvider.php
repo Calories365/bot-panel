@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(DiaryApiService::class, function ($app) {
-            return new DiaryApiService();
+            return new DiaryApiService;
         });
     }
 
@@ -29,8 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        JsonResource::withoutWrapping();//убрать любой обертку, по умолчанию data
-//        JsonResource::wrap('test');//задать глобально обертку
+        JsonResource::withoutWrapping(); // убрать любой обертку, по умолчанию data
+        //        JsonResource::wrap('test');//задать глобально обертку
 
     }
 }

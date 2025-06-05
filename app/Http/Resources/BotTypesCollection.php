@@ -20,9 +20,9 @@ class BotTypesCollection extends ResourceCollection
             'types' => $this->collection->map(function ($type) {
                 return [
                     'id' => $type->id,
-                    'name' => $type->name
+                    'name' => $type->name,
                 ];
-            })->all()
+            })->all(),
         ];
     }
 }

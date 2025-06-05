@@ -8,8 +8,8 @@ class ImageController extends Controller
 {
     public function show($filename): \Illuminate\Foundation\Application|\Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory
     {
-        $path = 'public/bots/' . $filename;
-        if (!Storage::exists($path)) {
+        $path = 'public/bots/'.$filename;
+        if (! Storage::exists($path)) {
             abort(404);
         }
 

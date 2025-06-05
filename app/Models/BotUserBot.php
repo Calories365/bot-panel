@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property int $id
+ * @property int $bot_user_id
+ * @property int $bot_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\BotUser $botUser
+ * @property-read \App\Models\Bot $bot
+ */
 class BotUserBot extends Model
 {
     use HasFactory;
@@ -36,14 +45,14 @@ class BotUserBot extends Model
             ->get();
     }
 
-//    public static function getNewUsersStatisticsToday($botId)
-//    {
-//        return static::where('bot_id', $botId)
-//            ->whereDate('created_at', Carbon::today())
-//            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
-//            ->groupBy('date')
-//            ->get();
-//    }
+    //    public static function getNewUsersStatisticsToday($botId)
+    //    {
+    //        return static::where('bot_id', $botId)
+    //            ->whereDate('created_at', Carbon::today())
+    //            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+    //            ->groupBy('date')
+    //            ->get();
+    //    }
     public static function getPremiumUsersStatistics($botId, $startDate, $endDate)
     {
         return static::where('bot_id', $botId)

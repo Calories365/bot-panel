@@ -11,7 +11,7 @@ class BotResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return array<string, mixed>
      */
     public function toArray($request)
@@ -38,7 +38,7 @@ class BotResource extends JsonResource
         });
 
         $typeInfo = [
-            'type_id' => (int)$this->type_id,
+            'type_id' => (int) $this->type_id,
             'types' => $allBotTypes,
         ];
 
@@ -51,13 +51,13 @@ class BotResource extends JsonResource
             'image_file' => null,
         ];
         $video_ruInfo = [
-        'image_url' => $this->video_ru,
-        'image_file' => null,
+            'image_url' => $this->video_ru,
+            'image_file' => null,
         ];
         $video_uaInfo = [
-        'image_url' => $this->video_ua,
-        'image_file' => null,
-         ];
+            'image_url' => $this->video_ua,
+            'image_file' => null,
+        ];
 
         return [
             'id' => $this->id,
@@ -68,14 +68,14 @@ class BotResource extends JsonResource
             'video_eng' => $video_engInfo,
             'video_ru' => $video_ruInfo,
             'video_ua' => $video_uaInfo,
-            'active' => (int)$this->active,
+            'active' => (int) $this->active,
             'wordpress_endpoint' => $this->wordpress_endpoint,
             'web_hook' => $this->web_hook,
             'type_id' => $typeInfo,
             'managers' => [
                 'managers' => $botManagers,
-                'allManagers' => $allManagers
-            ]
+                'allManagers' => $allManagers,
+            ],
         ];
     }
 }

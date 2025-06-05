@@ -4,9 +4,7 @@ namespace App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers;
 
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Services\TelegramServices\CaloriesHandlers\EditHandlerTrait;
-use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class EditMessageHandler implements MessageHandlerInterface
 {
@@ -16,21 +14,21 @@ class EditMessageHandler implements MessageHandlerInterface
     {
         $userId = $message->getFrom()->getId();
         $chatId = $message->getChat()->getId();
-        $text   = $message->getText();
+        $text = $message->getText();
 
         $editingState = Cache::get("user_editing_{$userId}");
         if ($editingState) {
-            $productId   = $editingState['product_id'];
-            $step        = $editingState['step'];
-            $messageId   = $editingState['message_id'];
+            $productId = $editingState['product_id'];
+            $step = $editingState['step'];
+            $messageId = $editingState['message_id'];
             $userProducts = Cache::get("user_products_{$userId}");
 
-            if (!$userProducts || !isset($userProducts[$productId])) {
+            if (! $userProducts || ! isset($userProducts[$productId])) {
                 $this->clearEditingState($userId);
 
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text'    => __('calories365-bot.product_not_found'),
+                    'text' => __('calories365-bot.product_not_found'),
                 ]);
 
                 return;
@@ -59,26 +57,31 @@ class EditMessageHandler implements MessageHandlerInterface
     protected function processInput($telegram, $chatId, $userId, $text, &$editingState, &$userProducts, $productId, $messageId, $botUser)
     {
         $currentStep = $editingState['step'];
-        $validInput  = true;
+        $validInput = true;
+
+        // Initialize variables to avoid undefined variable errors
+        $nextStep = '';
+        $nextPrompt = '';
+        $errorMessage = '';
 
         switch ($currentStep) {
             case 'awaiting_name':
                 if (strlen($text) <= 50) {
-                    $userProducts[$productId]['product_translation']['name']      = $text;
+                    $userProducts[$productId]['product_translation']['name'] = $text;
                     $userProducts[$productId]['product_translation']['said_name'] = $text;
-                    $userProducts[$productId]['product']['edited']               = 1;
-                    $userProducts[$productId]['product']['verified']   = 0;
-                    
+                    $userProducts[$productId]['product']['edited'] = 1;
+                    $userProducts[$productId]['product']['verified'] = 0;
+
                     if (isset($userProducts[$productId]['product']['ai_generated'])) {
                         $userProducts[$productId]['product']['ai_generated'] = false;
                     }
 
                     Cache::forget("product_click_count_{$userId}_{$productId}");
 
-                    $nextStep   = 'awaiting_quantity';
+                    $nextStep = 'awaiting_quantity';
                     $nextPrompt = __('calories365-bot.please_enter_new_quantity_of_grams');
                 } else {
-                    $validInput   = false;
+                    $validInput = false;
                     $errorMessage = __('calories365-bot.value_too_long');
                 }
                 break;
@@ -86,10 +89,10 @@ class EditMessageHandler implements MessageHandlerInterface
             case 'awaiting_quantity':
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['quantity_grams'] = $text;
-                    $nextStep   = 'awaiting_calories';
+                    $nextStep = 'awaiting_calories';
                     $nextPrompt = __('calories365-bot.please_enter_new_calories');
                 } else {
-                    $validInput   = false;
+                    $validInput = false;
                     $errorMessage = __('calories365-bot.enter_valid_numeric_value_for_grams');
                 }
                 break;
@@ -97,13 +100,13 @@ class EditMessageHandler implements MessageHandlerInterface
             case 'awaiting_calories':
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['calories'] = $text;
-                    $userProducts[$productId]['product']['edited']   = 1;
-                    $userProducts[$productId]['product']['verified']   = 0;
+                    $userProducts[$productId]['product']['edited'] = 1;
+                    $userProducts[$productId]['product']['verified'] = 0;
 
-                    $nextStep   = 'awaiting_proteins';
+                    $nextStep = 'awaiting_proteins';
                     $nextPrompt = __('calories365-bot.please_enter_new_proteins');
                 } else {
-                    $validInput   = false;
+                    $validInput = false;
                     $errorMessage = __('calories365-bot.enter_valid_numeric_value_for_calories');
                 }
                 break;
@@ -111,27 +114,27 @@ class EditMessageHandler implements MessageHandlerInterface
             case 'awaiting_proteins':
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['proteins'] = $text;
-                    $userProducts[$productId]['product']['edited']   = 1;
-                    $userProducts[$productId]['product']['verified']   = 0;
+                    $userProducts[$productId]['product']['edited'] = 1;
+                    $userProducts[$productId]['product']['verified'] = 0;
 
-                    $nextStep   = 'awaiting_fats';
+                    $nextStep = 'awaiting_fats';
                     $nextPrompt = __('calories365-bot.please_enter_new_fats');
                 } else {
-                    $validInput   = false;
+                    $validInput = false;
                     $errorMessage = __('calories365-bot.enter_valid_numeric_value_for_proteins');
                 }
                 break;
 
             case 'awaiting_fats':
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
-                    $userProducts[$productId]['product']['fats']   = $text;
+                    $userProducts[$productId]['product']['fats'] = $text;
                     $userProducts[$productId]['product']['edited'] = 1;
-                    $userProducts[$productId]['product']['verified']   = 0;
+                    $userProducts[$productId]['product']['verified'] = 0;
 
-                    $nextStep   = 'awaiting_carbohydrates';
+                    $nextStep = 'awaiting_carbohydrates';
                     $nextPrompt = __('calories365-bot.please_enter_new_carbohydrates');
                 } else {
-                    $validInput   = false;
+                    $validInput = false;
                     $errorMessage = __('calories365-bot.enter_valid_numeric_value_for_fats');
                 }
                 break;
@@ -139,14 +142,15 @@ class EditMessageHandler implements MessageHandlerInterface
             case 'awaiting_carbohydrates':
                 if (is_numeric($text) && $text > -1 && $text <= 1250) {
                     $userProducts[$productId]['product']['carbohydrates'] = $text;
-                    $userProducts[$productId]['product']['edited']        = 1;
-                    $userProducts[$productId]['product']['verified']   = 0;
+                    $userProducts[$productId]['product']['edited'] = 1;
+                    $userProducts[$productId]['product']['verified'] = 0;
 
                     $this->saveEditing($telegram, $chatId, $userId, $userProducts, $productId, $messageId, $botUser);
                     Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));
+
                     return;
                 } else {
-                    $validInput   = false;
+                    $validInput = false;
                     $errorMessage = __('calories365-bot.enter_valid_numeric_value_for_carbohydrates');
                 }
                 break;
@@ -155,8 +159,9 @@ class EditMessageHandler implements MessageHandlerInterface
                 $this->clearEditingState($userId);
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text'    => __('calories365-bot.error_editing_product'),
+                    'text' => __('calories365-bot.error_editing_product'),
                 ]);
+
                 return;
         }
 
@@ -178,7 +183,7 @@ class EditMessageHandler implements MessageHandlerInterface
     {
         try {
             $telegram->deleteMessage([
-                'chat_id'    => $chatId,
+                'chat_id' => $chatId,
                 'message_id' => $messageId,
             ]);
         } catch (\Exception $e) {

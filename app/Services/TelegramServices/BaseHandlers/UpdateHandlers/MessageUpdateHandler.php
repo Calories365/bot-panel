@@ -33,10 +33,11 @@ class MessageUpdateHandler
         foreach ($this->messageHandlers as $type => $handler) {
             if (isset($message[$type])) {
                 $handler->handle($bot, $telegram, $message, $botUser);
+
                 return;
             }
         }
 
-        Log::info("Unknown message type: " . json_encode($message));
+        Log::info('Unknown message type: '.json_encode($message));
     }
 }

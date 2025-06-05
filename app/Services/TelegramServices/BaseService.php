@@ -4,7 +4,6 @@ namespace App\Services\TelegramServices;
 
 use App\Models\Bot;
 use App\Models\BotUser;
-use App\Services\TelegramServices\BotHandlerStrategy;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\AudioMessageHandler;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\TextMessageHandler;
 use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\StartMessageHandler;
@@ -41,17 +40,17 @@ class BaseService implements BotHandlerStrategy
     protected function getUpdateHandlers(): array
     {
         $messageUpdateHandler = app(MessageUpdateHandler::class, [
-            'messageHandlers' => $this->getMessageHandlers()
+            'messageHandlers' => $this->getMessageHandlers(),
         ]);
         $myChatMemberUpdateHandler = app(MyChatMemberUpdateHandler::class);
         $callbackQueryHandler = app(CallbackQueryHandler::class, [
-            'callbackQueryHandlers' => $this->getCallbackQueryHandlers()
+            'callbackQueryHandlers' => $this->getCallbackQueryHandlers(),
         ]);
 
         return [
             'message' => $messageUpdateHandler,
             'my_chat_member' => $myChatMemberUpdateHandler,
-            'callback_query' => $callbackQueryHandler
+            'callback_query' => $callbackQueryHandler,
         ];
     }
 
@@ -62,7 +61,7 @@ class BaseService implements BotHandlerStrategy
     protected function getMessageHandlers(): array
     {
         $textMessageHandler = app(TextMessageHandler::class, [
-            'textMessageHandlers' => $this->getTextMessageHandlers()
+            'textMessageHandlers' => $this->getTextMessageHandlers(),
         ]);
         $audioMessageHandler = app(AudioMessageHandler::class);
 
@@ -82,7 +81,7 @@ class BaseService implements BotHandlerStrategy
 
         return [
             '/start' => $startTextMessageHandler,
-            '/default' => $startTextMessageHandler
+            '/default' => $startTextMessageHandler,
         ];
     }
 
@@ -90,7 +89,8 @@ class BaseService implements BotHandlerStrategy
      * BaseService getCallbackQueryHandlers.
      * collects and returns all basic CallbackQueryHandlers
      */
-    protected function getCallbackQueryHandlers(): array{
+    protected function getCallbackQueryHandlers(): array
+    {
 
         $callbackQueryHandler = app(CallbackQueryHandler::class);
 
@@ -112,13 +112,13 @@ class BaseService implements BotHandlerStrategy
      * BaseService handle.
      * starts the required Handler for the event
      */
-    public function handle(Bot $bot, Api $telegram, Update $update, BotUser $botUser): void
+    public function handle(Bot $bot, Api $telegram, Update $update, ?BotUser $botUser): void
     {
         $updateType = $update->detectType();
         if (isset($this->updateHandlers[$updateType])) {
             $this->updateHandlers[$updateType]->handle($bot, $telegram, $update, $botUser);
         } else {
-            Log::info("Unhandled update type: " . $updateType);
+            Log::info('Unhandled update type: '.$updateType);
         }
     }
 }

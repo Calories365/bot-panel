@@ -21,7 +21,7 @@ class EditingSkipCallbackQueryHandler extends EditingBaseCallbackQueryHandler
 
         $telegram->answerCallbackQuery([
             'callback_query_id' => $callbackQuery->getId(),
-            'text'       => __('calories365-bot.step_skipped'),
+            'text' => __('calories365-bot.step_skipped'),
             'show_alert' => false,
         ]);
     }
@@ -51,13 +51,15 @@ class EditingSkipCallbackQueryHandler extends EditingBaseCallbackQueryHandler
                 break;
             case 'awaiting_carbohydrates':
                 $this->saveEditing($telegram, $chatId, $userId, $userProducts, $productId, $messageId, $botUser);
+
                 return;
             default:
                 $this->clearEditingState($userId);
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text'    => __('calories365-bot.error_editing_product'),
+                    'text' => __('calories365-bot.error_editing_product'),
                 ]);
+
                 return;
         }
 

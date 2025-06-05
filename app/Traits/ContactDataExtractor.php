@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Traits;
+
 trait ContactDataExtractor
 {
     public static function extractContactData($message)
@@ -12,8 +13,7 @@ trait ContactDataExtractor
                 'telegramId' => $contact->getUserId(),
             ];
         }
+
         return [];
     }
 }
-
-

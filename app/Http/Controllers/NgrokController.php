@@ -3,33 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bot;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class NgrokController extends Controller
 {
     /**
      * Update the webhook URL for the calories bot
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function updateWebhook(Request $request): JsonResponse
     {
         $request->validate([
-            'ngrok_url' => 'required|url'
+            'ngrok_url' => 'required|url',
         ]);
 
         $ngrokUrl = $request->input('ngrok_url');
 
         $bot = Bot::where('type_id', 6)->first();
 
-        if (!$bot) {
-            Log::error("Calories bot (type_id=6) not found");
+        if (! $bot) {
+            Log::error('Calories bot (type_id=6) not found');
+
             return response()->json([
                 'success' => false,
-                'message' => 'Calories bot not found'
+                'message' => 'Calories bot not found',
             ], 404);
         }
 
@@ -42,7 +40,7 @@ class NgrokController extends Controller
             'success' => $success,
             'message' => $success ? 'Webhook updated successfully' : 'Failed to update webhook at Telegram API',
             'bot' => $bot->name,
-            'webhook_url' => $ngrokUrl
+            'webhook_url' => $ngrokUrl,
         ]);
     }
 }

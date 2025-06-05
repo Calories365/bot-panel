@@ -25,11 +25,11 @@ class SetEnglishLanguageCallbackQueryHandler implements CallbackQueryHandlerInte
         $messageId = $callbackQuery->getMessage()->getMessageId();
         try {
             $telegram->deleteMessage([
-                'chat_id'    => $chatId,
+                'chat_id' => $chatId,
                 'message_id' => $messageId,
             ]);
         } catch (\Exception $e) {
-            Log::error("Error deleting language message: " . $e->getMessage());
+            Log::error('Error deleting language message: '.$e->getMessage());
         }
 
         $telegram->answerCallbackQuery([
@@ -41,17 +41,17 @@ class SetEnglishLanguageCallbackQueryHandler implements CallbackQueryHandlerInte
         ])
             ->row([
                 ['text' => __('calories365-bot.menu')],
-                ['text' => __('calories365-bot.statistics')]
+                ['text' => __('calories365-bot.statistics')],
             ])
             ->row([
                 ['text' => __('calories365-bot.choose_language')],
-                ['text' => __('calories365-bot.feedback')]
+                ['text' => __('calories365-bot.feedback')],
             ]);
 
         $telegram->sendMessage([
             'chat_id' => $chatId,
             'text' => 'Language set to English',
-            'reply_markup' => $keyboard
+            'reply_markup' => $keyboard,
         ]);
     }
 }

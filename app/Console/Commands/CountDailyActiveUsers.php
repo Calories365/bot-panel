@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\BotUser;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 class CountDailyActiveUsers extends Command
@@ -34,7 +34,7 @@ class CountDailyActiveUsers extends Command
         DB::table('daily_activity')->updateOrInsert(
             ['date' => $today->format('Y-m-d')],
             [
-                'count'      => $count,
+                'count' => $count,
                 'updated_at' => now(),
                 'created_at' => now(),
             ]

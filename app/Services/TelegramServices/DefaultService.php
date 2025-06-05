@@ -2,8 +2,4 @@
 
 namespace App\Services\TelegramServices;
 
-class DefaultService extends BaseService
-{
-
-}
-
+class DefaultService extends BaseService {}

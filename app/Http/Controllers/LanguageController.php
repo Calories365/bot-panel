@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\LanguageSetting;
-use Illuminate\Http\Request;
 use App\Services\DiaryApiService;
+use Illuminate\Http\Request;
 
 class LanguageController extends Controller
 {
@@ -36,7 +36,7 @@ class LanguageController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to toggle Russian language',
-                'error' => $response['error']
+                'error' => $response['error'],
             ], 500);
         }
 

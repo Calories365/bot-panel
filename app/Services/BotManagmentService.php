@@ -2,19 +2,19 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class BotManagmentService
 {
     public function handleFileUpload($request, string $fieldName): ?string
     {
-        if (!$request->hasFile($fieldName)) {
+        if (! $request->hasFile($fieldName)) {
             return null;
         }
         $file = $request->file($fieldName);
         $filePath = $file->store('public/bots');
         $url = Storage::url($filePath);
+
         return str_replace('/storage/bots', '/images', $url);
     }
 

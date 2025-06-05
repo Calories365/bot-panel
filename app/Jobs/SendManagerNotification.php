@@ -17,7 +17,9 @@ class SendManagerNotification implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $bot;
+
     protected $manager;
+
     protected $message;
 
     public function __construct(Bot $bot, Manager $manager, $message)
@@ -34,11 +36,11 @@ class SendManagerNotification implements ShouldQueue
             sleep(2);
             $telegram->sendMessage([
                 'chat_id' => $this->manager->telegram_id,
-                'text' => $this->message
+                'text' => $this->message,
             ]);
-            Log::info('Message sent successfully to manager: ' . $this->manager->name);
+            Log::info('Message sent successfully to manager: '.$this->manager->name);
         } catch (\Exception $e) {
-            Log::error('Error sending message to ' . $this->manager->telegram_id . ': ' . $e->getMessage());
+            Log::error('Error sending message to '.$this->manager->telegram_id.': '.$e->getMessage());
         }
     }
 }

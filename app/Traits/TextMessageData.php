@@ -1,9 +1,9 @@
 <?php
 
 namespace App\Traits;
+
 trait TextMessageData
 {
-
     public static function extractContactData($message)
     {
         $contact = $message->getContact();
@@ -13,6 +13,7 @@ trait TextMessageData
                 'telegramId' => $contact->getUserId(),
             ];
         }
+
         return [];
     }
 }

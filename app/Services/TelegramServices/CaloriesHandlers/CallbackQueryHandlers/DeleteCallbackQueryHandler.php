@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 class DeleteCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
     public bool $blockAble = true;
+
     public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
         $callbackData = $callbackQuery->getData();
@@ -25,7 +26,7 @@ class DeleteCallbackQueryHandler implements CallbackQueryHandlerInterface
                     'message_id' => $messageId,
                 ]);
             } catch (\Exception $e) {
-                Log::error("Error deleting product message: " . $e->getMessage());
+                Log::error('Error deleting product message: '.$e->getMessage());
             }
 
             $userId = $callbackQuery->getFrom()->getId();
@@ -49,7 +50,7 @@ class DeleteCallbackQueryHandler implements CallbackQueryHandlerInterface
                                 'message_id' => $finalMessageId,
                             ]);
                         } catch (\Exception $e) {
-                            Log::error("Error deleting final action message: " . $e->getMessage());
+                            Log::error('Error deleting final action message: '.$e->getMessage());
                         }
 
                         Cache::forget("user_final_message_id_{$userId}");
