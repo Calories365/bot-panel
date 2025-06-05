@@ -1,8 +1,8 @@
 <script setup>
-import {computed, defineProps, onMounted, ref} from 'vue';
-import {Chart, registerables} from 'chart.js';
+import { computed, defineProps, onMounted, ref } from "vue";
+import { Chart, registerables } from "chart.js";
 import BotsButton from "@/Components/UI/BotsButton.vue";
-import {useRouter} from "vue-router";
+import { useRouter } from "vue-router";
 
 Chart.register(...registerables);
 const router = useRouter();
@@ -15,91 +15,99 @@ const props = defineProps({
 const chartRef = ref(null);
 
 const chartData = computed(() => {
-    if (props.data && props.data.new_users && props.data.banned_users && props.data.active_users) {
+    if (
+        props.data &&
+        props.data.new_users &&
+        props.data.banned_users &&
+        props.data.active_users
+    ) {
         return {
             labels: Object.keys(props.data.new_users),
             datasets: [
                 {
-                    label: 'New users for the day',
+                    label: "New users for the day",
                     data: Object.values(props.data.new_users),
-                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
-                    borderColor: 'rgba(0, 123, 255, 1)',
-                    borderWidth: 1
+                    backgroundColor: "rgba(0, 123, 255, 0.5)",
+                    borderColor: "rgba(0, 123, 255, 1)",
+                    borderWidth: 1,
                 },
                 {
-                    label: 'Banned users per day',
+                    label: "Banned users per day",
                     data: Object.values(props.data.banned_users),
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
+                    backgroundColor: "rgba(255, 99, 132, 0.5)",
+                    borderColor: "rgba(255, 99, 132, 1)",
+                    borderWidth: 1,
                 },
                 {
-                    label: 'Active users for the day',
+                    label: "Active users for the day",
                     data: Object.values(props.data.active_users),
-                    backgroundColor: 'rgba(246,206,0, 0.5)',
-                    borderColor: 'rgba(246,206,0, 1)',
-                    borderWidth: 1
-                }
-            ]
+                    backgroundColor: "rgba(246,206,0, 0.5)",
+                    borderColor: "rgba(246,206,0, 1)",
+                    borderWidth: 1,
+                },
+            ],
         };
     }
-    return {labels: [], datasets: []};
+    return { labels: [], datasets: [] };
 });
 
 const navigateToUsers = () => {
-    router.push({ name: 'showUsers', params: { id: props.botId } });
-}
+    router.push({ name: "showUsers", params: { id: props.botId } });
+};
 onMounted(() => {
-    const ctx = chartRef.value.getContext('2d');
+    const ctx = chartRef.value.getContext("2d");
     new Chart(ctx, {
-        type: 'line',
+        type: "line",
         data: chartData.value,
         options: {
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        stepSize: 1
-                    }
-                }
-            }
-        }
+                        stepSize: 1,
+                    },
+                },
+            },
+        },
     });
 });
 </script>
 
-
 <template>
     <div>
-        <canvas ref="chartRef" style="display: block; box-sizing: border-box; height: 197px; width: 789px;"></canvas>
+        <canvas
+            ref="chartRef"
+            style="
+                display: block;
+                box-sizing: border-box;
+                height: 197px;
+                width: 789px;
+            "
+        ></canvas>
         <div class="col-sm-12">
             <div class="table-wrapper">
                 <table class="table table-hover text-nowrap">
                     <thead>
-                    <tr>
-                        <th>Total Users</th>
-                        <th>⭐️ Active</th>
-                        <th>👶 Regular</th>
-                        <th>❌ Banned Bot</th>
-                    </tr>
+                        <tr>
+                            <th>Total Users</th>
+                            <th>⭐️ Active</th>
+                            <th>👶 Regular</th>
+                            <th>❌ Banned Bot</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td>{{ data.total_new_users }}</td>
-                        <td>{{ data.total_active_users }}</td>
-                        <td>{{ data.total_default_users }}</td>
-                        <td>{{ data.total_banned_users }}</td>
-                    </tr>
+                        <tr>
+                            <td>{{ data.total_new_users }}</td>
+                            <td>{{ data.total_active_users }}</td>
+                            <td>{{ data.total_default_users }}</td>
+                            <td>{{ data.total_banned_users }}</td>
+                        </tr>
                     </tbody>
                 </table>
-                <BotsButton @click="navigateToUsers"
-                >
-                    User list
-                </BotsButton>
+                <BotsButton @click="navigateToUsers"> User list </BotsButton>
             </div>
         </div>
     </div>
 </template>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

@@ -1,7 +1,7 @@
 <script setup>
 defineProps({
     value: Number,
-    text: String
+    text: String,
 });
 </script>
 

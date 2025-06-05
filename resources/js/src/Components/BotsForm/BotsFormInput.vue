@@ -1,5 +1,5 @@
 <script setup>
-import {computed, defineEmits, defineProps} from 'vue';
+import { computed, defineEmits, defineProps } from "vue";
 
 const props = defineProps({
     placeholder: String,
@@ -8,21 +8,25 @@ const props = defineProps({
     required: Boolean,
 });
 
-const emit = defineEmits(['handle']);
+const emit = defineEmits(["handle"]);
 
 const emailValue = computed({
     get: () => props.data,
     set: (newValue) => {
-        emit('handle', {key: props.name, value: newValue});
-    }
+        emit("handle", { key: props.name, value: newValue });
+    },
 });
 </script>
 
 <template>
     <div class="form-group">
-        <input class="form-control" id="exampleInputEmail1"
-               :placeholder="placeholder" v-model="emailValue" :required="required"
-        >
+        <input
+            class="form-control"
+            id="exampleInputEmail1"
+            :placeholder="placeholder"
+            v-model="emailValue"
+            :required="required"
+        />
     </div>
 </template>
 

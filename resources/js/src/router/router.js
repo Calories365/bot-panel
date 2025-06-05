@@ -1,7 +1,7 @@
-import {createRouter, createWebHistory} from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import routes from "./routes.js";
 import store from "@/store/store.js";
-import {getterTypes} from "@/store/modules/auth.js";
+import { getterTypes } from "@/store/modules/auth.js";
 import i18n from "@/i18n.js";
 
 const router = createRouter({
@@ -11,7 +11,6 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-
     if (store.state.auth.isLoading) {
         const unwatch = store.watch(
             (state) => state.auth.isLoading,
@@ -20,28 +19,27 @@ router.beforeEach((to, from, next) => {
                     unwatch();
                     next(to);
                 }
-            }
+            },
         );
     } else {
         if (to.meta.needAuth) {
             if (store.getters[getterTypes.isLoggedIn]) {
                 next();
             } else {
-                const message = i18n.global.t('Notification.Error.NeedAuth');
-                store.dispatch('setError', message, {root: true});
-                next({name: 'login'});
+                const message = i18n.global.t("Notification.Error.NeedAuth");
+                store.dispatch("setError", message, { root: true });
+                next({ name: "login" });
             }
         } else if (to.meta.needNotAuth) {
             if (!store.getters[getterTypes.isLoggedIn]) {
                 next();
             } else {
-                next({name: 'showBots'});
+                next({ name: "showBots" });
             }
         } else {
             next();
         }
     }
 });
-
 
 export default router;

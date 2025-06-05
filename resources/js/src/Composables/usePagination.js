@@ -1,7 +1,11 @@
-import {ref} from 'vue';
-import {actionTypes} from "@/store/modules/bots.js";
+import { ref } from "vue";
+import { actionTypes } from "@/store/modules/bots.js";
 
-export default function usePagination(dispatch, fetchDataFunction = null, botId = null) {
+export default function usePagination(
+    dispatch,
+    fetchDataFunction = null,
+    botId = null,
+) {
     const currentPage = ref(1);
     const pageSize = ref(10);
 
@@ -10,9 +14,9 @@ export default function usePagination(dispatch, fetchDataFunction = null, botId 
         if (fetchDataFunction) {
             fetchDataFunction(botId);
         } else {
-            dispatch(actionTypes.changePage, {page});
+            dispatch(actionTypes.changePage, { page });
         }
-        window.scrollTo({top: 0, left: 0, behavior: 'smooth'});
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     };
 
     const handlePageSizeChange = (size) => {
@@ -20,15 +24,15 @@ export default function usePagination(dispatch, fetchDataFunction = null, botId 
         if (fetchDataFunction) {
             fetchDataFunction(botId);
         } else {
-            dispatch(actionTypes.setPageSize, {size});
+            dispatch(actionTypes.setPageSize, { size });
         }
-        window.scrollTo({top: 0, left: 0, behavior: 'smooth'});
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     };
 
     return {
         currentPage,
         pageSize,
         handlePageChange,
-        handlePageSizeChange
+        handlePageSizeChange,
     };
 }

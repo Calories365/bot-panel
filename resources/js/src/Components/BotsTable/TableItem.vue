@@ -1,36 +1,33 @@
 <script setup>
-import {computed, defineProps} from 'vue';
-import {truncateString} from '@/utils/truncateString';
+import { computed, defineProps } from "vue";
+import { truncateString } from "@/utils/truncateString";
 
 const props = defineProps({
     data: {
         type: Object,
-        required: true
+        required: true,
     },
     limit: {
         type: String,
-        required: true
+        required: true,
     },
     action: {
         type: String,
-        required: true
+        required: true,
     },
     id: {
         type: Number,
-        required: true
-    }
+        required: true,
+    },
 });
 
 const truncatedText = computed(() => {
     return truncateString(props.data, props.limit);
 });
-
-
 </script>
 
 <template>
     {{ truncatedText }}
 </template>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

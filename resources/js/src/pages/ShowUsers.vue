@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineEmits, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, defineEmits, onMounted, onUnmounted, ref, watch } from "vue";
 import { useStore } from "vuex";
 import router from "@/router/router.js";
 import { actionTypes, getterTypes } from "@/store/modules/users.js";
@@ -19,10 +19,10 @@ const users = computed(() => store.getters[getterTypes.users]);
 const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const pagination = computed(() => store.getters[getterTypes.pagination]);
 
-const downloadLink = ref('');
+const downloadLink = ref("");
 const sizeOptions = [10, 20, 30, 40, 50];
-const prePageText = 'Number of users on the page';
-const emit = defineEmits(['handle']);
+const prePageText = "Number of users on the page";
+const emit = defineEmits(["handle"]);
 const showModal = ref(false);
 const selectedUserId = ref(null);
 
@@ -48,12 +48,16 @@ function fetchData(botId) {
     if (botId) {
         params.botId = botId;
     }
-    store.dispatch(actionTypes.getUsers, params)
+    store
+        .dispatch(actionTypes.getUsers, params)
         .then(() => {
-            console.log('Users loaded successfully', botId ? `for bot: ${botId}` : 'for all bots');
+            console.log(
+                "Users loaded successfully",
+                botId ? `for bot: ${botId}` : "for all bots",
+            );
         })
-        .catch(error => {
-            console.error('Failed to load users:', error);
+        .catch((error) => {
+            console.error("Failed to load users:", error);
         });
 }
 
@@ -64,7 +68,7 @@ watch(
             currentPage.value = 1;
             fetchData(newId);
         }
-    }
+    },
 );
 
 onMounted(() => {
@@ -76,22 +80,22 @@ onUnmounted(() => {
 });
 
 const handleEvent = (event) => {
-    if (event.action === 'delete') {
+    if (event.action === "delete") {
         selectedUserId.value = event.id;
         showModal.value = true;
     }
-    if (event.action === 'show') {
-        router.push({ name: 'showUser', params: { id: event.id } });
+    if (event.action === "show") {
+        router.push({ name: "showUser", params: { id: event.id } });
     }
-    if (event.action === 'showBot') {
-        router.push({ name: 'showBot', params: { id: event.id } });
+    if (event.action === "showBot") {
+        router.push({ name: "showBot", params: { id: event.id } });
     }
-    if (event.action === 'telegram') {
-        window.open(`https://t.me/${event.data}`, '_blank');
+    if (event.action === "telegram") {
+        window.open(`https://t.me/${event.data}`, "_blank");
     }
-    if (event.action === 'usersExport') {
+    if (event.action === "usersExport") {
         const botId = route.params.id;
-        store.dispatch(actionTypes.exportUsers, { botId }).then(response => {
+        store.dispatch(actionTypes.exportUsers, { botId }).then((response) => {
             downloadLink.value = response.downloadUrl;
         });
     }
@@ -104,9 +108,9 @@ const confirmDelete = () => {
 </script>
 
 <template>
-    <loader v-if="isSubmitting"/>
+    <loader v-if="isSubmitting" />
 
-    <div :class="{'loading': isSubmitting}" class="col-12">
+    <div :class="{ loading: isSubmitting }" class="col-12">
         <div v-if="downloadLink">
             <a :href="downloadLink" download>Скачать файл</a>
         </div>
@@ -119,7 +123,9 @@ const confirmDelete = () => {
         />
         <div v-if="users" class="row mb-2">
             <div class="col-2">
-                <bots-button-warning @click="handleEvent({action: 'usersExport'})">
+                <bots-button-warning
+                    @click="handleEvent({ action: 'usersExport' })"
+                >
                     Экспорт
                 </bots-button-warning>
             </div>

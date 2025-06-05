@@ -1,6 +1,6 @@
 <script setup>
-import {defineEmits, defineProps, onMounted, ref, watch} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
+import { defineEmits, defineProps, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import TablePerPageSelect from "@/Components/BotsTable/TablePerPageSelect.vue";
 import TableMainPart from "@/Components/BotsTable/TableMainPart.vue";
 import TablePagination from "@/Components/BotsTable/TablePagination.vue";
@@ -16,15 +16,19 @@ const props = defineProps({
     previousPage: Number,
     pageSizeOptions: {
         type: Array,
-        default: () => [10, 25, 50, 100]
+        default: () => [10, 25, 50, 100],
     },
     perPageText: String,
     perPage: Number,
 });
-const emit = defineEmits(['update:page-size-change', 'update:page-change', 'handle']);
+const emit = defineEmits([
+    "update:page-size-change",
+    "update:page-change",
+    "handle",
+]);
 
 function handleEvent(event) {
-    emit('handle', event);
+    emit("handle", event);
 }
 
 const pageSize = ref(props.perPage || props.pageSizeOptions[0]);
@@ -52,22 +56,21 @@ watch([pageSize, currentPage], () => {
         query.page = currentPage.value;
     }
 
-    router.replace({path: route.path, query});
+    router.replace({ path: route.path, query });
 });
 
-const handlePageSizeChange = size => {
+const handlePageSizeChange = (size) => {
     pageSize.value = size;
-    emit('update:page-size-change', size);
+    emit("update:page-size-change", size);
 };
 
-const handlePageChange = page => {
+const handlePageChange = (page) => {
     currentPage.value = page;
-    emit('update:page-change', page);
+    emit("update:page-change", page);
 };
 const handleExport = () => {
-    emit('update:export');
+    emit("update:export");
 };
-
 </script>
 
 <template>
@@ -78,14 +81,16 @@ const handleExport = () => {
                     :perPageText="perPageText"
                     :options="pageSizeOptions"
                     :value="pageSize"
-                    @update:page-size="handlePageSizeChange"/>
+                    @update:page-size="handlePageSizeChange"
+                />
             </div>
 
             <div class="row">
                 <table-main-part
                     :columns="columns"
                     :data="data"
-                    @handle="handleEvent"/>
+                    @handle="handleEvent"
+                />
             </div>
 
             <div class="row">
@@ -99,5 +104,4 @@ const handleExport = () => {
     </div>
 </template>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

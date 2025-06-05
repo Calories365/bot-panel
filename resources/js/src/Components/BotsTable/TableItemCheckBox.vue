@@ -1,23 +1,23 @@
 <script setup>
-import {computed, defineProps} from 'vue';
+import { computed, defineProps } from "vue";
 
 const props = defineProps({
     data: {
         type: Object,
-        required: true
+        required: true,
     },
     limit: {
         type: String,
-        required: true
+        required: true,
     },
     action: {
         type: String,
-        required: true
+        required: true,
     },
     id: {
         type: Number,
-        required: true
-    }
+        required: true,
+    },
 });
 
 const isChecked = computed(() => {
@@ -26,8 +26,7 @@ const isChecked = computed(() => {
 </script>
 
 <template>
-    <input type="checkbox" v-model="isChecked" disabled>
+    <input type="checkbox" v-model="isChecked" disabled />
 </template>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>
