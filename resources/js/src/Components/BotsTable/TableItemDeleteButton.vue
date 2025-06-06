@@ -1,30 +1,34 @@
 <script setup>
-import {defineEmits, defineProps} from 'vue';
+import { defineEmits, defineProps } from "vue";
 
 const props = defineProps({
     data: {
         type: Object,
-        required: true
+        required: true,
     },
     limit: {
         type: String,
-        required: true
+        required: true,
     },
     action: {
         type: String,
-        required: true
+        required: true,
     },
     id: {
         type: Number,
-        required: true
-    }
+        required: true,
+    },
 });
 
-const emit = defineEmits(['handle']);
+const emit = defineEmits(["handle"]);
 
 function handle() {
     if (props.action) {
-        emit('handle', {action: props.action, id: props.id, data: props.data});
+        emit("handle", {
+            action: props.action,
+            id: props.id,
+            data: props.data,
+        });
     }
 }
 </script>
@@ -35,5 +39,4 @@ function handle() {
     </button>
 </template>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

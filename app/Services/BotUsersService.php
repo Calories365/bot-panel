@@ -9,7 +9,6 @@ use App\Models\BotUserBot;
 use DateInterval;
 use DatePeriod;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class BotUsersService
@@ -33,10 +32,11 @@ class BotUsersService
 
     public function saveToFile($content, $fileName = 'usernames.txt'): string
     {
-        $filePath = 'public/exports/' . $fileName;
+        $filePath = 'public/exports/'.$fileName;
         Storage::put($filePath, $content);
         $url = Storage::url($filePath);
         Storage::disk('public')->put($filePath, $content);
+
         return Storage::disk('public')->url($filePath);
     }
 
@@ -64,11 +64,11 @@ class BotUsersService
         $newUsersStats = $dates;
         $bannedUsersStats = $dates;
         $premiumUsersStats = $dates;
-        $activeUsersStats  = $dates;
+        $activeUsersStats = $dates;
 
         $botId = $bot->id;
 
-        $newUsersData = BotUserBot::getNewUsersStatistics($botId,$startDate,$endDate);
+        $newUsersData = BotUserBot::getNewUsersStatistics($botId, $startDate, $endDate);
 
         foreach ($newUsersData as $data) {
             $newUsersStats[$data->date] = $data->count;
@@ -100,16 +100,15 @@ class BotUsersService
         $totalNewUsers = array_sum($newUsersStats);
         $totalBannedUsers = array_sum($bannedUsersStats);
         $totalPremiumUsers = array_sum($premiumUsersStats);
-        $totalActiveUsers  = array_sum($activeUsersStats);
+        $totalActiveUsers = array_sum($activeUsersStats);
         $totalDefaultUsers = array_sum($newUsersStats) - array_sum($premiumUsersStats);
-
 
         return [
             'new_users' => $newUsersStats,
             'banned_users' => $bannedUsersStats,
             'premium_users' => $premiumUsersStats,
-            'active_users'          => $activeUsersStats,
-            'total_active_users'    => $totalActiveUsers,
+            'active_users' => $activeUsersStats,
+            'total_active_users' => $totalActiveUsers,
             'total_new_users' => $totalNewUsers,
             'total_banned_users' => $totalBannedUsers,
             'total_premium_users' => $totalPremiumUsers,

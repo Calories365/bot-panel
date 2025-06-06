@@ -25,13 +25,13 @@ class TextMessageHandler implements MessageHandlerInterface
             if (str_contains($text, '/start')) {
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text' => "Введите ваш возраст",
+                    'text' => 'Введите ваш возраст',
                 ]);
                 Cache::put($cacheKey, ['step' => 'age'], now()->addMinutes(30));
             } else {
                 $telegram->sendMessage([
                     'chat_id' => $chatId,
-                    'text' => "Для начала формирования заявки нажмите /start",
+                    'text' => 'Для начала формирования заявки нажмите /start',
                 ]);
             }
         } else {
@@ -41,7 +41,7 @@ class TextMessageHandler implements MessageHandlerInterface
                     $userData['step'] = 'name';
                     $telegram->sendMessage([
                         'chat_id' => $chatId,
-                        'text' => "Введите ваше имя",
+                        'text' => 'Введите ваше имя',
                     ]);
                     Cache::put($cacheKey, $userData, now()->addMinutes(30));
                     break;
@@ -50,7 +50,7 @@ class TextMessageHandler implements MessageHandlerInterface
                     $userData['step'] = 'contact';
                     $telegram->sendMessage([
                         'chat_id' => $chatId,
-                        'text' => "Введите ваш контактный номер",
+                        'text' => 'Введите ваш контактный номер',
                     ]);
                     Cache::put($cacheKey, $userData, now()->addMinutes(30));
                     break;
@@ -68,7 +68,7 @@ class TextMessageHandler implements MessageHandlerInterface
                     );
                     $telegram->sendMessage([
                         'chat_id' => $chatId,
-                        'text' => "Спасибо, ваша заявка принята!",
+                        'text' => 'Спасибо, ваша заявка принята!',
                     ]);
                     Cache::forget($cacheKey);
                     break;

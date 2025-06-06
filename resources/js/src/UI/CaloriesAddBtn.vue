@@ -1,7 +1,7 @@
 <script>
 export default {
-    name: "CaloriesAddBtn"
-}
+    name: "CaloriesAddBtn",
+};
 </script>
 
 <template>
@@ -10,7 +10,6 @@ export default {
 
 <style scoped lang="scss">
 .section-addProducts__btn {
-
     background-color: $main-color;
     font-size: 16px;
     height: 3em;
@@ -24,11 +23,11 @@ export default {
 }
 
 .section-addProducts__btn:hover {
-
     transition: all 0.3s ease 0s;
 }
 
-.section-addProducts__btn:after, .section-addProducts__btn:before {
+.section-addProducts__btn:after,
+.section-addProducts__btn:before {
     content: "";
     display: block;
     background-color: white;
@@ -48,9 +47,9 @@ export default {
     width: 1.5em;
 }
 
-.section-addProducts__btn:hover:before, .section-addProducts__btn:hover:after {
+.section-addProducts__btn:hover:before,
+.section-addProducts__btn:hover:after {
     background-color: $pink_color;
     transition: all 0.3s ease 0s;
 }
 </style>
-

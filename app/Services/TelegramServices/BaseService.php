@@ -2,7 +2,8 @@
 
 namespace App\Services\TelegramServices;
 
-use App\Interfaces\BotHandlerStrategy;
+use App\Models\Bot;
+use App\Models\BotUser;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\AudioMessageHandler;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\TextMessageHandler;
 use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\StartMessageHandler;
@@ -10,6 +11,8 @@ use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\CallbackQueryHandl
 use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\MessageUpdateHandler;
 use App\Services\TelegramServices\BaseHandlers\UpdateHandlers\MyChatMemberUpdateHandler;
 use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Api;
+use Telegram\Bot\Objects\Update;
 
 /**
  * Class BaseService
@@ -36,14 +39,18 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getUpdateHandlers(): array
     {
-        $messageUpdateHandler = new MessageUpdateHandler($this->getMessageHandlers());
-        $myChatMemberUpdateHandler = new MyChatMemberUpdateHandler();
-        $callbackQueryHandler = new CallbackQueryHandler($this->getCallbackQueryHandlers());
+        $messageUpdateHandler = app(MessageUpdateHandler::class, [
+            'messageHandlers' => $this->getMessageHandlers(),
+        ]);
+        $myChatMemberUpdateHandler = app(MyChatMemberUpdateHandler::class);
+        $callbackQueryHandler = app(CallbackQueryHandler::class, [
+            'callbackQueryHandlers' => $this->getCallbackQueryHandlers(),
+        ]);
 
         return [
             'message' => $messageUpdateHandler,
             'my_chat_member' => $myChatMemberUpdateHandler,
-            'callback_query' => $callbackQueryHandler
+            'callback_query' => $callbackQueryHandler,
         ];
     }
 
@@ -53,10 +60,10 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getMessageHandlers(): array
     {
-        $textMessageHandler = new TextMessageHandler(
-            $this->getTextMessageHandlers()
-        );
-        $audioMessageHandler = new AudioMessageHandler();
+        $textMessageHandler = app(TextMessageHandler::class, [
+            'textMessageHandlers' => $this->getTextMessageHandlers(),
+        ]);
+        $audioMessageHandler = app(AudioMessageHandler::class);
 
         return [
             'text' => $textMessageHandler,
@@ -70,11 +77,11 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getTextMessageHandlers(): array
     {
-        $startTextMessageHandler = new StartMessageHandler();
+        $startTextMessageHandler = app(StartMessageHandler::class);
 
         return [
             '/start' => $startTextMessageHandler,
-            '/default' => $startTextMessageHandler
+            '/default' => $startTextMessageHandler,
         ];
     }
 
@@ -82,9 +89,10 @@ class BaseService implements BotHandlerStrategy
      * BaseService getCallbackQueryHandlers.
      * collects and returns all basic CallbackQueryHandlers
      */
-    protected function getCallbackQueryHandlers(): array{
+    protected function getCallbackQueryHandlers(): array
+    {
 
-        $callbackQueryHandler = new CallbackQueryHandler();
+        $callbackQueryHandler = app(CallbackQueryHandler::class);
 
         return [
 
@@ -92,16 +100,25 @@ class BaseService implements BotHandlerStrategy
     }
 
     /**
+     * Get list of commands that should be excluded from middleware processing
+     * Default implementation returns empty array
+     */
+    public function getExcludedCommands(): array
+    {
+        return [];
+    }
+
+    /**
      * BaseService handle.
      * starts the required Handler for the event
      */
-    public function handle($bot, $telegram, $update, $botUser): void
+    public function handle(Bot $bot, Api $telegram, Update $update, ?BotUser $botUser): void
     {
         $updateType = $update->detectType();
         if (isset($this->updateHandlers[$updateType])) {
             $this->updateHandlers[$updateType]->handle($bot, $telegram, $update, $botUser);
         } else {
-            Log::info("Unhandled update type: " . $updateType);
+            Log::info('Unhandled update type: '.$updateType);
         }
     }
 }

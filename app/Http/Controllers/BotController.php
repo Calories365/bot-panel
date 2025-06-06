@@ -29,6 +29,7 @@ class BotController extends BaseController
     {
         $this->botManagmentService = $botManagmentService;
     }
+
     public function index(Request $request): \Illuminate\Http\Resources\Json\AnonymousResourceCollection
     {
         $perPage = $request->input('per_page', 10);
@@ -39,6 +40,7 @@ class BotController extends BaseController
         });
 
         $bots = Bot::paginate($perPage);
+
         return BotResource::collection($bots);
     }
 
@@ -50,6 +52,7 @@ class BotController extends BaseController
     public function destroy(Bot $bot): \Illuminate\Http\JsonResponse
     {
         $bot->delete();
+
         return response()->json(['message' => 'Bot deleted successfully']);
     }
 
@@ -69,12 +72,8 @@ class BotController extends BaseController
 
     /**
      * Unified logic for creating/updating a bot.
-     *
-     * @param BotDataRequest $request
-     * @param Bot|null       $bot
-     * @return Bot
      */
-    protected function handleBotData(BotDataRequest $request, Bot $bot = null): Bot
+    protected function handleBotData(BotDataRequest $request, ?Bot $bot = null): Bot
     {
         $data = $request->validated();
 
@@ -96,10 +95,10 @@ class BotController extends BaseController
         return $bot;
     }
 
-
     public function getTypes(): BotTypesCollection
     {
         $botTypes = BotType::all();
+
         return new BotTypesCollection($botTypes);
     }
 
@@ -111,6 +110,7 @@ class BotController extends BaseController
     public function getBotUserData(Bot $bot, BotUsersService $botUsersService): \Illuminate\Http\JsonResponse
     {
         $data = $botUsersService->getBotUserData($bot);
+
         return response()->json($data);
     }
 
@@ -118,10 +118,11 @@ class BotController extends BaseController
     {
         try {
             $telegramHandler->handle($bot, $request);
+
             return response()->json(['status' => 'success']);
-        } catch
-        (\Exception $e) {
-            Log::error('Error in handle: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Error in handle: '.$e->getMessage());
+
             return response()->json(['status' => 'success']);
         }
     }

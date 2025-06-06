@@ -3,8 +3,8 @@
 namespace App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers;
 
 use App\Services\DiaryApiService;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
@@ -33,7 +33,7 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
 
             $response = $this->diaryApiService->deleteMeal($mealId, $calories_id, $locale);
             if (isset($response['error'])) {
-                Log::error('Error deleting meal: ' . $response['error']);
+                Log::error('Error deleting meal: '.$response['error']);
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
                     'text' => __('calories365-bot.error_deleting_product'),
@@ -46,7 +46,7 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                         'message_id' => $messageId,
                     ]);
                 } catch (\Exception $e) {
-                    Log::error("Error deleting meal message: " . $e->getMessage());
+                    Log::error('Error deleting meal message: '.$e->getMessage());
                 }
 
                 $telegram->answerCallbackQuery([
@@ -55,14 +55,14 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                     'show_alert' => false,
                 ]);
 
-                $cacheKey   = "stats_summary_{$chatId}";
+                $cacheKey = "stats_summary_{$chatId}";
                 $cacheValue = Cache::get($cacheKey);
 
                 if ($cacheValue) {
-                    $date             = $cacheValue['date'];
-                    $partOfDay        = $cacheValue['part_of_day'];
-                    $finalMessageId   = $cacheValue['final_message_id'];
-                    $cachedLocale     = $cacheValue['locale'] ?? $locale;
+                    $date = $cacheValue['date'];
+                    $partOfDay = $cacheValue['part_of_day'];
+                    $finalMessageId = $cacheValue['final_message_id'];
+                    $cachedLocale = $cacheValue['locale'] ?? $locale;
 
                     $meals = $this->diaryApiService->showUserStats($date, $partOfDay, $calories_id, $cachedLocale);
 
@@ -70,12 +70,12 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
 
                         try {
                             $telegram->editMessageText([
-                                'chat_id'    => $chatId,
+                                'chat_id' => $chatId,
                                 'message_id' => $finalMessageId,
-                                'text'       => __('calories365-bot.no_entries_remain'), // Добавьте перевод
+                                'text' => __('calories365-bot.no_entries_remain'), // Добавьте перевод
                             ]);
                         } catch (\Exception $e) {
-                            Log::error("Error editing final stats message: " . $e->getMessage());
+                            Log::error('Error editing final stats message: '.$e->getMessage());
                         }
 
                         Cache::forget($cacheKey);
@@ -84,20 +84,19 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
 
                         try {
                             $telegram->editMessageText([
-                                'chat_id'    => $chatId,
+                                'chat_id' => $chatId,
                                 'message_id' => $finalMessageId,
-                                'text'       => $newText,
+                                'text' => $newText,
                                 'parse_mode' => 'Markdown',
                             ]);
                         } catch (\Exception $e) {
-                            Log::error("Error editing final stats message: " . $e->getMessage());
+                            Log::error('Error editing final stats message: '.$e->getMessage());
                         }
                     }
                 }
             }
         }
     }
-
 
     private function generateUpdatedStatsText(array $meals, string $date, ?string $partOfDay, string $locale): string
     {
@@ -110,28 +109,28 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
             ];
             foreach ($meals as $meal) {
                 $quantityFactor = $meal['quantity'] / 100;
-                $total['calories']      += $meal['calories']      * $quantityFactor;
-                $total['proteins']      += $meal['proteins']      * $quantityFactor;
-                $total['fats']          += $meal['fats']          * $quantityFactor;
+                $total['calories'] += $meal['calories'] * $quantityFactor;
+                $total['proteins'] += $meal['proteins'] * $quantityFactor;
+                $total['fats'] += $meal['fats'] * $quantityFactor;
                 $total['carbohydrates'] += $meal['carbohydrates'] * $quantityFactor;
             }
             $productArray = [
-                [ __('calories365-bot.calories', [], $locale), round($total['calories']) ],
-                [ __('calories365-bot.proteins', [], $locale), round($total['proteins']) ],
-                [ __('calories365-bot.fats', [], $locale), round($total['fats']) ],
-                [ __('calories365-bot.carbohydrates', [], $locale), round($total['carbohydrates']) ],
+                [__('calories365-bot.calories', [], $locale), round($total['calories'])],
+                [__('calories365-bot.proteins', [], $locale), round($total['proteins'])],
+                [__('calories365-bot.fats', [], $locale), round($total['fats'])],
+                [__('calories365-bot.carbohydrates', [], $locale), round($total['carbohydrates'])],
             ];
 
             $partOfDayName = match ($partOfDay) {
                 'morning' => __('calories365-bot.breakfast', [], $locale),
-                'dinner'  => __('calories365-bot.lunch', [], $locale),
-                'supper'  => __('calories365-bot.dinner', [], $locale),
-                default   => __('calories365-bot.total_for_day', [], $locale)
+                'dinner' => __('calories365-bot.lunch', [], $locale),
+                'supper' => __('calories365-bot.dinner', [], $locale),
+                default => __('calories365-bot.total_for_day', [], $locale)
             };
 
             return \App\Utilities\Utilities::generateTableType2(
                 __('calories365-bot.total_for_part_of_day', [
-                    'partOfDayName' => $partOfDayName
+                    'partOfDayName' => $partOfDayName,
                 ], $locale),
                 $productArray
             );
@@ -169,46 +168,46 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
 
             foreach ($meals as $meal) {
                 $part = $meal['part_of_day'];
-                if (!isset($partsOfDay[$part])) {
+                if (! isset($partsOfDay[$part])) {
                     continue;
                 }
                 $factor = $meal['quantity'] / 100;
-                $cal    = $meal['calories'] * $factor;
-                $prot   = $meal['proteins'] * $factor;
-                $fat    = $meal['fats'] * $factor;
-                $carb   = $meal['carbohydrates'] * $factor;
+                $cal = $meal['calories'] * $factor;
+                $prot = $meal['proteins'] * $factor;
+                $fat = $meal['fats'] * $factor;
+                $carb = $meal['carbohydrates'] * $factor;
 
-                $partsOfDay[$part]['calories']      += $cal;
-                $partsOfDay[$part]['proteins']      += $prot;
-                $partsOfDay[$part]['fats']          += $fat;
+                $partsOfDay[$part]['calories'] += $cal;
+                $partsOfDay[$part]['proteins'] += $prot;
+                $partsOfDay[$part]['fats'] += $fat;
                 $partsOfDay[$part]['carbohydrates'] += $carb;
 
-                $total['calories']      += $cal;
-                $total['proteins']      += $prot;
-                $total['fats']          += $fat;
+                $total['calories'] += $cal;
+                $total['proteins'] += $prot;
+                $total['fats'] += $fat;
                 $total['carbohydrates'] += $carb;
             }
 
-            $text = __('calories365-bot.your_data_for_date', ['date' => $date], $locale) . "\n\n";
+            $text = __('calories365-bot.your_data_for_date', ['date' => $date], $locale)."\n\n";
             foreach ($partsOfDay as $p) {
                 if ($p['calories'] == 0 && $p['proteins'] == 0 && $p['fats'] == 0 && $p['carbohydrates'] == 0) {
                     continue;
                 }
 
                 $table = [
-                    [ __('calories365-bot.calories', [], $locale), round($p['calories']) ],
-                    [ __('calories365-bot.proteins', [], $locale), round($p['proteins']) ],
-                    [ __('calories365-bot.fats', [], $locale), round($p['fats']) ],
-                    [ __('calories365-bot.carbohydrates', [], $locale), round($p['carbohydrates']) ],
+                    [__('calories365-bot.calories', [], $locale), round($p['calories'])],
+                    [__('calories365-bot.proteins', [], $locale), round($p['proteins'])],
+                    [__('calories365-bot.fats', [], $locale), round($p['fats'])],
+                    [__('calories365-bot.carbohydrates', [], $locale), round($p['carbohydrates'])],
                 ];
-                $text .= \App\Utilities\Utilities::generateTableType2($p['name'], $table) . "\n\n";
+                $text .= \App\Utilities\Utilities::generateTableType2($p['name'], $table)."\n\n";
             }
 
             $table = [
-                [ __('calories365-bot.calories', [], $locale), round($total['calories']) ],
-                [ __('calories365-bot.proteins', [], $locale), round($total['proteins']) ],
-                [ __('calories365-bot.fats', [], $locale), round($total['fats']) ],
-                [ __('calories365-bot.carbohydrates', [], $locale), round($total['carbohydrates']) ],
+                [__('calories365-bot.calories', [], $locale), round($total['calories'])],
+                [__('calories365-bot.proteins', [], $locale), round($total['proteins'])],
+                [__('calories365-bot.fats', [], $locale), round($total['fats'])],
+                [__('calories365-bot.carbohydrates', [], $locale), round($total['carbohydrates'])],
             ];
             $text .= \App\Utilities\Utilities::generateTableType2(
                 __('calories365-bot.total_for_day', [], $locale),
@@ -219,4 +218,3 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
         }
     }
 }
-

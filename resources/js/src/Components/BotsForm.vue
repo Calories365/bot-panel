@@ -1,5 +1,5 @@
 <script setup>
-import {defineEmits, defineProps, ref} from 'vue';
+import { defineEmits, defineProps, ref } from "vue";
 import BotsFormInput from "@/Components/BotsForm/BotsFormInput.vue";
 import BotsFormDropdown from "@/Components/BotsForm/BotsFormDropdown.vue";
 import BotsFormTextarea from "@/Components/BotsForm/BotsFormTextarea.vue";
@@ -25,22 +25,22 @@ const componentMap = {
 };
 const formRef = ref(null);
 function getComponentType(type) {
-    return componentMap[type] || componentMap['default'];
+    return componentMap[type] || componentMap["default"];
 }
 
 function handleEvent(payload) {
-    if (payload.action === 'submit') {
+    if (payload.action === "submit") {
         if (formRef.value.checkValidity()) {
-            emit('handle', payload);
+            emit("handle", payload);
         } else {
             formRef.value.reportValidity();
         }
     } else {
-        emit('handle', payload);
+        emit("handle", payload);
     }
 }
 
-const emit = defineEmits(['handle']);
+const emit = defineEmits(["handle"]);
 const errors = ref({});
 </script>
 

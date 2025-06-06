@@ -16,38 +16,39 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
     use EditHandlerTrait;
 
     protected DiaryApiService $diaryApiService;
+
     protected SpeechToTextService $speechToTextService;
 
     public function __construct(DiaryApiService $diaryApiService, SpeechToTextService $speechToTextService)
     {
-        $this->diaryApiService     = $diaryApiService;
+        $this->diaryApiService = $diaryApiService;
         $this->speechToTextService = $speechToTextService;
     }
 
     public function handle($bot, $telegram, $callbackQuery, $botUser)
     {
         $callbackData = $callbackQuery->getData();
-        $parts        = explode('_', $callbackData);
-        $messageId    = $callbackQuery->getMessage()->getMessageId();
-        $locale       = $botUser->locale;
-        $calories_id  = $botUser->calories_id;
+        $parts = explode('_', $callbackData);
+        $messageId = $callbackQuery->getMessage()->getMessageId();
+        $locale = $botUser->locale;
+        $calories_id = $botUser->calories_id;
 
         if (isset($parts[1])) {
             $productId = $parts[1];
-            $chatId    = $callbackQuery->getMessage()->getChat()->getId();
-            $userId    = $callbackQuery->getFrom()->getId();
+            $chatId = $callbackQuery->getMessage()->getChat()->getId();
+            $userId = $callbackQuery->getFrom()->getId();
 
-            $products  = Cache::get("user_products_{$userId}", []);
+            $products = Cache::get("user_products_{$userId}", []);
 
             if (isset($products[$productId])) {
                 $clickCount = Cache::increment("product_click_count_{$userId}_{$productId}");
                 Cache::put("product_click_count_{$userId}_{$productId}", $clickCount, now()->addMinutes(30));
 
-                $saidName      = $products[$productId]['product_translation']['said_name'];
+                $saidName = $products[$productId]['product_translation']['said_name'];
                 $quantityGrams = $products[$productId]['product']['quantity_grams'] ?? '';
-                $originalName  = $products[$productId]['product_translation']['original_name'] ?? '';
+                $originalName = $products[$productId]['product_translation']['original_name'] ?? '';
 
-                $formattedText = $saidName . " - " . $quantityGrams . " " . __('calories365-bot.grams');
+                $formattedText = $saidName.' - '.$quantityGrams.' '.__('calories365-bot.grams');
 
                 try {
                     if ($clickCount > 1) {
@@ -59,20 +60,23 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                                 $product = $response['product'];
                             } else {
                                 $this->generateProductData($products, $productId, $userId, $telegram, $chatId, $callbackQuery);
+
                                 return;
                             }
                         } else {
                             $this->generateProductData($products, $productId, $userId, $telegram, $chatId, $callbackQuery);
+
                             return;
                         }
                     }
                 } catch (GuzzleException $e) {
-                    Log::error("Error generating product data: " . $e->getMessage());
+                    Log::error('Error generating product data: '.$e->getMessage());
                     $telegram->answerCallbackQuery([
                         'callback_query_id' => $callbackQuery->getId(),
-                        'text'             => __('calories365-bot.error_processing_data'),
-                        'show_alert'       => false,
+                        'text' => __('calories365-bot.error_processing_data'),
+                        'show_alert' => false,
                     ]);
+
                     return;
                 }
 
@@ -90,14 +94,14 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
 
                     $telegram->answerCallbackQuery([
                         'callback_query_id' => $callbackQuery->getId(),
-                        'text'             => __('calories365-bot.product_data_updated'),
-                        'show_alert'       => false,
+                        'text' => __('calories365-bot.product_data_updated'),
+                        'show_alert' => false,
                     ]);
                 } else {
                     $telegram->answerCallbackQuery([
                         'callback_query_id' => $callbackQuery->getId(),
-                        'text'             => __('calories365-bot.product_not_found'),
-                        'show_alert'       => false,
+                        'text' => __('calories365-bot.product_not_found'),
+                        'show_alert' => false,
                     ]);
                 }
             }
@@ -109,17 +113,18 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
         $saidName = $products[$productId]['product_translation']['said_name'];
 
         try {
-            Log::info('saidName: ' . $saidName);
+            Log::info('saidName: '.$saidName);
             $productData = $this->speechToTextService->generateNewProductData($saidName);
             Log::info('generated: ');
             Log::info(print_r($productData, true));
         } catch (GuzzleException $e) {
-            Log::error("Error generating product data: " . $e->getMessage());
+            Log::error('Error generating product data: '.$e->getMessage());
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text'             => __('calories365-bot.error_generating_data'),
-                'show_alert'       => false,
+                'text' => __('calories365-bot.error_generating_data'),
+                'show_alert' => false,
             ]);
+
             return;
         }
 
@@ -134,13 +139,14 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
             stripos($productData, 'ошибка') !== false ||
             stripos($productData, 'помилка') !== false
         )) {
-            Log::error("OpenAI couldn't generate data for product: " . $saidName);
-            Log::error("Response: " . $productData);
+            Log::error("OpenAI couldn't generate data for product: ".$saidName);
+            Log::error('Response: '.$productData);
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text'             => __('calories365-bot.cannot_generate_product_data'),
-                'show_alert'       => true,
+                'text' => __('calories365-bot.cannot_generate_product_data'),
+                'show_alert' => true,
             ]);
+
             return;
         }
 
@@ -148,12 +154,13 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
             $newNutritionalData = $this->parseNutritionalData($productData);
 
             if (empty($newNutritionalData)) {
-                Log::error("Failed to parse nutritional data from OpenAI response for product: " . $saidName);
+                Log::error('Failed to parse nutritional data from OpenAI response for product: '.$saidName);
                 $telegram->answerCallbackQuery([
                     'callback_query_id' => $callbackQuery->getId(),
-                    'text'             => __('calories365-bot.cannot_generate_product_data'),
-                    'show_alert'       => true,
+                    'text' => __('calories365-bot.cannot_generate_product_data'),
+                    'show_alert' => true,
                 ]);
+
                 return;
             }
 
@@ -174,14 +181,14 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
 
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text'             => __('calories365-bot.product_data_updated'),
-                'show_alert'       => false,
+                'text' => __('calories365-bot.product_data_updated'),
+                'show_alert' => false,
             ]);
         } else {
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQuery->getId(),
-                'text'             => __('calories365-bot.failed_to_get_product_data'),
-                'show_alert'       => true,
+                'text' => __('calories365-bot.failed_to_get_product_data'),
+                'show_alert' => true,
             ]);
         }
     }
@@ -192,14 +199,14 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
         $parts = explode(';', $dataString);
 
         foreach ($parts as $part) {
-            $part = trim($part, " ;");
+            $part = trim($part, ' ;');
             if (empty($part)) {
                 continue;
             }
 
             $keyValue = explode('-', $part);
             if (count($keyValue) === 2) {
-                $key   = trim($keyValue[0]);
+                $key = trim($keyValue[0]);
                 $value = trim($keyValue[1]);
 
                 switch (mb_strtolower($key)) {
@@ -210,14 +217,15 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                         $nutritionalData['proteins'] = (float) $value;
                         break;
                     case mb_strtolower(__('calories365-bot.fats')):
-                    $nutritionalData['fats'] = (float) $value;
+                        $nutritionalData['fats'] = (float) $value;
                         break;
                     case mb_strtolower(__('calories365-bot.carbohydrates')):
-                    $nutritionalData['carbohydrates'] = (float) $value;
+                        $nutritionalData['carbohydrates'] = (float) $value;
                         break;
                 }
             }
         }
+
         return $nutritionalData;
     }
 }

@@ -24,29 +24,29 @@ class StatsMessageHandler
                 [
                     [
                         'text' => __('calories365-bot.breakfast'),
-                        'callback_data' => 'Breakfast'
+                        'callback_data' => 'Breakfast',
                     ],
                     [
                         'text' => __('calories365-bot.lunch'),
-                        'callback_data' => 'Dinner'
+                        'callback_data' => 'Dinner',
                     ],
                     [
                         'text' => __('calories365-bot.dinner'),
-                        'callback_data' => 'Supper'
+                        'callback_data' => 'Supper',
                     ],
                 ],
                 [
                     [
                         'text' => __('calories365-bot.whole_day'),
-                        'callback_data' => 'AllDay'
+                        'callback_data' => 'AllDay',
                     ],
                 ],
             ],
         ]);
 
         $telegram->sendMessage([
-            'chat_id'      => $chatId,
-            'text'         => __('calories365-bot.statistics'),
+            'chat_id' => $chatId,
+            'text' => __('calories365-bot.statistics'),
             'reply_markup' => $inlineKeyboard,
         ]);
 

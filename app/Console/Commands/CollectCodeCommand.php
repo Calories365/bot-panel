@@ -54,17 +54,13 @@ class CollectCodeCommand extends Command
         }
 
         // 5. Сообщаем об успехе
-        $this->info('Файлы успешно собраны в: ' . $outputPath);
+        $this->info('Файлы успешно собраны в: '.$outputPath);
 
         return 0;
     }
 
     /**
      * Рекурсивный обход директории для поиска нужных файлов.
-     *
-     * @param  string  $directory
-     * @param  array   $extensions
-     * @return array
      */
     protected function getFilesFromDirectory(string $directory, array $extensions): array
     {

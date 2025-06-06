@@ -2,17 +2,13 @@
 
 namespace App\Services\TelegramServices\BaseHandlers\UpdateHandlers;
 
-use App\Models\BotUser;
-
 class MyChatMemberUpdateHandler implements UpdateHandlerInterface
 {
-
     public function handle($bot, $telegram, $update, $botUser)
     {
         $myChatMember = $update->getMyChatMember();
         $newStatus = $myChatMember['new_chat_member']['status'];
         $userId = $myChatMember['from']['id'];
-
 
         $userModel = $botUser;
 

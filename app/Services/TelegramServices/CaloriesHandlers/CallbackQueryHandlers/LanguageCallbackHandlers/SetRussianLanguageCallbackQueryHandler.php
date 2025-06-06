@@ -24,17 +24,17 @@ class SetRussianLanguageCallbackQueryHandler implements CallbackQueryHandlerInte
         $messageId = $callbackQuery->getMessage()->getMessageId();
         try {
             $telegram->deleteMessage([
-                'chat_id'    => $chatId,
+                'chat_id' => $chatId,
                 'message_id' => $messageId,
             ]);
         } catch (\Exception $e) {
-            Log::error("Error deleting language message: " . $e->getMessage());
+            Log::error('Error deleting language message: '.$e->getMessage());
         }
 
         $telegram->answerCallbackQuery([
             'callback_query_id' => $callbackQuery->getId(),
-            'text'    => 'Язык установлен на русский',
-            'show_alert' => true
+            'text' => 'Язык установлен на русский',
+            'show_alert' => true,
         ]);
 
         $keyboard = Keyboard::make([
@@ -42,17 +42,17 @@ class SetRussianLanguageCallbackQueryHandler implements CallbackQueryHandlerInte
         ])
             ->row([
                 ['text' => __('calories365-bot.menu')],
-                ['text' => __('calories365-bot.statistics')]
+                ['text' => __('calories365-bot.statistics')],
             ])
             ->row([
                 ['text' => __('calories365-bot.choose_language')],
-                ['text' => __('calories365-bot.feedback')]
+                ['text' => __('calories365-bot.feedback')],
             ]);
 
-      $telegram->sendMessage([
-          'chat_id' => $chatId,
-          'text' => 'Язык установлен на русский',
-          'reply_markup' => $keyboard
-      ]);
+        $telegram->sendMessage([
+            'chat_id' => $chatId,
+            'text' => 'Язык установлен на русский',
+            'reply_markup' => $keyboard,
+        ]);
     }
 }

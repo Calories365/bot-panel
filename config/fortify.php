@@ -74,7 +74,7 @@ return [
     |
     */
 
-//    'home' => RouteServiceProvider::HOME,
+    //    'home' => RouteServiceProvider::HOME,
     'home' => 'https://calories-working.test/',
 
     /*
@@ -152,7 +152,7 @@ return [
         Features::updateProfileInformation(),
         Features::updatePasswords(),
         Features::twoFactorAuthentication([
-//            'confirm' => true,
+            //            'confirm' => true,
             'confirmPassword' => true,
             // 'window' => 0,
         ]),

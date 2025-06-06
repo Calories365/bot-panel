@@ -1,5 +1,5 @@
-import {createStore} from 'vuex';
-import auth from '@/store/modules/auth';
+import { createStore } from "vuex";
+import auth from "@/store/modules/auth";
 import bots from "@/store/modules/bots.js";
 import users from "@/store/modules/users.js";
 import admins from "@/store/modules/admins.js";
@@ -31,19 +31,24 @@ export default createStore({
     },
     actions: {
         addSuccess({ commit }, message) {
-            commit('ADD_SUCCESS', message);
+            commit("ADD_SUCCESS", message);
             setTimeout(() => {
-                commit('RESET_SUCCESS');
+                commit("RESET_SUCCESS");
             }, 3000);
         },
         addError({ commit }, message) {
-            commit('ADD_ERROR', message);
+            commit("ADD_ERROR", message);
             setTimeout(() => {
-                commit('RESET_ERROR');
+                commit("RESET_ERROR");
             }, 3000);
         },
     },
     modules: {
-        auth, bots, users, admins, managers, language
-    }
+        auth,
+        bots,
+        users,
+        admins,
+        managers,
+        language,
+    },
 });

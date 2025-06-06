@@ -1,34 +1,38 @@
 <script setup>
-import {computed, defineEmits, defineProps} from 'vue';
-import { truncateString } from '@/utils/truncateString';
+import { computed, defineEmits, defineProps } from "vue";
+import { truncateString } from "@/utils/truncateString";
 const props = defineProps({
     data: {
         type: Object,
-        required: true
+        required: true,
     },
     limit: {
         type: String,
-        required: true
+        required: true,
     },
     action: {
         type: String,
-        required: true
+        required: true,
     },
     id: {
         type: Number,
-        required: true
-    }
+        required: true,
+    },
 });
 
 const truncatedText = computed(() => {
     return truncateString(props.data, parseInt(props.limit, 10));
 });
 
-const emit = defineEmits(['handle']);
+const emit = defineEmits(["handle"]);
 
 function handle() {
     if (props.action) {
-        emit('handle', {action: props.action, id: props.id, data: props.data});
+        emit("handle", {
+            action: props.action,
+            id: props.id,
+            data: props.data,
+        });
     }
 }
 </script>
@@ -37,5 +41,4 @@ function handle() {
     <a href="#" @click.prevent="handle">{{ truncatedText }}</a>
 </template>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

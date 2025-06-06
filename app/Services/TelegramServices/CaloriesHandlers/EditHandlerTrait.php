@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 trait EditHandlerTrait
 {
     protected $messageText;
+
     protected $replyMarkup;
 
     protected function saveEditing($telegram, $chatId, $userId, &$userProducts, $productId, $messageId, $botUser, $callbackQueryId = false)
@@ -18,7 +19,7 @@ trait EditHandlerTrait
         if ($callbackQueryId) {
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQueryId,
-                'text'       => __('calories365-bot.changes_saved'),
+                'text' => __('calories365-bot.changes_saved'),
                 'show_alert' => false,
             ]);
         }
@@ -40,7 +41,7 @@ trait EditHandlerTrait
         if ($callbackQueryId) {
             $telegram->answerCallbackQuery([
                 'callback_query_id' => $callbackQueryId,
-                'text'       => __('calories365-bot.changes_canceled'),
+                'text' => __('calories365-bot.changes_canceled'),
                 'show_alert' => false,
             ]);
         }
@@ -52,7 +53,7 @@ trait EditHandlerTrait
     protected function clearEditingState($userId)
     {
         Cache::forget("user_editing_{$userId}");
-        Cache::forget("command_block{$userId}", 0);
+        Cache::forget("command_block{$userId}");
     }
 
     protected function updateProductMessage($telegram, $chatId, $productData)
@@ -79,10 +80,10 @@ trait EditHandlerTrait
             if (isset($errorData['description']) && strpos($errorData['description'], 'message is not modified') !== false) {
                 Log::info(__('calories365-bot.message_not_modified'));
             } else {
-                Log::error("Error updating product message: " . $e->getMessage());
+                Log::error('Error updating product message: '.$e->getMessage());
             }
         } catch (\Exception $e) {
-            Log::error("Error updating product message: " . $e->getMessage());
+            Log::error('Error updating product message: '.$e->getMessage());
         }
     }
 
@@ -94,7 +95,7 @@ trait EditHandlerTrait
                 'message_id' => $messageId,
             ]);
         } catch (\Exception $e) {
-            Log::error("Error deleting editing message: " . $e->getMessage());
+            Log::error('Error deleting editing message: '.$e->getMessage());
         }
     }
 
@@ -106,8 +107,8 @@ trait EditHandlerTrait
                     ['text' => __('calories365-bot.save'), 'callback_data' => 'editing_save'],
                     ['text' => __('calories365-bot.skip_step'), 'callback_data' => 'editing_skip'],
                     ['text' => __('calories365-bot.cancel'), 'callback_data' => 'editing_cancel'],
-                ]
-            ]
+                ],
+            ],
         ]);
 
         try {
@@ -118,17 +119,17 @@ trait EditHandlerTrait
                 'reply_markup' => $replyMarkup,
             ]);
         } catch (\Exception $e) {
-            Log::error("Error editing message during editing: " . $e->getMessage());
+            Log::error('Error editing message during editing: '.$e->getMessage());
         }
     }
 
     protected function generateTableBody($product, $productTranslation, $productId)
     {
         $productArray = [
-            [ __('calories365-bot.calories'),      $product['calories'],      round($product['calories'] / 100 * $product['quantity_grams'], 1) ],
-            [ __('calories365-bot.proteins'),      $product['proteins'],      round($product['proteins'] / 100 * $product['quantity_grams'], 1) ],
-            [ __('calories365-bot.fats'),          $product['fats'],          round($product['fats'] / 100 * $product['quantity_grams'], 1) ],
-            [ __('calories365-bot.carbohydrates'), $product['carbohydrates'], round($product['carbohydrates'] / 100 * $product['quantity_grams'], 1) ],
+            [__('calories365-bot.calories'),      $product['calories'],      round($product['calories'] / 100 * $product['quantity_grams'], 1)],
+            [__('calories365-bot.proteins'),      $product['proteins'],      round($product['proteins'] / 100 * $product['quantity_grams'], 1)],
+            [__('calories365-bot.fats'),          $product['fats'],          round($product['fats'] / 100 * $product['quantity_grams'], 1)],
+            [__('calories365-bot.carbohydrates'), $product['carbohydrates'], round($product['carbohydrates'] / 100 * $product['quantity_grams'], 1)],
         ];
 
         $this->messageText = Utilities::generateTable(
@@ -145,7 +146,7 @@ trait EditHandlerTrait
         $saidName = $productTranslation['said_name'] ?? '';
         $originalName = $productTranslation['original_name'] ?? '';
 
-        /// Check if the product was already generated using the OpenAI API
+        // / Check if the product was already generated using the OpenAI API
         $wasGeneratedByOpenAI = (isset($product['edited']) && $product['edited'] == 1 &&
                 isset($product['verified']) && $product['verified'] == 1) ||
             (isset($product['ai_generated']) && $product['ai_generated'] === true);
@@ -154,33 +155,32 @@ trait EditHandlerTrait
         // show "Generate with AI"
         // If this is the first click and the name differs from the original,
         // show "Search"
-        $useSearchButton = !$wasGeneratedByOpenAI && $clickCount === 0 && $saidName !== $originalName && !empty($originalName);
+        $useSearchButton = ! $wasGeneratedByOpenAI && $clickCount === 0 && $saidName !== $originalName && ! empty($originalName);
         $searchButtonText = $useSearchButton
             ? __('calories365-bot.search')
             : __('calories365-bot.generate_with_ai');
-
 
         $inlineKeyboard = [
             [
                 [
                     'text' => $searchButtonText,
-                    'callback_data' => 'search_' . $productId
+                    'callback_data' => 'search_'.$productId,
                 ],
             ],
             [
                 [
                     'text' => __('calories365-bot.edit'),
-                    'callback_data' => 'edit_' . $productId
+                    'callback_data' => 'edit_'.$productId,
                 ],
                 [
                     'text' => __('calories365-bot.delete'),
-                    'callback_data' => 'destroy_' . $productId
-                ]
-            ]
+                    'callback_data' => 'destroy_'.$productId,
+                ],
+            ],
         ];
 
         $this->replyMarkup = json_encode([
-            'inline_keyboard' => $inlineKeyboard
+            'inline_keyboard' => $inlineKeyboard,
         ]);
 
         return true;

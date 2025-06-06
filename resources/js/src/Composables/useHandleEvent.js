@@ -1,4 +1,4 @@
-export function useHandleEvent({localData, showModal = false, actions = {}}) {
+export function useHandleEvent({ localData, showModal = false, actions = {} }) {
     function handleEvent(payload) {
         if (payload.key && payload.value !== undefined) {
             localData.value[payload.key] = payload.value;
@@ -11,7 +11,6 @@ export function useHandleEvent({localData, showModal = false, actions = {}}) {
             }
         }
     }
-
 
     return {
         handleEvent,

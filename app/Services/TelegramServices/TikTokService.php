@@ -10,7 +10,7 @@ class TikTokService extends BaseService
     {
         $messageHandlers = parent::getMessageHandlers();
 
-        $messageHandlers['text'] = new TextMessageHandler();
+        $messageHandlers['text'] = app(TextMessageHandler::class);
 
         return $messageHandlers;
     }

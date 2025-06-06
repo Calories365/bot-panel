@@ -35,7 +35,7 @@ return [
         'url' => env('DIARY_API_URL', 'http://nginx/api'),
         'host' => env('DIARY_HOST', 'calories365.org'),
         'token' => env('DIARY_API_TOKEN', null),
-        'key' =>env('DIARY_API_KEY', null),
+        'key' => env('DIARY_API_KEY', null),
     ],
 
 ];

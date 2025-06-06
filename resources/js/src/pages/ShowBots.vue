@@ -1,12 +1,12 @@
 <script setup>
 import BotsTable from "@/Components/BotsTable.vue";
-import {computed, defineEmits, onMounted, ref} from 'vue';
-import {useStore} from "vuex";
-import {actionTypes, getterTypes} from "@/store/modules/bots.js";
+import { computed, defineEmits, onMounted, ref } from "vue";
+import { useStore } from "vuex";
+import { actionTypes, getterTypes } from "@/store/modules/bots.js";
 import router from "@/router/router.js";
 import BotsConfirmatiomModal from "@/Components/UI/BotsConfirmatiomModal.vue";
 import Loader from "@/Components/UI/Loader.vue";
-import {bots_table} from "@/ComponentConfigs/Table/bots_table.js";
+import { bots_table } from "@/ComponentConfigs/Table/bots_table.js";
 import usePagination from "@/Composables/usePagination.js";
 
 const store = useStore();
@@ -15,40 +15,42 @@ const isSubmitting = computed(() => store.getters[getterTypes.isSubmitting]);
 const pagination = computed(() => store.getters[getterTypes.pagination]);
 
 const sizeOptions = [10, 20, 30, 40, 50];
-const prePageText = 'Number of bots on the page';
-const emit = defineEmits(['handle']);
+const prePageText = "Number of bots on the page";
+const emit = defineEmits(["handle"]);
 const showModal = ref(false);
 const selectedBotId = ref(null);
-const {currentPage, pageSize, handlePageChange, handlePageSizeChange} = usePagination(store.dispatch);
-
+const { currentPage, pageSize, handlePageChange, handlePageSizeChange } =
+    usePagination(store.dispatch);
 
 function handleEvent(event) {
-    if (event.action === 'delete') {
+    if (event.action === "delete") {
         selectedBotId.value = event.id;
         showModal.value = true;
     }
-    if (event.action === 'show') {
-        router.push({name: 'showBot', params: {id: event.id}});
+    if (event.action === "show") {
+        router.push({ name: "showBot", params: { id: event.id } });
     }
 }
 
 const confirmDelete = () => {
-    store.dispatch(actionTypes.deleteBot, {id: selectedBotId.value});
+    store.dispatch(actionTypes.deleteBot, { id: selectedBotId.value });
     selectedBotId.value = null;
 };
 
 onMounted(() => {
-    store.dispatch(actionTypes.getAllBots).then(allBots => {
-    }).catch(error => {
-        console.error('Failed to load bots:', error);
-    });
+    store
+        .dispatch(actionTypes.getAllBots)
+        .then((allBots) => {})
+        .catch((error) => {
+            console.error("Failed to load bots:", error);
+        });
 });
 </script>
 
 <template>
-    <loader v-if="isSubmitting"/>
+    <loader v-if="isSubmitting" />
 
-    <div :class="{'loading': isSubmitting}" class="col-12">
+    <div :class="{ loading: isSubmitting }" class="col-12">
         <div class="card">
             <BotsTable
                 :per-page-text="prePageText"
@@ -60,7 +62,8 @@ onMounted(() => {
                 :per-page="pagination.perPage"
                 @update:page-change="handlePageChange"
                 @update:page-size-change="handlePageSizeChange"
-                @handle="handleEvent"/>
+                @handle="handleEvent"
+            />
         </div>
     </div>
 

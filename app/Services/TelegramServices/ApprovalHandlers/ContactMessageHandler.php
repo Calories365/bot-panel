@@ -2,7 +2,6 @@
 
 namespace App\Services\TelegramServices\ApprovalHandlers;
 
-use App\Models\BotUser;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
 use App\Traits\ContactDataExtractor;
@@ -19,11 +18,12 @@ class ContactMessageHandler implements MessageHandlerInterface
         $commonData = self::extractCommonData($message);
         $contactData = self::extractContactData($message);
 
-        if (!$contactData) {
+        if (! $contactData) {
             $telegram->sendMessage([
                 'chat_id' => $commonData['chatId'],
                 'text' => 'Ошибка, попробуйте перейти по ссылке еще раз!',
             ]);
+
             return;
         }
 
@@ -34,11 +34,12 @@ class ContactMessageHandler implements MessageHandlerInterface
         }
 
         $userIdFromWordpress = Cache::get($commonData['chatId']);
-        if (!$userIdFromWordpress) {
+        if (! $userIdFromWordpress) {
             $telegram->sendMessage([
                 'chat_id' => $commonData['chatId'],
                 'text' => 'Ошибка, попробуйте перейти по ссылке еще раз!',
             ]);
+
             return;
         }
 
@@ -48,14 +49,14 @@ class ContactMessageHandler implements MessageHandlerInterface
             'wp_id' => $userIdFromWordpress,
             'tg_id' => $commonData['chatId'],
             'tg_username' => $commonData['username'],
-            'tg_number' => $phoneNumber
+            'tg_number' => $phoneNumber,
         ];
 
         try {
             $url = $bot->wordpress_endpoint;
-//            $response = Http::asForm()->post($url, $data);
-//            $body = $response->body();
-//            Log::info(print_r($body, true));
+            //            $response = Http::asForm()->post($url, $data);
+            //            $body = $response->body();
+            //            Log::info(print_r($body, true));
 
             $body = '/ID already exists/';
 
@@ -65,7 +66,7 @@ class ContactMessageHandler implements MessageHandlerInterface
                 '/Success/' => 'Успех!',
                 '/User does not exist/' => 'Такого пользователя не существует!',
                 '/Number code invalid/' => 'Недопустимый код номера!',
-                '/ID already exists/' => 'Ваш ID уже есть в базе!'
+                '/ID already exists/' => 'Ваш ID уже есть в базе!',
             ];
 
             foreach ($patterns as $pattern => $message) {
@@ -78,7 +79,7 @@ class ContactMessageHandler implements MessageHandlerInterface
                 }
             }
         } catch (\Exception $e) {
-            Log::error("Error accessing /test.wp: " . $e->getMessage());
+            Log::error('Error accessing /test.wp: '.$e->getMessage());
         }
     }
 }

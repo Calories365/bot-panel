@@ -1,18 +1,18 @@
 <script setup>
-import {defineEmits, defineProps, ref} from 'vue';
-import Multiselect from 'vue-multiselect';
-import 'vue-multiselect/dist/vue-multiselect.css';
+import { defineEmits, defineProps, ref } from "vue";
+import Multiselect from "vue-multiselect";
+import "vue-multiselect/dist/vue-multiselect.css";
 
 const props = defineProps({
     placeholder: String,
     data: {
         type: Object,
-        default: () => ({})
+        default: () => ({}),
     },
     name: String,
 });
 
-const emit = defineEmits(['handle']);
+const emit = defineEmits(["handle"]);
 
 const options = ref(props.data.allManagers || []);
 const value = ref(props.data.managers || []);
@@ -20,9 +20,9 @@ const value = ref(props.data.managers || []);
 const handleSelectionChange = (newValues) => {
     const dataToEmit = {
         managers: newValues,
-        allManagers: props.data.allManagers
+        allManagers: props.data.allManagers,
     };
-    emit('handle', {key: props.name, value: dataToEmit});
+    emit("handle", { key: props.name, value: dataToEmit });
 };
 </script>
 
@@ -44,7 +44,6 @@ const handleSelectionChange = (newValues) => {
             :show-labels="true"
             @update:modelValue="handleSelectionChange"
         ></multiselect>
-
     </div>
 </template>
 
@@ -96,5 +95,4 @@ const handleSelectionChange = (newValues) => {
 .multiselect__tag-icon:hover::after {
     color: red;
 }
-
 </style>

@@ -1,31 +1,31 @@
 <script setup>
-import {defineEmits, defineProps} from 'vue';
+import { defineEmits, defineProps } from "vue";
 
 const props = defineProps({
     data: {
         type: Object,
-        required: true
+        required: true,
     },
     limit: {
         type: String,
-        required: true
+        required: true,
     },
     action: {
         type: String,
-        required: true
+        required: true,
     },
     id: {
         type: Number,
-        required: true
-    }
+        required: true,
+    },
 });
 
-const emit = defineEmits(['handle']);
+const emit = defineEmits(["handle"]);
 
 function handle(id) {
-    console.log('handle: ', id);
+    console.log("handle: ", id);
     if (props.action) {
-        emit('handle', {action: props.action, id: id, data: id});
+        emit("handle", { action: props.action, id: id, data: id });
     }
 }
 </script>
@@ -37,13 +37,14 @@ function handle(id) {
                 {{ value }}
             </a>
 
-            <span v-if="index < Object.keys(data).length - 1" class="divider"> | </span>
+            <span v-if="index < Object.keys(data).length - 1" class="divider">
+                |
+            </span>
         </span>
     </div>
 </template>
 
 <style scoped lang="scss">
-
 a {
     padding: 0 10px;
 }
@@ -51,5 +52,4 @@ a {
 .divider {
     color: #aaa;
 }
-
 </style>

@@ -4,9 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $counter
+ * @property \Illuminate\Support\Carbon|null $premium_until
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\BotUser $botUser
+ */
 class Subscription extends Model
 {
     use HasFactory;

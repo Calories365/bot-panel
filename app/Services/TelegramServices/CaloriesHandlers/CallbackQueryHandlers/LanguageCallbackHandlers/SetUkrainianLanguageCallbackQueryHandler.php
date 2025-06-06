@@ -24,17 +24,17 @@ class SetUkrainianLanguageCallbackQueryHandler implements CallbackQueryHandlerIn
         $messageId = $callbackQuery->getMessage()->getMessageId();
         try {
             $telegram->deleteMessage([
-                'chat_id'    => $chatId,
+                'chat_id' => $chatId,
                 'message_id' => $messageId,
             ]);
         } catch (\Exception $e) {
-            Log::error("Error deleting language message: " . $e->getMessage());
+            Log::error('Error deleting language message: '.$e->getMessage());
         }
 
         $telegram->answerCallbackQuery([
             'callback_query_id' => $callbackQuery->getId(),
-            'text'    => 'Мова встановлена на українську',
-            'show_alert' => true
+            'text' => 'Мова встановлена на українську',
+            'show_alert' => true,
         ]);
 
         $keyboard = Keyboard::make([
@@ -42,17 +42,17 @@ class SetUkrainianLanguageCallbackQueryHandler implements CallbackQueryHandlerIn
         ])
             ->row([
                 ['text' => __('calories365-bot.menu')],
-                ['text' => __('calories365-bot.statistics')]
+                ['text' => __('calories365-bot.statistics')],
             ])
             ->row([
                 ['text' => __('calories365-bot.choose_language')],
-                ['text' => __('calories365-bot.feedback')]
+                ['text' => __('calories365-bot.feedback')],
             ]);
 
         $telegram->sendMessage([
             'chat_id' => $chatId,
             'text' => 'Мову встановлено на українську',
-            'reply_markup' => $keyboard
+            'reply_markup' => $keyboard,
         ]);
     }
 }

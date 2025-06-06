@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use Illuminate\Support\Arr;
 
 /**
  * Пример коллекции, которая объединяет
@@ -26,19 +25,19 @@ class CaloriesBotUserResource extends ResourceCollection
     {
         return $this->collection->transform(function ($botUser) {
             return [
-                'id'             => $botUser->id,
-                'name'           => $botUser->name,
-                'username'       => $botUser->username,
-                'telegram_id'    => $botUser->telegram_id,
-                'is_banned'      => $botUser->is_banned,
-                'phone'          => $botUser->phone,
-                'premium'        => $botUser->premium,
+                'id' => $botUser->id,
+                'name' => $botUser->name,
+                'username' => $botUser->username,
+                'telegram_id' => $botUser->telegram_id,
+                'is_banned' => $botUser->is_banned,
+                'phone' => $botUser->phone,
+                'premium' => $botUser->premium,
                 'premium_calories' => $botUser->premium_calories,
-                'created_at'     => $botUser->created_at->format('d.m.Y H:i:s'),
-                'source'         => $botUser->source,
-                'email'             => $botUser->email,
+                'created_at' => $botUser->created_at->format('d.m.Y H:i:s'),
+                'source' => $botUser->source,
+                'email' => $botUser->email,
                 'username_calories' => $botUser->username_calories,
-                'bot_type_id' => 6
+                'bot_type_id' => 6,
             ];
         });
     }

@@ -1,5 +1,5 @@
 <script setup>
-import {defineProps} from 'vue';
+import { defineProps } from "vue";
 import TableItem from "@/Components/BotsTable/TableItem.vue";
 import TableItemCheckBox from "@/Components/BotsTable/TableItemCheckBox.vue";
 import TableItemLink from "@/Components/BotsTable/TableItemLink.vue";
@@ -8,12 +8,12 @@ import TableItemDeleteButton from "@/Components/BotsTable/TableItemDeleteButton.
 const props = defineProps({
     columns: {
         type: Array,
-        required: true
+        required: true,
     },
     data: {
         type: Array,
-        required: true
-    }
+        required: true,
+    },
 });
 
 const componentMap = {
@@ -23,9 +23,8 @@ const componentMap = {
     button: TableItemDeleteButton,
 };
 function getComponentType(type) {
-    return componentMap[type] || componentMap['default'];
+    return componentMap[type] || componentMap["default"];
 }
-
 </script>
 
 <template>
@@ -33,21 +32,29 @@ function getComponentType(type) {
         <div class="table-wrapper">
             <table class="table table-hover text-nowrap">
                 <thead>
-                <tr>
-                    <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
-                </tr>
+                    <tr>
+                        <th v-for="column in columns" :key="column.key">
+                            {{ column.label }}
+                        </th>
+                    </tr>
                 </thead>
                 <tbody>
-                <tr v-for="item in data" :key="item.id">
-                    <td v-for="column in columns" :key="column.key" class="bot-table-td">
-                        <component :is="getComponentType(column.type)" :data="item[column.key]"
-                                   :limit="column.limit"
-                                   :action="column.action"
-                                   :id="item.id"
+                    <tr v-for="item in data" :key="item.id">
+                        <td
+                            v-for="column in columns"
+                            :key="column.key"
+                            class="bot-table-td"
                         >
-                        </component>
-                    </td>
-                </tr>
+                            <component
+                                :is="getComponentType(column.type)"
+                                :data="item[column.key]"
+                                :limit="column.limit"
+                                :action="column.action"
+                                :id="item.id"
+                            >
+                            </component>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -60,6 +67,6 @@ function getComponentType(type) {
 }
 
 .bot-table-td {
-//text-align: center;
+    //text-align: center;
 }
 </style>

@@ -18,7 +18,7 @@ class EditingCancelCallbackQueryHandler extends EditingBaseCallbackQueryHandler
 
         $telegram->answerCallbackQuery([
             'callback_query_id' => $callbackQuery->getId(),
-            'text'       => __('calories365-bot.editing_canceled'),
+            'text' => __('calories365-bot.editing_canceled'),
             'show_alert' => false,
         ]);
     }

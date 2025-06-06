@@ -1,4 +1,4 @@
-import {mutationTypes} from "@/store/modules/auth.js";
+import { mutationTypes } from "@/store/modules/auth.js";
 
 export class BaseValidator {
     constructor(data, commit, dispatch) {
@@ -8,8 +8,7 @@ export class BaseValidator {
         this.errors = {};
     }
 
-    validate() {
-    }
+    validate() {}
 
     addError(key, message) {
         this.errors[key] = message;
@@ -27,11 +26,10 @@ export class BaseValidator {
         this.validate();
 
         if (this.hasErrors()) {
-            Object.values(this.getErrors()).forEach(error => {
-                this.dispatch('addError', error, {root: true});
+            Object.values(this.getErrors()).forEach((error) => {
+                this.dispatch("addError", error, { root: true });
             });
             throw new Error();
         }
     }
 }
-

@@ -1,11 +1,9 @@
 <script>
-
-
 export default {
     data() {
         return {
-            username: 'Пена',
-            locale: localStorage.getItem('locale') || 'en',
+            username: "Пена",
+            locale: localStorage.getItem("locale") || "en",
         };
     },
     computed: {
@@ -14,16 +12,13 @@ export default {
         },
         errorMessage() {
             return this.$store.getters.isError;
-        }
+        },
     },
-}
+};
 </script>
 
 <template>
-    <router-view/>
+    <router-view />
 </template>
 
-<style lang="scss">
-
-
-</style>
+<style lang="scss"></style>

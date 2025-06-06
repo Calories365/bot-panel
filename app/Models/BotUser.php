@@ -4,8 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string|null $username
+ * @property int $telegram_id
+ * @property bool $premium
+ * @property bool $is_banned
+ * @property string|null $phone
+ * @property int|null $calories_id
+ * @property string|null $locale
+ * @property \Illuminate\Support\Carbon|null $last_active_at
+ * @property string|null $source
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Bot> $bots
+ * @property-read \App\Models\Subscription|null $subscription
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Bot> $banned_bots
+ */
 class BotUser extends Model
 {
     use HasFactory;
@@ -19,8 +38,25 @@ class BotUser extends Model
         'phone',
         'calories_id',
         'locale',
-        'last_active_at'
+        'last_active_at',
     ];
+
+    protected $casts = [
+        'premium' => 'boolean',
+        'is_banned' => 'boolean',
+        'last_active_at' => 'datetime',
+    ];
+
+    protected static function booted()
+    {
+        static::saved(static function (self $botUser) {
+            Cache::forget('tg_bot_user_'.$botUser->telegram_id);
+        });
+
+        static::deleted(static function (self $botUser) {
+            Cache::forget('tg_bot_user_'.$botUser->telegram_id);
+        });
+    }
 
     public function bots()
     {
@@ -50,24 +86,24 @@ class BotUser extends Model
         return $query->paginate($perPage);
     }
 
-    public static function addOrUpdateUser($chatId, $firstName, $lastName, $username, $botId, $premium, $source = null, $result = null , $locale = null)
+    public static function addOrUpdateUser($chatId, $firstName, $lastName, $username, $botId, $premium, $source = null, $result = null, $locale = null)
     {
         Log::info($locale);
-        $fullName = $firstName . ($lastName ? " {$lastName}" : '');
+        $fullName = $firstName.($lastName ? " {$lastName}" : '');
 
         $botUser = self::firstOrNew(['telegram_id' => $chatId]);
         $wasExists = $botUser->exists;
 
-        $botUser->name     = $fullName;
+        $botUser->name = $fullName;
         $botUser->username = $username;
-        $botUser->premium  = $premium ? 1 : 0;
+        $botUser->premium = (bool) $premium;
 
-        if (!$wasExists) {
-            $botUser->is_banned = 0;
+        if (! $wasExists) {
+            $botUser->is_banned = false;
         }
 
-        if ($locale){
-            if ($locale == 'uk'){
+        if ($locale) {
+            if ($locale == 'uk') {
                 $locale = 'ua';
             }
 
@@ -76,7 +112,7 @@ class BotUser extends Model
 
         $botUser->save();
 
-        if (!$wasExists && $source) {
+        if (! $wasExists && $source) {
             $botUser->source = $source;
             $botUser->save();
         }
@@ -87,41 +123,41 @@ class BotUser extends Model
         }
         $botUser->bots()->syncWithoutDetaching([$botId]);
 
-        if ($source == 'bot_link'){
+        if ($source == 'bot_link') {
             CaloriesUser::updateOrCreate(
                 ['telegram_id' => $chatId],
 
                 [
-                    'name'              => $botUser->name,
-                    'username'          => $botUser->username,
-                    'telegram_id'       => $botUser->telegram_id,
-                    'is_banned'         => $botUser->is_banned,
-                    'phone'             => $botUser->phone,
-                    'premium'           => $botUser->premium,
-                    'premium_calories'  => false,
-                    'source'            => $botUser->source ?: 'bot_only',
-                    'email'             => null,
+                    'name' => $botUser->name,
+                    'username' => $botUser->username,
+                    'telegram_id' => $botUser->telegram_id,
+                    'is_banned' => $botUser->is_banned,
+                    'phone' => $botUser->phone,
+                    'premium' => $botUser->premium,
+                    'premium_calories' => false,
+                    'source' => $botUser->source ?: 'bot_only',
+                    'email' => null,
                     'username_calories' => null,
                 ]
             );
-        } elseif($source == 'calories'){
+        } elseif ($source == 'calories') {
 
             CaloriesUser::where('calories_id', $result['user_id'])->delete();
 
             $caloriesUser = CaloriesUser::firstOrNew(['telegram_id' => $chatId]);
 
-            $caloriesUser->name              = $botUser->name;
-            $caloriesUser->username          = $botUser->username;
-            $caloriesUser->telegram_id       = $botUser->telegram_id;
-            $caloriesUser->is_banned         = $botUser->is_banned;
-            $caloriesUser->phone             = $botUser->phone;
-            $caloriesUser->premium           = $botUser->premium;
-            $caloriesUser->premium_calories  = $result['premium'] ?? 0;
-            $caloriesUser->email             = $result['email'];
+            $caloriesUser->name = $botUser->name;
+            $caloriesUser->username = $botUser->username;
+            $caloriesUser->telegram_id = $botUser->telegram_id;
+            $caloriesUser->is_banned = $botUser->is_banned;
+            $caloriesUser->phone = $botUser->phone;
+            $caloriesUser->premium = $botUser->premium;
+            $caloriesUser->premium_calories = $result['premium'] ?? 0;
+            $caloriesUser->email = $result['email'];
             $caloriesUser->username_calories = $result['name'];
             $caloriesUser->calories_id = $result['user_id'];
 
-            if (!$caloriesUser->exists) {
+            if (! $caloriesUser->exists) {
                 $caloriesUser->source = $source;
             }
 

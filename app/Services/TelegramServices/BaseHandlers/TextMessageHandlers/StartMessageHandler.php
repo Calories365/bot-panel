@@ -12,7 +12,6 @@ use Telegram\Bot\FileUpload\InputFile;
 
 class StartMessageHandler implements MessageHandlerInterface
 {
-
     use BasicDataExtractor;
 
     public function handle($bot, $telegram, $message, $botUser)
@@ -34,19 +33,21 @@ class StartMessageHandler implements MessageHandlerInterface
                         $telegram->sendPhoto([
                             'chat_id' => $commonData['chatId'],
                             'photo' => $photo,
-                            'caption' => $messageText
+                            'caption' => $messageText,
                         ]);
-                    } catch (Telegram\Bot\Exceptions\TelegramOtherException $e) {
+                    } catch (\Telegram\Bot\Exceptions\TelegramOtherException $e) {
                         if ($e->getMessage() === 'Forbidden: bot was blocked by the user') {
                             $userModel = BotUser::where('telegram_id', $commonData['chatId'])->firstOrFail();
-                            $userModel->is_banned = 1;
+                            $userModel->is_banned = true;
                             $userModel->save();
                         } else {
                             Log::info($e->getMessage());
                         }
+                    } catch (\Exception $e) {
+                        Log::error('Error sending photo: '.$e->getMessage());
                     }
                 } else {
-                    Log::error("Image file not found: " . $relativeImagePath);
+                    Log::error('Image file not found: '.$relativeImagePath);
                 }
             } else {
                 $telegram->sendMessage([
@@ -65,6 +66,4 @@ class StartMessageHandler implements MessageHandlerInterface
             );
         }
     }
-
-
 }

@@ -3,25 +3,34 @@
 namespace App\Console\Commands;
 
 use App\Services\AudioConversionService;
+use App\Services\ChatGPTServices\SpeechToTextService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class testApi extends Command
 {
     protected $signature = 'test';
+
     protected $description = 'Command description';
 
     public function handle()
     {
-        Log::info(111);
+        Log::info('Testing audio conversion');
         $fullLocalPath = '/var/www/bot-panel/storage/app/public/audios/file_110.oga';
-        $convertedPath = str_replace('.oga', '.mp3', $fullLocalPath);
-        $audioConversionService = new AudioConversionService();
-        $convertedPath = $audioConversionService->convertToMp3($fullLocalPath);
+        $localPath = 'audios/file_110.oga';
+
+        $speechToTextService = new SpeechToTextService;
+        $audioConversionService = new AudioConversionService($speechToTextService);
+        [$convertedLocalPath, $convertedFullPath] = $audioConversionService->convertToMp3($localPath, $fullLocalPath);
+
         try {
-            $this->info("Файл успешно конвертирован в: " . $convertedPath);
+            if ($convertedFullPath) {
+                $this->info('Файл успешно конвертирован в: '.$convertedFullPath);
+            } else {
+                $this->error('Ошибка конвертации аудио');
+            }
         } catch (\Exception $e) {
-            $this->error("Ошибка конвертации аудио: " . $e->getMessage());
+            $this->error('Ошибка конвертации аудио: '.$e->getMessage());
         }
     }
 }

@@ -3,14 +3,12 @@
 namespace App\Services\TelegramServices\Request2Handlers;
 
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
-use App\Services\TelegramServices\MessageHandlers\Telegram;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Log;
 
 class TextMessageHandler implements MessageHandlerInterface
 {
-
     use BasicDataExtractor;
 
     public function handle($bot, $telegram, $message, $botUser)
@@ -26,6 +24,7 @@ class TextMessageHandler implements MessageHandlerInterface
             ]);
 
             Utilities::saveAndNotify($commonData['chatId'], $commonData['firstName'], $commonData['lastName'], $commonData['username'], $bot, $commonData['premium']);
+
             return true;
         } else {
             Log::info('saveAndNotifyAllManagers');

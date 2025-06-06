@@ -10,5 +10,4 @@ class UserController extends Controller
     {
         return $request->user()->only(['email', 'name', 'email_verified_at', 'calories_limit', 'id']);
     }
-
 }

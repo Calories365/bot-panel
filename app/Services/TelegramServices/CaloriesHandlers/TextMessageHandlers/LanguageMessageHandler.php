@@ -2,11 +2,8 @@
 
 namespace App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers;
 
-use App\Models\BotUser;
 use App\Models\LanguageSetting;
-use App\Services\TelegramServices\BaseHandlers\TextMessageHandlers\Telegram;
 use App\Traits\BasicDataExtractor;
-use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Keyboard\Keyboard;
 
 class LanguageMessageHandler
@@ -18,8 +15,8 @@ class LanguageMessageHandler
 
         $setting = LanguageSetting::first();
         $enabled = $setting->russian_language_enabled;
-        //for academic usage
-        if ($bot->name === 'calories365KNU_bot' or !$enabled){
+        // for academic usage
+        if ($bot->name === 'calories365KNU_bot' or ! $enabled) {
             $keyboard = [
                 [
                     ['text' => 'Українська', 'callback_data' => 'Ukrainian'],
@@ -39,18 +36,15 @@ class LanguageMessageHandler
         $commonData = self::extractCommonData($message);
         $chatId = $commonData['chatId'];
 
+        $inlineKeyboard = Keyboard::make([
+            'inline_keyboard' => $keyboard,
+        ]);
 
+        $telegram->sendMessage([
+            'chat_id' => $chatId,
+            'text' => __('calories365-bot.please_choose_your_language'),
+            'reply_markup' => $inlineKeyboard,
+        ]);
 
-            $inlineKeyboard = Keyboard::make([
-                'inline_keyboard' => $keyboard
-            ]);
-
-            $telegram->sendMessage([
-                'chat_id'      => $chatId,
-                'text'         => __('calories365-bot.please_choose_your_language'),
-                'reply_markup' => $inlineKeyboard
-            ]);
-
-            return;
-        }
+    }
 }

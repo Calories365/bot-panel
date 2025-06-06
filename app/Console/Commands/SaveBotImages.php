@@ -10,14 +10,15 @@ use Illuminate\Support\Facades\Storage;
 class SaveBotImages extends Command
 {
     protected $signature = 'bots:save-images';
+
     protected $description = 'Saves images from bots to the transfer directory with their original extensions.';
 
     public function handle()
     {
         $bots = Bot::all();
         foreach ($bots as $bot) {
-            $sourcePathJpg = 'public/transfer/' . $bot->name . '.jpg';
-            $sourcePathPng = 'public/transfer/' . $bot->name . '.png';
+            $sourcePathJpg = 'public/transfer/'.$bot->name.'.jpg';
+            $sourcePathPng = 'public/transfer/'.$bot->name.'.png';
             $sourcePath = Storage::exists($sourcePathJpg) ? $sourcePathJpg : (Storage::exists($sourcePathPng) ? $sourcePathPng : null);
 
             if ($sourcePath) {
@@ -40,10 +41,11 @@ class SaveBotImages extends Command
 
     protected function uploadImageToBot($fileContents, $sourcePath)
     {
-        $targetPath = 'public/bots/' . basename($sourcePath);
+        $targetPath = 'public/bots/'.basename($sourcePath);
         Storage::put($targetPath, $fileContents);
 
         $url = Storage::url($targetPath);
+
         return str_replace('/storage/bots', '/images', $url);
     }
 }

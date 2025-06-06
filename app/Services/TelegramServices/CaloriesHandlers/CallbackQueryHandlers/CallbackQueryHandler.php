@@ -15,7 +15,6 @@ class CallbackQueryHandler implements UpdateHandlerInterface
         $this->callbackQueryHandlers = $callbackQueryHandlers;
     }
 
-
     public function handle($bot, $telegram, $update, $botUser)
     {
         $callbackQuery = $update->getCallbackQuery();
@@ -28,7 +27,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
 
         $action = $parts[0];
         if (isset($parts[1]) && in_array($action, ['editing', 'delete'])) {
-            $action = $action . '_' . $parts[1];
+            $action = $action.'_'.$parts[1];
         }
 
         if (isset($this->callbackQueryHandlers[$action])) {
@@ -36,7 +35,7 @@ class CallbackQueryHandler implements UpdateHandlerInterface
             $handler = $this->callbackQueryHandlers[$action];
             $isBlocked = Cache::get("command_block{$userId}", 0);
 
-            if (!$isBlocked || !$handler->blockAble) {
+            if (! $isBlocked || ! $handler->blockAble) {
 
                 $handler->handle($bot, $telegram, $callbackQuery, $botUser);
             } else {
@@ -47,10 +46,12 @@ class CallbackQueryHandler implements UpdateHandlerInterface
                     'show_alert' => true,
                 ]);
             }
+
             return true;
         }
 
-        Log::info('Unknown callback query: ' . $action);
+        Log::info('Unknown callback query: '.$action);
+
         return true;
     }
 }

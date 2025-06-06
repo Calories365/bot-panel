@@ -9,6 +9,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Api;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $token
+ * @property string $message
+ * @property bool $active
+ * @property string|null $message_image
+ * @property int $type_id
+ * @property string|null $wordpress_endpoint
+ * @property string|null $web_hook
+ * @property string|null $video_ru
+ * @property string|null $video_ua
+ * @property string|null $video_eng
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Manager> $managers
+ * @property-read \App\Models\BotType $type
+ */
 class Bot extends Model
 {
     use HasFactory;
@@ -25,6 +43,10 @@ class Bot extends Model
         'video_ru',
         'video_ua',
         'video_eng',
+    ];
+
+    protected $casts = [
+        'active' => 'boolean',
     ];
 
     public function users()
@@ -52,11 +74,13 @@ class Bot extends Model
         try {
             $telegram = new Api($this->token);
             $webHook = $this->web_hook;
-            $url = $webHook . '/api/webhook/bot/' . $this->name;
+            $url = $webHook.'/api/webhook/bot/'.$this->name;
             $telegram->setWebhook(['url' => $url]);
+
             return true;
         } catch (\Exception $e) {
             Log::info('error during updating webhook');
+
             return false;
         }
     }
@@ -64,12 +88,11 @@ class Bot extends Model
     public function notifyAdmins($message, $delaySeconds = 2)
     {
         $admins = BotAdmin::all();
-        $delaySeconds = (int)$delaySeconds;
+        $delaySeconds = (int) $delaySeconds;
         foreach ($admins as $admin) {
             SendAdminNotification::dispatch($this, $admin, $message)->delay(now()->addSeconds($delaySeconds));
         }
     }
-
 
     public function notifyManagers(Bot $bot, $message): void
     {
@@ -83,7 +106,7 @@ class Bot extends Model
 
         $nextManager = $query->first();
 
-        if (!$nextManager) {
+        if (! $nextManager) {
             $nextManager = $bot->managers()->orderBy('id')->first();
         }
 
@@ -92,10 +115,10 @@ class Bot extends Model
                 ['bot_id' => $bot->id],
                 ['manager_id' => $nextManager->id]
             );
-            Log::info('trying to send msg: ' . $message . ' to manager ' . $nextManager->name);
+            Log::info('trying to send msg: '.$message.' to manager '.$nextManager->name);
             SendManagerNotification::dispatch($bot, $nextManager, $message);
         } else {
-            Log::info('No managers available for bot ID ' . $bot->id);
+            Log::info('No managers available for bot ID '.$bot->id);
         }
     }
 
@@ -105,14 +128,13 @@ class Bot extends Model
             return Manager::first();
         });
 
-
         if ($currentManager) {
             $currentManager->is_last = false;
             $currentManager->save();
 
             $nextManager = Manager::where('id', '>', $currentManager->id)->first();
 
-            if (!$nextManager) {
+            if (! $nextManager) {
 
                 $nextManager = Manager::first();
             }
@@ -121,20 +143,8 @@ class Bot extends Model
 
             $nextManager->save();
 
-            Log::info('Preparing to send message( ' . $message . ') to manager: ' . $nextManager->name);
+            Log::info('Preparing to send message( '.$message.') to manager: '.$nextManager->name);
             SendManagerNotification::dispatch($bot, $nextManager, $message);
         }
     }
-
-
-    private function escapeMarkdown($text): array|string
-    {
-        return str_replace(
-            ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'],
-            ['\_', '\*', '\[', '\]', '\(', '\)', '\~', '\`', '\>', '\#', '\+', '\-', '\=', '\|', '\{', '\}', '\.', '\!'],
-            $text
-        );
-    }
-
-
 }

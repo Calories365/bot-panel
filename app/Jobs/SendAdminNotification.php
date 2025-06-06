@@ -5,7 +5,6 @@ namespace App\Jobs;
 use App\Models\Bot;
 use App\Models\BotAdmin;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -18,7 +17,9 @@ class SendAdminNotification implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $bot;
+
     protected $admin;
+
     protected $message;
 
     public function __construct(Bot $bot, BotAdmin $admin, $message)
@@ -36,9 +37,9 @@ class SendAdminNotification implements ShouldQueue
                 'chat_id' => $this->admin->telegram_id,
                 'text' => $this->message,
             ]);
-//            Log::info('Sent message to admin: ' . $this->admin->name);
+            //            Log::info('Sent message to admin: ' . $this->admin->name);
         } catch (\Exception $e) {
-//            Log::error('Error sending message to ' . $this->admin->telegram_id . ': ' . $e->getMessage());
+            //            Log::error('Error sending message to ' . $this->admin->telegram_id . ': ' . $e->getMessage());
         }
     }
 }

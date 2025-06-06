@@ -2,19 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\BotUserResource;
 use App\Models\BotUser;
-use App\Models\CaloriesUser;
 use App\Models\Subscription;
 use App\Services\BotUsersService;
 use App\Services\DiaryApiService;
-use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Log;
-use SebastianBergmann\LinesOfCode\LinesOfCode;
 
 class UsersController extends BaseController
 {
@@ -23,11 +18,11 @@ class UsersController extends BaseController
     public function index(Request $request, DiaryApiService $diaryApiService)
     {
         $perPage = $request->input('per_page', 10);
-        $botId   = $request->input('botId');
+        $botId = $request->input('botId');
 
         $bot = \App\Models\Bot::find($botId);
 
-        if (!$botId) {
+        if (! $botId) {
             $caloriesUsers = \App\Models\CaloriesUser::orderBy('created_at', 'desc')
                 ->paginate($perPage);
 
@@ -36,11 +31,10 @@ class UsersController extends BaseController
 
         $botUsers = BotUser::getPaginatedUsers($perPage, $botId);
 
-       if ($bot->type_id != 6) {
-           return \App\Http\Resources\BotUserResource::collection($botUsers);
+        if ($bot->type_id != 6) {
+            return \App\Http\Resources\BotUserResource::collection($botUsers);
 
-       } elseif (($bot && $bot->type_id == 6))
-         {
+        } elseif (($bot && $bot->type_id == 6)) {
             $caloriesIds = $botUsers
                 ->pluck('calories_id')
                 ->filter()
@@ -55,12 +49,12 @@ class UsersController extends BaseController
                 $bulkData = $diaryApiService->showUsersInfoForBotMultiple($caloriesIds, $locale);
 
                 $diaryData = [];
-                if (is_array($bulkData) && !isset($bulkData['error'])) {
+                if (is_array($bulkData) && ! isset($bulkData['error'])) {
                     foreach ($bulkData as $row) {
                         $cid = $row['calories_id'];
                         $diaryData[$cid] = [
                             'email' => $row['email'] ?? null,
-                            'name'  => $row['name'] ?? null,
+                            'name' => $row['name'] ?? null,
                         ];
                     }
                 } else {
@@ -72,7 +66,6 @@ class UsersController extends BaseController
         }
     }
 
-
     public function show(BotUser $user): \Illuminate\Http\JsonResponse
     {
         return response()->json($user);
@@ -81,6 +74,7 @@ class UsersController extends BaseController
     public function destroy(BotUser $user): \Illuminate\Http\JsonResponse
     {
         $user->delete();
+
         return response()->json(['message' => 'User deleted successfully']);
     }
 
@@ -90,7 +84,7 @@ class UsersController extends BaseController
         $content = $botUsersService->exportUsers($botId);
 
         if (empty($content)) {
-            $content = "No users with valid usernames found.";
+            $content = 'No users with valid usernames found.';
         }
 
         $fileName = 'usernames.txt';
@@ -100,7 +94,7 @@ class UsersController extends BaseController
 
         return response()->json([
             'message' => 'Export successful',
-            'downloadUrl' => $downloadUrl
+            'downloadUrl' => $downloadUrl,
         ]);
     }
 
@@ -114,7 +108,7 @@ class UsersController extends BaseController
         $canTranscribeAudio = $subscription->canTranscribeAudio();
 
         return response()->json([
-            'canTranscribeAudio' => $canTranscribeAudio
+            'canTranscribeAudio' => $canTranscribeAudio,
         ]);
     }
 }

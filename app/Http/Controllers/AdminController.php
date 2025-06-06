@@ -24,6 +24,7 @@ class AdminController extends BaseController
         });
 
         $bots = BotAdmin::paginate($perPage);
+
         return BotAdminResource::collection($bots);
     }
 
@@ -36,18 +37,21 @@ class AdminController extends BaseController
     {
         $data = $request->all();
         $botAdmin = BotAdmin::create($data);
+
         return response()->json(['id' => $botAdmin->id]);
     }
 
     public function update(Request $request, BotAdmin $botAdmin): BotAdminResource
     {
         $botAdmin->update($request->only(['name', 'telegram_id']));
+
         return new BotAdminResource($botAdmin);
     }
 
     public function destroy(BotAdmin $botAdmin): \Illuminate\Http\JsonResponse
     {
         $botAdmin->delete();
+
         return response()->json(['message' => 'BotAdmin deleted successfully']);
     }
 }

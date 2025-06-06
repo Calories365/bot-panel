@@ -13,42 +13,42 @@ const state = {
 };
 
 export const getterTypes = {
-    admins: '[admins] allAdmins',
-    pagination: '[admins] pagination',
-    isSubmitting: '[admins] isSubmitting',
-    admin: '[admins] admin',
+    admins: "[admins] allAdmins",
+    pagination: "[admins] pagination",
+    isSubmitting: "[admins] isSubmitting",
+    admin: "[admins] admin",
 };
 
 const getters = {
-    [getterTypes.admins]: state => state.admins,
-    [getterTypes.admin]: state => state.admin,
-    [getterTypes.pagination]: state => state.pagination,
-    [getterTypes.isSubmitting]: state => state.isSubmitting,
+    [getterTypes.admins]: (state) => state.admins,
+    [getterTypes.admin]: (state) => state.admin,
+    [getterTypes.pagination]: (state) => state.pagination,
+    [getterTypes.isSubmitting]: (state) => state.isSubmitting,
 };
 
 export const mutationTypes = {
-    getAllAdminsStart: '[admins] getAllAdminsStart',
-    getAllAdminsSuccess: '[admins] getAllAdminsSuccess',
-    getAllAdminsFailure: '[admins] getAllAdminsFailure',
+    getAllAdminsStart: "[admins] getAllAdminsStart",
+    getAllAdminsSuccess: "[admins] getAllAdminsSuccess",
+    getAllAdminsFailure: "[admins] getAllAdminsFailure",
 
-    setCurrentPage: '[admins] setCurrentPage',
-    setPerPage: '[admins] setPerPage',
+    setCurrentPage: "[admins] setCurrentPage",
+    setPerPage: "[admins] setPerPage",
 
-    deleteAdminStart: '[admins] deleteAdminStart',
-    deleteAdminSuccess: '[admins] deleteAdminSuccess',
-    deleteAdminFailure: '[admins] deleteAdminFailure',
+    deleteAdminStart: "[admins] deleteAdminStart",
+    deleteAdminSuccess: "[admins] deleteAdminSuccess",
+    deleteAdminFailure: "[admins] deleteAdminFailure",
 
-    getAdminStart: '[admins] getAdminStart',
-    getAdminSuccess: '[admins] getAdminSuccess',
-    getAdminFailure: '[admins] getAdminFailure',
+    getAdminStart: "[admins] getAdminStart",
+    getAdminSuccess: "[admins] getAdminSuccess",
+    getAdminFailure: "[admins] getAdminFailure",
 
-    updateAdminStart: '[admins] updateAdminStart',
-    updateAdminSuccess: '[admins] updateAdminSuccess',
-    updateAdminFailure: '[admins] updateAdminFailure',
+    updateAdminStart: "[admins] updateAdminStart",
+    updateAdminSuccess: "[admins] updateAdminSuccess",
+    updateAdminFailure: "[admins] updateAdminFailure",
 
-    createAdminStart: '[admins] createAdminStart',
-    createAdminSuccess: '[admins] createAdminSuccess',
-    createAdminFailure: '[admins] createAdminFailure',
+    createAdminStart: "[admins] createAdminStart",
+    createAdminSuccess: "[admins] createAdminSuccess",
+    createAdminFailure: "[admins] createAdminFailure",
 };
 
 const mutations = {
@@ -120,87 +120,114 @@ const mutations = {
 };
 
 export const actionTypes = {
-    getAllAdmins: '[admins] getAllAdmins',
-    changePage: '[admins] changePage',
-    setPageSize: '[admins] setPageSize',
-    deleteAdmin: '[admins] deleteAdmin',
-    getAdmin: '[admins] getAdmin',
-    updateAdmin: '[admins] updateAdmin',
-    createAdmin: '[admins] createAdmin',
+    getAllAdmins: "[admins] getAllAdmins",
+    changePage: "[admins] changePage",
+    setPageSize: "[admins] setPageSize",
+    deleteAdmin: "[admins] deleteAdmin",
+    getAdmin: "[admins] getAdmin",
+    updateAdmin: "[admins] updateAdmin",
+    createAdmin: "[admins] createAdmin",
 };
 
 const actions = {
-    async [actionTypes.getAllAdmins]({commit, state}, {page, perPage} = {}) {
+    async [actionTypes.getAllAdmins](
+        { commit, state },
+        { page, perPage } = {},
+    ) {
         commit(mutationTypes.getAllAdminsStart);
         try {
             const currentPage = page || state.pagination.currentPage;
             const currentPerPage = perPage || state.pagination.perPage;
-            const response = await adminsApi.getAllAdmins({page: currentPage, perPage: currentPerPage});
+            const response = await adminsApi.getAllAdmins({
+                page: currentPage,
+                perPage: currentPerPage,
+            });
             commit(mutationTypes.getAllAdminsSuccess, response.data);
             return response.data.data;
         } catch (error) {
-            commit(mutationTypes.getAllAdminsFailure, error.response ? error.response.data : error);
+            commit(
+                mutationTypes.getAllAdminsFailure,
+                error.response ? error.response.data : error,
+            );
             throw error;
         }
     },
-    async [actionTypes.changePage]({commit, dispatch}, {page}) {
+    async [actionTypes.changePage]({ commit, dispatch }, { page }) {
         commit(mutationTypes.setCurrentPage, page);
-        return await dispatch(actionTypes.getAllAdmins, {page});
+        return await dispatch(actionTypes.getAllAdmins, { page });
     },
-    async [actionTypes.setPageSize]({commit, dispatch, state}, {size}) {
+    async [actionTypes.setPageSize]({ commit, dispatch, state }, { size }) {
         commit(mutationTypes.setPerPage, size);
-        return await dispatch(actionTypes.getAllAdmins, {page: state.pagination.currentPage, perPage: size});
+        return await dispatch(actionTypes.getAllAdmins, {
+            page: state.pagination.currentPage,
+            perPage: size,
+        });
     },
-    async [actionTypes.deleteAdmin]({commit, dispatch, state}, {id}) {
+    async [actionTypes.deleteAdmin]({ commit, dispatch, state }, { id }) {
         commit(mutationTypes.deleteAdminStart);
         try {
             await adminsApi.deleteAdmin(id);
-            dispatch('addSuccess', 'Адмиин удален!', {root: true});
+            dispatch("addSuccess", "Адмиин удален!", { root: true });
             commit(mutationTypes.deleteAdminSuccess);
             return await dispatch(actionTypes.getAllAdmins, {
                 page: state.pagination.currentPage,
-                perPage: state.pagination.perPage
+                perPage: state.pagination.perPage,
             });
         } catch (error) {
-            dispatch('addError', 'Ошибка удаления!', {root: true});
-            commit(mutationTypes.deleteAdminFailure, error.response ? error.response.data : error);
+            dispatch("addError", "Ошибка удаления!", { root: true });
+            commit(
+                mutationTypes.deleteAdminFailure,
+                error.response ? error.response.data : error,
+            );
             throw error;
         }
     },
-    async [actionTypes.getAdmin]({commit}, adminId) {
+    async [actionTypes.getAdmin]({ commit }, adminId) {
         commit(mutationTypes.getAdminStart);
         try {
             const response = await adminsApi.getAdminById(adminId);
             commit(mutationTypes.getAdminSuccess, response.data);
             return response.data;
         } catch (error) {
-            commit(mutationTypes.getAdminFailure, error.response ? error.response.data : error);
+            commit(
+                mutationTypes.getAdminFailure,
+                error.response ? error.response.data : error,
+            );
             throw error;
         }
     },
-    async [actionTypes.updateAdmin]({commit, state, dispatch}, adminData) {
+    async [actionTypes.updateAdmin]({ commit, state, dispatch }, adminData) {
         commit(mutationTypes.updateAdminStart);
         try {
-            const response = await adminsApi.updateAdmin(state.admin.id, adminData);
+            const response = await adminsApi.updateAdmin(
+                state.admin.id,
+                adminData,
+            );
             commit(mutationTypes.updateAdminSuccess, response.data);
-            dispatch('addSuccess', 'Админ обновлен!', {root: true});
+            dispatch("addSuccess", "Админ обновлен!", { root: true });
             return response.data;
         } catch (error) {
-            commit(mutationTypes.updateAdminFailure, error.response ? error.response.data : error);
-            dispatch('addError', 'Ошибка обновления!', {root: true});
+            commit(
+                mutationTypes.updateAdminFailure,
+                error.response ? error.response.data : error,
+            );
+            dispatch("addError", "Ошибка обновления!", { root: true });
             throw error;
         }
     },
-    async [actionTypes.createAdmin]({commit, state, dispatch}, adminData) {
+    async [actionTypes.createAdmin]({ commit, state, dispatch }, adminData) {
         commit(mutationTypes.createAdminStart);
         try {
             const response = await adminsApi.createAdmin(adminData);
             commit(mutationTypes.createAdminSuccess, response.data);
-            dispatch('addSuccess', 'Админ создан!', {root: true});
+            dispatch("addSuccess", "Админ создан!", { root: true });
             return response.data.id;
         } catch (error) {
-            commit(mutationTypes.createAdminFailure, error.response ? error.response.data : error);
-            dispatch('addError', 'Ошибка создания!', {root: true});
+            commit(
+                mutationTypes.createAdminFailure,
+                error.response ? error.response.data : error,
+            );
+            dispatch("addError", "Ошибка создания!", { root: true });
             throw error;
         }
     },

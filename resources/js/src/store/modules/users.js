@@ -13,32 +13,32 @@ const state = {
 };
 
 export const getterTypes = {
-    users: '[users] allUsers',
-    pagination: '[users] pagination',
-    isSubmitting: '[users] isSubmitting',
+    users: "[users] allUsers",
+    pagination: "[users] pagination",
+    isSubmitting: "[users] isSubmitting",
 };
 
 const getters = {
-    [getterTypes.users]: state => state.users,
-    [getterTypes.pagination]: state => state.pagination,
-    [getterTypes.isSubmitting]: state => state.isSubmitting,
+    [getterTypes.users]: (state) => state.users,
+    [getterTypes.pagination]: (state) => state.pagination,
+    [getterTypes.isSubmitting]: (state) => state.isSubmitting,
 };
 
 export const mutationTypes = {
-    getUsersStart: '[users] getUsersStart',
-    getUsersSuccess: '[users] getAsersSuccess',
-    getUsersFailure: '[users] getUsersFailure',
-    setCurrentPage: '[users] setCurrentPage',
-    setPerPage: '[users] setPerPage',
-    deleteUserStart: '[users] deleteUserStart',
-    deleteUserSuccess: '[users] deleteUserSuccess',
-    deleteUserFailure: '[users] deleteUserFailure',
+    getUsersStart: "[users] getUsersStart",
+    getUsersSuccess: "[users] getAsersSuccess",
+    getUsersFailure: "[users] getUsersFailure",
+    setCurrentPage: "[users] setCurrentPage",
+    setPerPage: "[users] setPerPage",
+    deleteUserStart: "[users] deleteUserStart",
+    deleteUserSuccess: "[users] deleteUserSuccess",
+    deleteUserFailure: "[users] deleteUserFailure",
 
-    destroyUsers: '[users] destroyUsers',
+    destroyUsers: "[users] destroyUsers",
 
-    exportUsersStart: '[users] exportUsersStart',
-    exportUsersSuccess: '[users] exportUsersSuccess',
-    exportUsersFailure: '[users] exportUsersFailure',
+    exportUsersStart: "[users] exportUsersStart",
+    exportUsersSuccess: "[users] exportUsersSuccess",
+    exportUsersFailure: "[users] exportUsersFailure",
 };
 
 const mutations = {
@@ -97,21 +97,24 @@ const mutations = {
 };
 
 export const actionTypes = {
-    getUsers: '[users] getUsers',
-    changePage: '[users] changePage',
-    setPageSize: '[users] setPageSize',
-    deleteUser: '[users] deleteUser',
-    destroyUsers: '[users] destroyUsers',
-    exportUsers: '[users] exportUsers',
+    getUsers: "[users] getUsers",
+    changePage: "[users] changePage",
+    setPageSize: "[users] setPageSize",
+    deleteUser: "[users] deleteUser",
+    destroyUsers: "[users] destroyUsers",
+    exportUsers: "[users] exportUsers",
 };
 
 const actions = {
-    async [actionTypes.getUsers]({commit, state}, {botId, page, perPage} = {}) {
+    async [actionTypes.getUsers](
+        { commit, state },
+        { botId, page, perPage } = {},
+    ) {
         commit(mutationTypes.getUsersStart);
         try {
             const currentPage = page || state.pagination.currentPage;
             const currentPerPage = perPage || state.pagination.perPage;
-            const params = {page: currentPage, perPage: currentPerPage};
+            const params = { page: currentPage, perPage: currentPerPage };
             if (botId) {
                 params.botId = botId;
             }
@@ -119,36 +122,45 @@ const actions = {
             commit(mutationTypes.getUsersSuccess, response.data);
             return response.data.data;
         } catch (error) {
-            commit(mutationTypes.getUsersFailure, error.response ? error.response.data : error);
+            commit(
+                mutationTypes.getUsersFailure,
+                error.response ? error.response.data : error,
+            );
             throw error;
         }
     },
-    async [actionTypes.changePage]({commit, dispatch}, {page}) {
+    async [actionTypes.changePage]({ commit, dispatch }, { page }) {
         commit(mutationTypes.setCurrentPage, page);
-        return await dispatch(actionTypes.getUsers, {page});
+        return await dispatch(actionTypes.getUsers, { page });
     },
-    async [actionTypes.setPageSize]({commit, dispatch, state}, {size}) {
+    async [actionTypes.setPageSize]({ commit, dispatch, state }, { size }) {
         commit(mutationTypes.setPerPage, size);
-        return await dispatch(actionTypes.getUsers, {page: state.pagination.currentPage, perPage: size});
+        return await dispatch(actionTypes.getUsers, {
+            page: state.pagination.currentPage,
+            perPage: size,
+        });
     },
-    async [actionTypes.deleteUser]({commit, dispatch, state}, {id}) {
+    async [actionTypes.deleteUser]({ commit, dispatch, state }, { id }) {
         commit(mutationTypes.deleteUserStart);
         try {
             await usersApi.deleteUser(id);
             commit(mutationTypes.deleteUserSuccess);
             return await dispatch(actionTypes.getUsers, {
                 page: state.pagination.currentPage,
-                perPage: state.pagination.perPage
+                perPage: state.pagination.perPage,
             });
         } catch (error) {
-            commit(mutationTypes.deleteUserFailure, error.response ? error.response.data : error);
+            commit(
+                mutationTypes.deleteUserFailure,
+                error.response ? error.response.data : error,
+            );
             throw error;
         }
     },
-    async [actionTypes.destroyUsers]({commit}) {
+    async [actionTypes.destroyUsers]({ commit }) {
         commit(mutationTypes.destroyUsers);
     },
-    async [actionTypes.exportUsers]({commit}, {botId}) {
+    async [actionTypes.exportUsers]({ commit }, { botId }) {
         commit(mutationTypes.exportUsersStart);
         try {
             const params = {};
@@ -159,11 +171,13 @@ const actions = {
             commit(mutationTypes.exportUsersSuccess, response.data);
             return response.data;
         } catch (error) {
-            commit(mutationTypes.exportUsersFailure, error.response ? error.response.data : error);
+            commit(
+                mutationTypes.exportUsersFailure,
+                error.response ? error.response.data : error,
+            );
             throw error;
         }
     },
-
 };
 
 export default {

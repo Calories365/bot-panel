@@ -13,42 +13,42 @@ const state = {
 };
 
 export const getterTypes = {
-    managers: '[managers] allManagers',
-    pagination: '[managers] pagination',
-    isSubmitting: '[managers] isSubmitting',
-    manager: '[managers] manager',
+    managers: "[managers] allManagers",
+    pagination: "[managers] pagination",
+    isSubmitting: "[managers] isSubmitting",
+    manager: "[managers] manager",
 };
 
 const getters = {
-    [getterTypes.managers]: state => state.managers,
-    [getterTypes.manager]: state => state.manager,
-    [getterTypes.pagination]: state => state.pagination,
-    [getterTypes.isSubmitting]: state => state.isSubmitting,
+    [getterTypes.managers]: (state) => state.managers,
+    [getterTypes.manager]: (state) => state.manager,
+    [getterTypes.pagination]: (state) => state.pagination,
+    [getterTypes.isSubmitting]: (state) => state.isSubmitting,
 };
 
 export const mutationTypes = {
-    getAllManagersStart: '[managers] getAllManagersStart',
-    getAllManagersSuccess: '[managers] getAllManagersSuccess',
-    getAllManagersFailure: '[managers] getAllManagersFailure',
+    getAllManagersStart: "[managers] getAllManagersStart",
+    getAllManagersSuccess: "[managers] getAllManagersSuccess",
+    getAllManagersFailure: "[managers] getAllManagersFailure",
 
-    setCurrentPage: '[managers] setCurrentPage',
-    setPerPage: '[managers] setPerPage',
+    setCurrentPage: "[managers] setCurrentPage",
+    setPerPage: "[managers] setPerPage",
 
-    deleteManagerStart: '[managers] deleteManagerStart',
-    deleteManagerSuccess: '[managers] deleteManagerSuccess',
-    deleteManagerFailure: '[managers] deleteManagerFailure',
+    deleteManagerStart: "[managers] deleteManagerStart",
+    deleteManagerSuccess: "[managers] deleteManagerSuccess",
+    deleteManagerFailure: "[managers] deleteManagerFailure",
 
-    getManagerStart: '[managers] getManagerStart',
-    getManagerSuccess: '[managers] getManagerSuccess',
-    getManagerFailure: '[managers] getManagerFailure',
+    getManagerStart: "[managers] getManagerStart",
+    getManagerSuccess: "[managers] getManagerSuccess",
+    getManagerFailure: "[managers] getManagerFailure",
 
-    updateManagerStart: '[managers] updateManagerStart',
-    updateManagerSuccess: '[managers] updateManagerSuccess',
-    updateManagerFailure: '[managers] updateManagerFailure',
+    updateManagerStart: "[managers] updateManagerStart",
+    updateManagerSuccess: "[managers] updateManagerSuccess",
+    updateManagerFailure: "[managers] updateManagerFailure",
 
-    createManagerStart: '[managers] createManagerStart',
-    createManagerSuccess: '[managers] createManagerSuccess',
-    createManagerFailure: '[managers] createManagerFailure',
+    createManagerStart: "[managers] createManagerStart",
+    createManagerSuccess: "[managers] createManagerSuccess",
+    createManagerFailure: "[managers] createManagerFailure",
 };
 
 const mutations = {
@@ -120,87 +120,120 @@ const mutations = {
 };
 
 export const actionTypes = {
-    getAllManagers: '[managers] getAllManagers',
-    changePage: '[managers] changePage',
-    setPageSize: '[managers] setPageSize',
-    deleteManager: '[managers] deleteManager',
-    getManager: '[managers] getManager',
-    updateManager: '[managers] updateManager',
-    createManager: '[managers] createManager',
+    getAllManagers: "[managers] getAllManagers",
+    changePage: "[managers] changePage",
+    setPageSize: "[managers] setPageSize",
+    deleteManager: "[managers] deleteManager",
+    getManager: "[managers] getManager",
+    updateManager: "[managers] updateManager",
+    createManager: "[managers] createManager",
 };
 
 const actions = {
-    async [actionTypes.getAllManagers]({commit, state}, {page, perPage} = {}) {
+    async [actionTypes.getAllManagers](
+        { commit, state },
+        { page, perPage } = {},
+    ) {
         commit(mutationTypes.getAllManagersStart);
         try {
             const currentPage = page || state.pagination.currentPage;
             const currentPerPage = perPage || state.pagination.perPage;
-            const response = await managersApi.getAllManagers({page: currentPage, perPage: currentPerPage});
+            const response = await managersApi.getAllManagers({
+                page: currentPage,
+                perPage: currentPerPage,
+            });
             commit(mutationTypes.getAllManagersSuccess, response.data);
             return response.data.data;
         } catch (error) {
-            commit(mutationTypes.getAllManagersFailure, error.response ? error.response.data : error);
+            commit(
+                mutationTypes.getAllManagersFailure,
+                error.response ? error.response.data : error,
+            );
             throw error;
         }
     },
-    async [actionTypes.changePage]({commit, dispatch}, {page}) {
+    async [actionTypes.changePage]({ commit, dispatch }, { page }) {
         commit(mutationTypes.setCurrentPage, page);
-        return await dispatch(actionTypes.getAllManagers, {page});
+        return await dispatch(actionTypes.getAllManagers, { page });
     },
-    async [actionTypes.setPageSize]({commit, dispatch, state}, {size}) {
+    async [actionTypes.setPageSize]({ commit, dispatch, state }, { size }) {
         commit(mutationTypes.setPerPage, size);
-        return await dispatch(actionTypes.getAllManagers, {page: state.pagination.currentPage, perPage: size});
+        return await dispatch(actionTypes.getAllManagers, {
+            page: state.pagination.currentPage,
+            perPage: size,
+        });
     },
-    async [actionTypes.deleteManager]({commit, dispatch, state}, {id}) {
+    async [actionTypes.deleteManager]({ commit, dispatch, state }, { id }) {
         commit(mutationTypes.deleteManagerStart);
         try {
             await managersApi.deleteManager(id);
-            dispatch('addSuccess', 'Менеджер удален!', {root: true});
+            dispatch("addSuccess", "Менеджер удален!", { root: true });
             commit(mutationTypes.deleteManagerSuccess);
             return await dispatch(actionTypes.getAllManagers, {
                 page: state.pagination.currentPage,
-                perPage: state.pagination.perPage
+                perPage: state.pagination.perPage,
             });
         } catch (error) {
-            dispatch('addError', 'Ошибка удаления!', {root: true});
-            commit(mutationTypes.deleteManagerFailure, error.response ? error.response.data : error);
+            dispatch("addError", "Ошибка удаления!", { root: true });
+            commit(
+                mutationTypes.deleteManagerFailure,
+                error.response ? error.response.data : error,
+            );
             throw error;
         }
     },
-    async [actionTypes.getManager]({commit}, managerId) {
+    async [actionTypes.getManager]({ commit }, managerId) {
         commit(mutationTypes.getManagerStart);
         try {
             const response = await managersApi.getManagerById(managerId);
             commit(mutationTypes.getManagerSuccess, response.data);
             return response.data;
         } catch (error) {
-            commit(mutationTypes.getManagerFailure, error.response ? error.response.data : error);
+            commit(
+                mutationTypes.getManagerFailure,
+                error.response ? error.response.data : error,
+            );
             throw error;
         }
     },
-    async [actionTypes.updateManager]({commit, state, dispatch}, managerData) {
+    async [actionTypes.updateManager](
+        { commit, state, dispatch },
+        managerData,
+    ) {
         commit(mutationTypes.updateManagerStart);
         try {
-            const response = await managersApi.updateManager(state.manager.id, managerData);
+            const response = await managersApi.updateManager(
+                state.manager.id,
+                managerData,
+            );
             commit(mutationTypes.updateManagerSuccess, response.data);
-            dispatch('addSuccess', 'Менеджер обновлен!', {root: true});
+            dispatch("addSuccess", "Менеджер обновлен!", { root: true });
             return response.data;
         } catch (error) {
-            commit(mutationTypes.updateManagerFailure, error.response ? error.response.data : error);
-            dispatch('addError', 'Ошибка обновления!', {root: true});
+            commit(
+                mutationTypes.updateManagerFailure,
+                error.response ? error.response.data : error,
+            );
+            dispatch("addError", "Ошибка обновления!", { root: true });
             throw error;
         }
     },
-    async [actionTypes.createManager]({commit, state, dispatch}, managerData) {
+    async [actionTypes.createManager](
+        { commit, state, dispatch },
+        managerData,
+    ) {
         commit(mutationTypes.createManagerStart);
         try {
             const response = await managersApi.createManager(managerData);
             commit(mutationTypes.createManagerSuccess, response.data);
-            dispatch('addSuccess', 'Менеджер создан!', {root: true});
+            dispatch("addSuccess", "Менеджер создан!", { root: true });
             return response.data.id;
         } catch (error) {
-            commit(mutationTypes.createManagerFailure, error.response ? error.response.data : error);
-            dispatch('addError', 'Ошибка создания!', {root: true});
+            commit(
+                mutationTypes.createManagerFailure,
+                error.response ? error.response.data : error,
+            );
+            dispatch("addError", "Ошибка создания!", { root: true });
             throw error;
         }
     },
