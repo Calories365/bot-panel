@@ -71,7 +71,7 @@ class BotController extends BaseController
     }
 
     /**
-     * Unified logic for creating/updating a bot.
+     * Unified logic for creating/updating a bot
      */
     protected function handleBotData(BotDataRequest $request, ?Bot $bot = null): Bot
     {
