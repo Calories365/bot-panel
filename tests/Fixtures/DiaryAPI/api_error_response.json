@@ -1,6 +1,0 @@
-{
-  "error": "Invalid API key or insufficient permissions",
-  "error_code": "AUTH_ERROR",
-  "message": "Please check your API credentials",
-  "timestamp": "2024-12-20T10:30:00Z"
-} 

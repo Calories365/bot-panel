@@ -86,6 +86,10 @@ class AudioMessageHandler implements MessageHandlerInterface
                             $productTranslation = $productInfo['product_translation'];
                             $product = $productInfo['product'];
                             $productId = $productTranslation['id'];
+                            Log::info('table body');
+                            Log::info(print_r($product, true));
+                            Log::info(print_r($productTranslation, true));
+                            Log::info(print_r($productId, true));
                             $this->generateTableBody($product, $productTranslation, $productId);
 
                             $sentMessage = $telegram->sendMessage([
@@ -101,17 +105,25 @@ class AudioMessageHandler implements MessageHandlerInterface
                                 'message_id' => $sentMessage->getMessageId(),
                             ];
                         } else {
-                            $messageText = ($index + 1).'. '.__('calories365-bot.incomplete_product_info')."\n";
+                            $addedProduct = $this->generateProduct();
+                            $this->generateTableBody($addedProduct['product'], $addedProduct['productTranslation'], $addedProduct['productId']);
 
-                            $telegram->sendMessage([
+                            $sentMessage = $telegram->sendMessage([
                                 'chat_id' => $chatId,
-                                'text' => $messageText,
+                                'text' => $this->messageText,
                                 'parse_mode' => 'Markdown',
+                                'reply_markup' => $this->replyMarkup,
                             ]);
+
+                            $userProducts[$addedProduct['productId']] = [
+                                'product_translation' => $addedProduct['productTranslation'],
+                                'product' => $addedProduct['product'],
+                                'message_id' => $sentMessage->getMessageId(),
+                            ];
                         }
                     }
 
-                    Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30)); // Время хранения - 30 минут
+                    Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));
 
                     $finalMessageText = __('calories365-bot.save_products_for')."\n";
 
@@ -171,4 +183,39 @@ class AudioMessageHandler implements MessageHandlerInterface
             ]);
         }
     }
+
+    /**
+     * Возвращает тестовый $productInfo с захардкоженными значениями.
+     */
+    private function generateProduct(): array
+    {
+        return [
+            'productTranslation' => [
+                'id'            => 77777777,
+                'product_id'    => 77777777,
+                'locale'        => 'ru',
+                'name'          => 'Тварог',
+                'said_name'     => 'Тварог',
+                'original_name' => 'Тварог',
+            ],
+
+            'product' => [
+                'id'              => 8265,
+                'user_id'         => 89,
+                'calories'        => 136,
+                'proteins'        => 21,
+                'carbohydrates'   => 3,
+                'fats'            => 4,
+                'fibers'          => 0,
+                'quantity_grams'  => 200,
+
+                'edited'          => 1,
+                'verified'        => 1,
+                'ai_generated'    => true,
+            ],
+
+            'productId' => 8265,
+        ];
+    }
+
 }
