@@ -1,0 +1,243 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Bot;
+use App\Models\BotType;
+use App\Models\BotUser;
+use App\Models\Subscription;
+use App\Services\OpenAIService;
+use App\Services\TelegramService;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Mockery;
+use Telegram\Bot\Api;
+use Tests\TestCase;
+use Tests\TestFixtures;
+
+class VoiceMessageIntegrationTest2 extends TestCase
+{
+    use DatabaseTransactions, TestFixtures;
+
+    protected Bot $bot;
+    protected BotUser $botUser;
+    protected Subscription $subscription;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+
+        $this->createTestData();
+
+        Storage::fake('public');
+
+        Mockery::mock('overload:'.Api::class, function ($mock) {
+            $mock->shouldReceive('setWebhook')->andReturnTrue();
+
+            // Возвращаем объект с публичным свойством file_path
+            $mock->shouldReceive('getFile')->andReturn(
+                (object) ['file_path' => 'voice/file_123.oga']
+            );
+
+            $mock->shouldReceive('sendMessage')->andReturn(['ok' => true]);
+
+            $mock->shouldIgnoreMissing();
+        });
+    }
+
+    /** @test */
+    public function processes_voice_message_end_to_end()
+    {
+        $webhookData = $this->getTelegramVoiceWebhook();
+        $webhookData['message']['from']['id'] = $this->botUser->telegram_id;
+        $webhookData['message']['chat']['id'] = $this->botUser->telegram_id;
+
+        // Мокаем все HTTP запросы
+        $this->mockHttpRequests();
+
+        // Отправляем webhook запрос
+        $response = $this->postJson("/api/webhook/bot/{$this->bot->name}", $webhookData);
+
+        // Проверяем успешный ответ
+        $response->assertOk()
+                ->assertJson(['status' => 'success']);
+
+        // Базовые проверки состояния
+//        $this->assertPostProcessingState();
+
+//        // Проверяем, что хотя бы один HTTP запрос был выполнен
+        Http::assertSent(fn ($r) => str_contains($r->url(), 'audio/transcriptions'));
+        Http::assertSent(fn ($r) => str_contains($r->url(), 'chat/completions'));
+        Http::assertSent(fn ($r) => str_contains($r->url(), 'getFile'));
+        Http::assertSent(fn ($r) => str_contains($r->url(), 'sendMessage'));
+    }
+
+    private function mockHttpRequests(): void
+    {
+        Http::fake(array_merge(
+            $this->telegramFakes(),
+            $this->openAiFakes(),
+            $this->diaryFakes(),
+        ));
+    }
+
+    private function telegramFakes(): array
+    {
+        return [
+            "api.telegram.org/bot{$this->bot->token}/getFile*" =>
+                Http::response($this->getTelegramGetFileResponse()),
+
+            "api.telegram.org/file/bot{$this->bot->token}/*" =>
+                Http::response(file_get_contents(
+                    base_path('tests/Fixtures/Audio/test.mp3')
+                )),
+
+            "api.telegram.org/bot{$this->bot->token}/sendMessage*" =>
+                Http::response(['ok' => true]),
+        ];
+    }
+
+    private function openAiFakes(): array
+    {
+        return [
+            'api.openai.com/v1/audio/transcriptions*' =>
+                Http::response($this->getWhisperVoiceResponse()),
+
+            'api.openai.com/v1/chat/completions*' =>
+                Http::response($this->getGptFoodAnalysisResponse()),
+        ];
+    }
+
+    private function diaryFakes(): array
+    {
+        return [
+            config('services.diary.url').'/api/products/search*' =>
+                Http::response($this->getDiaryProductsFoundResponse()),
+
+            config('services.diary.url').'/api/products*' =>
+                Http::response($this->getDiarySaveProductResponse()),
+        ];
+    }
+
+    private function createTestData(): void
+    {
+        // Создаем BotType для Calories бота
+        $botType = BotType::factory()->create([
+            'name' => 'Calories',
+        ]);
+
+        // Создаем Bot
+        $this->bot = Bot::factory()->for($botType, 'type')->create([
+            'name' => 'test_calories_bot',
+            'token' => 'fake_bot_token',
+            'active' => true,
+        ]);
+
+        // Генерируем уникальный telegram_id
+        $uniqueTelegramId = fake()->unique()->numberBetween(1000000000, 9999999999);
+
+        // Создаем BotUser (telegram пользователь)
+        $this->botUser = BotUser::create([
+            'name' => 'Test User',
+            'username' => 'test_user',
+            'telegram_id' => $uniqueTelegramId,
+            'premium' => false,
+            'is_banned' => false,
+            'calories_id' => 12345,
+            'locale' => 'en',
+            'last_active_at' => now()->subDay(),
+        ]);
+
+        // Связываем пользователя с ботом
+        $this->botUser->bots()->attach($this->bot->id);
+
+        // Создаем подписку
+        $this->subscription = Subscription::create([
+            'user_id' => $this->botUser->calories_id,
+            'counter' => 0,
+            'premium_until' => null,
+        ]);
+    }
+
+//    private function assertTelegramServiceCalls(): void
+//    {
+//        // Проверяем, что TelegramService был вызван для получения файла
+//        $this->assertTrue(
+//            Http::assertSent(function ($request) {
+//                return str_contains($request->url(), 'getFile');
+//            })
+//        );
+//
+//        // Проверяем, что файл был скачан
+//        $this->assertTrue(
+//            Http::assertSent(function ($request) {
+//                return str_contains($request->url(), 'file/bot');
+//            })
+//        );
+//
+//        // Проверяем, что сообщение было отправлено пользователю
+//        $this->assertTrue(
+//            Http::assertSent(function ($request) {
+//                return str_contains($request->url(), 'sendMessage');
+//            })
+//        );
+//    }
+//
+//    private function assertOpenAIServiceCalls(): void
+//    {
+//        // Проверяем вызов Whisper API
+//        $this->assertTrue(
+//            Http::assertSent(function ($request) {
+//                return str_contains($request->url(), 'audio/transcriptions');
+//            })
+//        );
+//
+//        // Проверяем вызов GPT-4o
+//        $this->assertTrue(
+//            Http::assertSent(function ($request) {
+//                return str_contains($request->url(), 'chat/completions');
+//            })
+//        );
+//    }
+
+//    private function assertDiaryApiServiceCalls(): void
+//    {
+//        // Проверяем поиск продуктов
+//        $this->assertTrue(
+//            Http::assertSent(function ($request) {
+//                return str_contains($request->url(), '/api/products/search');
+//            })
+//        );
+//
+//        // Проверяем сохранение продукта
+//        $this->assertTrue(
+//            Http::assertSent(function ($request) {
+//                return str_contains($request->url(), '/api/products') && $request->method() === 'POST';
+//            })
+//        );
+//    }
+
+//    private function assertPostProcessingState(): void
+//    {
+//        // Проверяем состояние пользователя
+//        $this->botUser->refresh();
+//        $this->assertNotNull($this->botUser->id);
+//        $this->assertTrue($this->botUser->bots->contains($this->bot));
+//
+//        // Проверяем, что подписка существует (счетчик может не измениться в тестах)
+//        $this->subscription->refresh();
+//        $this->assertNotNull($this->subscription);
+//
+//        // Основная проверка - что пользователь связан с ботом
+//        $this->assertEquals($this->botUser->calories_id, $this->subscription->user_id);
+//    }
+
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+}

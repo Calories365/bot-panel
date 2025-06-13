@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Services\ChatGPTServices\SpeechToTextService;
 use FFMpeg\FFMpeg;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Telegram\Bot\Api;
@@ -82,16 +83,25 @@ class AudioConversionService
     }
 
     /**
-     * Download the audio file to local storage (public disk).
-     * Returns an array [relativePath, absolutePath].
+     * Downloads a file from a Telegram file URL and stores it on the public disk.
+     * Returns [$relativePath, $absolutePath].
      */
     private function downloadAudio(string $downloadLink): array
     {
-        $contents = file_get_contents($downloadLink);
+        $response = Http::timeout(45)
+            ->withHeaders(['Accept' => 'audio/ogg'])
+            ->get($downloadLink);
+
+        if (! $response->ok()) {
+            Log::error("Cannot download voice file: {$downloadLink} (status {$response->status()})");
+
+            return [null, null];
+        }
 
         $fileName = basename($downloadLink);
-        $localPath = 'audios/'.$fileName;
-        Storage::disk('public')->put($localPath, $contents);
+        $localPath = "audios/{$fileName}";
+        Storage::disk('public')->put($localPath, $response->body());
+
         $fullLocalPath = Storage::disk('public')->path($localPath);
 
         return [$localPath, $fullLocalPath];

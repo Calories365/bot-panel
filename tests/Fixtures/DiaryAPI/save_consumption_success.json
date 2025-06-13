@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "message": "Food consumption saved successfully",
+  "consumption_id": 12345,
+  "consumption": {
+    "id": 12345,
+    "product_id": 456,
+    "grams": 200,
+    "calories_consumed": 154,
+    "proteins_consumed": 4.0,
+    "fats_consumed": 0.8,
+    "carbohydrates_consumed": 32.2,
+    "meal_type": "breakfast",
+    "consumed_at": "2024-12-20T08:30:00Z"
+  }
+} 

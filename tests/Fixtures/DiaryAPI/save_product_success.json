@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "message": "Product saved successfully",
+  "product_id": 789,
+  "product": {
+    "id": 789,
+    "name": "Новый продукт",
+    "calories": 250,
+    "proteins": 15.0,
+    "fats": 8.0,
+    "carbohydrates": 30.0,
+    "created_at": "2024-12-20T10:30:00Z"
+  }
+} 

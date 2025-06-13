@@ -153,7 +153,7 @@ class StartMessageHandler implements MessageHandlerInterface
                 } catch (\Telegram\Bot\Exceptions\TelegramOtherException $e) {
                     if ($e->getMessage() === 'Forbidden: bot was blocked by the user') {
                         $userModel = BotUser::where('telegram_id', $commonData['chatId'])->firstOrFail();
-                        $userModel->is_banned = true;
+                        $userModel->is_banned = 1;
                         $userModel->save();
                     } else {
                         Log::info($e->getMessage());

@@ -65,6 +65,8 @@ class AudioMessageHandler implements MessageHandlerInterface
 
                 $responseArray = $this->diaryApiService->sendText($text, $caloriesId, $locale);
 
+                Log::info(print_r($responseArray, true));
+
                 if (isset($responseArray['error'])) {
                     $telegram->sendMessage([
                         'chat_id' => $chatId,
