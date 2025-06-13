@@ -61,6 +61,7 @@ class AudioMessageHandler implements MessageHandlerInterface
             if ($text) {
 
                 $locale = $botUser->locale;
+
                 $caloriesId = $botUser->calories_id;
 
                 $responseArray = $this->diaryApiService->sendText($text, $caloriesId, $locale);
