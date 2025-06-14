@@ -4,9 +4,11 @@ namespace App\Services\TelegramServices\CaloriesHandlers;
 
 use App\Models\Subscription;
 use App\Services\AudioConversionService;
+use App\Services\ChatGPTServices\SpeechToTextService;
 use App\Services\DiaryApiService;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
+use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -14,16 +16,18 @@ class AudioMessageHandler implements MessageHandlerInterface
 {
     use BasicDataExtractor, EditHandlerTrait;
 
-    protected AudioConversionService $audioConversionService;
-
-    protected DiaryApiService $diaryApiService;
+    protected AudioConversionService  $audioConversionService;
+    protected DiaryApiService         $diaryApiService;
+    protected SpeechToTextService     $speechToTextService;
 
     public function __construct(
         AudioConversionService $audioConversionService,
-        DiaryApiService $diaryApiService,
+        DiaryApiService        $diaryApiService,
+        SpeechToTextService    $speechToTextService
     ) {
         $this->audioConversionService = $audioConversionService;
-        $this->diaryApiService = $diaryApiService;
+        $this->diaryApiService        = $diaryApiService;
+        $this->speechToTextService    = $speechToTextService;
     }
 
     public function handle($bot, $telegram, $message, $botUser)
@@ -56,16 +60,12 @@ class AudioMessageHandler implements MessageHandlerInterface
 
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
 
-            Log::info(print_r($text, true));
-
             if ($text) {
 
                 $locale = $botUser->locale;
                 $caloriesId = $botUser->calories_id;
 
                 $responseArray = $this->diaryApiService->sendText($text, $caloriesId, $locale);
-
-                Log::info(print_r($responseArray, true));
 
                 if (isset($responseArray['error'])) {
                     $telegram->sendMessage([
@@ -82,45 +82,37 @@ class AudioMessageHandler implements MessageHandlerInterface
                     $userProducts = [];
 
                     foreach ($products as $index => $productInfo) {
+
                         if (isset($productInfo['product_translation']) && isset($productInfo['product'])) {
                             $productTranslation = $productInfo['product_translation'];
-                            $product = $productInfo['product'];
-                            $productId = $productTranslation['id'];
-                            Log::info('table body');
-                            Log::info(print_r($product, true));
-                            Log::info(print_r($productTranslation, true));
-                            Log::info(print_r($productId, true));
-                            $this->generateTableBody($product, $productTranslation, $productId);
+                            $product            = $productInfo['product'];
+                            $productId          = $productTranslation['id'];
 
-                            $sentMessage = $telegram->sendMessage([
-                                'chat_id' => $chatId,
-                                'text' => $this->messageText,
-                                'parse_mode' => 'Markdown',
-                                'reply_markup' => $this->replyMarkup,
-                            ]);
-
-                            $userProducts[$productId] = [
-                                'product_translation' => $productTranslation,
-                                'product' => $product,
-                                'message_id' => $sentMessage->getMessageId(),
-                            ];
                         } else {
-                            $addedProduct = $this->generateProduct();
-                            $this->generateTableBody($addedProduct['product'], $addedProduct['productTranslation'], $addedProduct['productId']);
+                            $said   = $productInfo['said_name']       ?? 'Продукт';
+                            $grams  = $productInfo['quantity_grams']  ?? 100;
 
-                            $sentMessage = $telegram->sendMessage([
-                                'chat_id' => $chatId,
-                                'text' => $this->messageText,
-                                'parse_mode' => 'Markdown',
-                                'reply_markup' => $this->replyMarkup,
-                            ]);
+                            $generated = $this->generateProduct($said, $grams);
 
-                            $userProducts[$addedProduct['productId']] = [
-                                'product_translation' => $addedProduct['productTranslation'],
-                                'product' => $addedProduct['product'],
-                                'message_id' => $sentMessage->getMessageId(),
-                            ];
+                            $productTranslation = $generated['productTranslation'];
+                            $product            = $generated['product'];
+                            $productId          = $generated['productId'];
                         }
+
+                        $this->generateTableBody($product, $productTranslation, $productId);
+
+                        $sentMessage = $telegram->sendMessage([
+                            'chat_id'     => $chatId,
+                            'text'        => $this->messageText,
+                            'parse_mode'  => 'Markdown',
+                            'reply_markup'=> $this->replyMarkup,
+                        ]);
+
+                        $userProducts[$productId] = [
+                            'product_translation' => $productTranslation,
+                            'product'             => $product,
+                            'message_id'          => $sentMessage->getMessageId(),
+                        ];
                     }
 
                     Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));
@@ -184,37 +176,51 @@ class AudioMessageHandler implements MessageHandlerInterface
         }
     }
 
+    /* -------------------------------------------------------------------- */
     /**
-     * Возвращает тестовый $productInfo с захардкоженными значениями.
+     * Generates a product using OpenAI.
+     *
+     * @param string $saidName       – the name spoken by the user
+     * @param float  $quantityGrams  – the amount in grams
      */
-    private function generateProduct(): array
+    private function generateProduct(string $saidName, float $quantityGrams): array
     {
+        $raw = $this->speechToTextService->generateNewProductData($saidName);
+        Log::info('AI RAW for "'.$saidName.'": '.$raw);
+
+        if (!$raw || preg_match('/(sorry|извин|вибач|cannot|не могу|не можу|ошиб|error|помил)/iu', $raw)) {
+            $nutritional = [
+                'calories'      => 0,
+                'proteins'      => 0,
+                'carbohydrates' => 0,
+                'fats'          => 0,
+                'edited'        => 1,
+                'verified'      => 1,
+                'ai_generated'  => true,
+            ];
+        } else {
+            $nutritional = Utilities::parseAIGeneratedNutritionalData($raw);
+        }
+
+        $uniqueId  = uniqid('product_', true);
+        $productId = crc32($uniqueId);
+
         return [
             'productTranslation' => [
-                'id'            => 77777777,
-                'product_id'    => 77777777,
-                'locale'        => 'ru',
-                'name'          => 'Тварог',
-                'said_name'     => 'Тварог',
-                'original_name' => 'Тварог',
+                'id'            => $productId,
+                'product_id'    => $productId,
+                'locale'        => app()->getLocale(),
+                'name'          => $saidName,
+                'said_name'     => $saidName,
+                'original_name' => $saidName,
             ],
-
-            'product' => [
-                'id'              => 8265,
-                'user_id'         => 89,
-                'calories'        => 136,
-                'proteins'        => 21,
-                'carbohydrates'   => 3,
-                'fats'            => 4,
-                'fibers'          => 0,
-                'quantity_grams'  => 200,
-
-                'edited'          => 1,
-                'verified'        => 1,
-                'ai_generated'    => true,
-            ],
-
-            'productId' => 8265,
+            'product' => array_merge($nutritional, [
+                'id'             => $productId,
+                'user_id'        => null,
+                'fibers'         => 0,
+                'quantity_grams' => $quantityGrams,
+            ]),
+            'productId' => $productId,
         ];
     }
 

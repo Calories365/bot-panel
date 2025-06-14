@@ -198,4 +198,35 @@ class Utilities
             }
         }
     }
+
+    public static function parseAIGeneratedNutritionalData(string $raw): array
+    {
+        $map = [
+            mb_strtolower(__('calories365-bot.calories'))      => 'calories',
+            mb_strtolower(__('calories365-bot.proteins'))      => 'proteins',
+            mb_strtolower(__('calories365-bot.fats'))          => 'fats',
+            mb_strtolower(__('calories365-bot.carbohydrates')) => 'carbohydrates',
+        ];
+
+        $out = [];
+        foreach (explode(';', $raw) as $part) {
+            $part = trim($part, " ;\n\r\t");
+            if ($part === '') {
+                continue;
+            }
+            [$k, $v] = array_map('trim', explode('-', $part) + ['', '']);
+            $key = $map[mb_strtolower($k)] ?? null;
+            if ($key) {
+                $out[$key] = (float) $v;
+            }
+        }
+
+        $out += [
+            'edited'       => 1,
+            'verified'     => 1,
+            'ai_generated' => true,
+        ];
+
+        return $out;
+    }
 }
