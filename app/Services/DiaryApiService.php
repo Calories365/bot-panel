@@ -4,6 +4,7 @@ namespace App\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class DiaryApiService
@@ -52,18 +53,22 @@ class DiaryApiService
         return $headers;
     }
 
-    public function sendText(string $text, $calories_id, $locale)
+    /**
+     * Send plain text to Diary API and return decoded JSON or ['error'=>…].
+     */
+    public function sendText(string $text, $caloriesId, string $locale): array
     {
         try {
-            $response = $this->client->post($this->apiUrl.'/caloriesEndPoint', [
-                'headers' => $this->getHeaders($calories_id, $locale),
-                'json' => [
+            $response = Http::timeout(45)
+                ->withHeaders($this->getHeaders($caloriesId, $locale))
+                ->post($this->apiUrl.'/caloriesEndPoint', [
                     'text' => $text,
-                ],
-            ]);
+                ]);
 
-            return json_decode($response->getBody()->getContents(), true);
-        } catch (GuzzleException $e) {
+            $response->throw();
+
+            return $response->json();
+        } catch (\Throwable $e) {
             Log::error('Error sending text to diary service: '.$e->getMessage());
 
             return ['error' => $e->getMessage()];

@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class SpeechToTextService
@@ -38,10 +39,10 @@ class SpeechToTextService
         }
     }
 
+    /* ---------- convertSpeechToText ---------- */
     public function convertSpeechToText(string $filePath)
     {
         $locale = app()->getLocale();
-
         $languageCode = match ($locale) {
             'ua' => 'uk',
             'ru' => 'ru',
@@ -49,48 +50,24 @@ class SpeechToTextService
             default => 'uk',
         };
 
-        $multipartBody = new MultipartStream([
-            [
-                'name' => 'file',
-                'contents' => fopen($filePath, 'r'),
-                'filename' => basename($filePath),
-            ],
-            [
-                'name' => 'model',
-                'contents' => 'whisper-1',
-            ],
-            [
-                'name' => 'language',
-                'contents' => $languageCode,
-            ],
-        ]);
+        $response = Http::timeout(45)
+            ->attach('file',        fopen($filePath, 'r'), basename($filePath))
+            ->attach('model',       'whisper-1')
+            ->attach('language',    $languageCode)
+            ->withHeaders([
+                'Authorization' => 'Bearer '.$this->getApiKey(),
+            ])
+            ->post('https://api.openai.com/v1/audio/transcriptions')
+            ->throw();
 
-        $headers = [
-            'Authorization' => 'Bearer '.$this->getApiKey(),
-            'Content-Type' => 'multipart/form-data; boundary='.$multipartBody->getBoundary(),
-        ];
+        $data = $response->json();
 
-        $request = new Request(
-            'POST',
-            'https://api.openai.com/v1/audio/transcriptions',
-            $headers,
-            $multipartBody
-        );
-
-        try {
-            $response = $this->client->send($request);
-            $data = json_decode($response->getBody()->getContents(), true);
-
-            if (isset($data['text'])) {
-                return $this->analyzeFoodIntake($data['text']);
-            }
-
-            return false;
-        } catch (GuzzleException $e) {
-            return ['error' => $e->getMessage()];
-        }
+        return isset($data['text'])
+            ? $this->analyzeFoodIntake($data['text'])
+            : false;
     }
 
+    /* ---------- analyzeFoodIntake ---------- */
     public function analyzeFoodIntake(string $text)
     {
         Log::info('prompt: '.$text);
@@ -100,34 +77,25 @@ class SpeechToTextService
         ]);
 
         try {
-            $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
-                'headers' => [
+            $result = Http::timeout(45)
+                ->withHeaders([
                     'Authorization' => 'Bearer '.$this->getApiKey(),
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'model' => 'gpt-4o',
-                    'messages' => [
-                        [
-                            'role' => 'user',
-                            'content' => $prompt,
-                        ],
-                    ],
-                ],
-            ]);
-
-            $result = json_decode($response->getBody()->getContents(), true);
+                ])
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model'    => 'gpt-4o',
+                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                ])
+                ->throw()
+                ->json();
 
             return $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
-        } catch (GuzzleException $e) {
+        } catch (\Throwable $e) {
             return ['error' => $e->getMessage()];
         }
     }
 
-    /**
-     * @throws GuzzleException
-     */
+    /* ---------- generateNewProductData ---------- */
     public function generateNewProductData(string $text)
     {
         $prompt = __('calories365-bot.prompt_generate_new_product_data', [
@@ -135,27 +103,20 @@ class SpeechToTextService
         ]);
 
         try {
-            $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
-                'headers' => [
+            $result = Http::timeout(45)
+                ->withHeaders([
                     'Authorization' => 'Bearer '.$this->getApiKey(),
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'model' => 'gpt-4o',
-                    'messages' => [
-                        [
-                            'role' => 'user',
-                            'content' => $prompt,
-                        ],
-                    ],
-                ],
-            ]);
-
-            $result = json_decode($response->getBody()->getContents(), true);
+                ])
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model'    => 'gpt-4o',
+                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                ])
+                ->throw()
+                ->json();
 
             return $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
-        } catch (GuzzleException $e) {
+        } catch (\Throwable $e) {
             return ['error' => $e->getMessage()];
         }
     }
@@ -196,30 +157,24 @@ class SpeechToTextService
         return true;
     }
 
-    private function askGPTForRelevance($prompt)
+    /* ---------- askGPTForRelevance ---------- */
+    private function askGPTForRelevance(string $prompt)
     {
         try {
-            $response = $this->client->post('https://api.openai.com/v1/chat/completions', [
-                'headers' => [
+            $result = Http::timeout(45)
+                ->withHeaders([
                     'Authorization' => 'Bearer '.$this->getApiKey(),
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'model' => 'gpt-4o',
-                    'messages' => [
-                        [
-                            'role' => 'user',
-                            'content' => $prompt,
-                        ],
-                    ],
-                ],
-            ]);
-
-            $result = json_decode($response->getBody()->getContents(), true);
+                ])
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model'    => 'gpt-4o',
+                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                ])
+                ->throw()
+                ->json();
 
             return $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
-        } catch (GuzzleException $e) {
+        } catch (\Throwable $e) {
             return ['error' => $e->getMessage()];
         }
     }

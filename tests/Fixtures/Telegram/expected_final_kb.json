@@ -1,0 +1,12 @@
+{
+    "inline_keyboard": [
+        [
+            { "text": "Завтрак", "callback_data": "save_morning" },
+            { "text": "Обед",    "callback_data": "save_dinner"  }
+        ],
+        [
+            { "text": "Ужин",    "callback_data": "save_supper"  },
+            { "text": "Отмена",  "callback_data": "cancel"       }
+        ]
+    ]
+}
