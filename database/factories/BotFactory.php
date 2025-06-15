@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Bot;
-use App\Models\BotType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

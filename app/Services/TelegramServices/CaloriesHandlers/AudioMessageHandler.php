@@ -16,18 +16,20 @@ class AudioMessageHandler implements MessageHandlerInterface
 {
     use BasicDataExtractor, EditHandlerTrait;
 
-    protected AudioConversionService  $audioConversionService;
-    protected DiaryApiService         $diaryApiService;
-    protected SpeechToTextService     $speechToTextService;
+    protected AudioConversionService $audioConversionService;
+
+    protected DiaryApiService $diaryApiService;
+
+    protected SpeechToTextService $speechToTextService;
 
     public function __construct(
         AudioConversionService $audioConversionService,
-        DiaryApiService        $diaryApiService,
-        SpeechToTextService    $speechToTextService
+        DiaryApiService $diaryApiService,
+        SpeechToTextService $speechToTextService
     ) {
         $this->audioConversionService = $audioConversionService;
-        $this->diaryApiService        = $diaryApiService;
-        $this->speechToTextService    = $speechToTextService;
+        $this->diaryApiService = $diaryApiService;
+        $this->speechToTextService = $speechToTextService;
     }
 
     public function handle($bot, $telegram, $message, $botUser)
@@ -88,33 +90,33 @@ class AudioMessageHandler implements MessageHandlerInterface
 
                         if (isset($productInfo['product_translation']) && isset($productInfo['product'])) {
                             $productTranslation = $productInfo['product_translation'];
-                            $product            = $productInfo['product'];
-                            $productId          = $productTranslation['id'];
+                            $product = $productInfo['product'];
+                            $productId = $productTranslation['id'];
 
                         } else {
-                            $said   = $productInfo['said_name']       ?? 'Продукт';
-                            $grams  = $productInfo['quantity_grams']  ?? 100;
+                            $said = $productInfo['said_name'] ?? 'Продукт';
+                            $grams = $productInfo['quantity_grams'] ?? 100;
 
                             $generated = $this->generateProduct($said, $grams);
 
                             $productTranslation = $generated['productTranslation'];
-                            $product            = $generated['product'];
-                            $productId          = $generated['productId'];
+                            $product = $generated['product'];
+                            $productId = $generated['productId'];
                         }
 
                         $this->generateTableBody($product, $productTranslation, $productId);
 
                         $sentMessage = $telegram->sendMessage([
-                            'chat_id'     => $chatId,
-                            'text'        => $this->messageText,
-                            'parse_mode'  => 'Markdown',
-                            'reply_markup'=> $this->replyMarkup,
+                            'chat_id' => $chatId,
+                            'text' => $this->messageText,
+                            'parse_mode' => 'Markdown',
+                            'reply_markup' => $this->replyMarkup,
                         ]);
 
                         $userProducts[$productId] = [
                             'product_translation' => $productTranslation,
-                            'product'             => $product,
-                            'message_id'          => $sentMessage->getMessageId(),
+                            'product' => $product,
+                            'message_id' => $sentMessage->getMessageId(),
                         ];
                     }
 
@@ -183,48 +185,47 @@ class AudioMessageHandler implements MessageHandlerInterface
     /**
      * Generates a product using OpenAI.
      *
-     * @param string $saidName       – the name spoken by the user
-     * @param float  $quantityGrams  – the amount in grams
+     * @param  string  $saidName  – the name spoken by the user
+     * @param  float  $quantityGrams  – the amount in grams
      */
     private function generateProduct(string $saidName, float $quantityGrams): array
     {
         $raw = $this->speechToTextService->generateNewProductData($saidName);
         Log::info('AI RAW for "'.$saidName.'": '.$raw);
 
-        if (!$raw || preg_match('/(sorry|извин|вибач|cannot|не могу|не можу|ошиб|error|помил)/iu', $raw)) {
+        if (! $raw || preg_match('/(sorry|извин|вибач|cannot|не могу|не можу|ошиб|error|помил)/iu', $raw)) {
             $nutritional = [
-                'calories'      => 0,
-                'proteins'      => 0,
+                'calories' => 0,
+                'proteins' => 0,
                 'carbohydrates' => 0,
-                'fats'          => 0,
-                'edited'        => 1,
-                'verified'      => 1,
-                'ai_generated'  => true,
+                'fats' => 0,
+                'edited' => 1,
+                'verified' => 1,
+                'ai_generated' => true,
             ];
         } else {
             $nutritional = Utilities::parseAIGeneratedNutritionalData($raw);
         }
 
-        $uniqueId  = uniqid('product_', true);
+        $uniqueId = uniqid('product_', true);
         $productId = crc32($uniqueId);
 
         return [
             'productTranslation' => [
-                'id'            => $productId,
-                'product_id'    => $productId,
-                'locale'        => app()->getLocale(),
-                'name'          => $saidName,
-                'said_name'     => $saidName,
+                'id' => $productId,
+                'product_id' => $productId,
+                'locale' => app()->getLocale(),
+                'name' => $saidName,
+                'said_name' => $saidName,
                 'original_name' => $saidName,
             ],
             'product' => array_merge($nutritional, [
-                'id'             => $productId,
-                'user_id'        => null,
-                'fibers'         => 0,
+                'id' => $productId,
+                'user_id' => null,
+                'fibers' => 0,
                 'quantity_grams' => $quantityGrams,
             ]),
             'productId' => $productId,
         ];
     }
-
 }

@@ -58,8 +58,8 @@ class SubscriptionFactory extends Factory
     public function fresh(): static
     {
         return $this->state(fn () => [
-            'counter'        => 0,
-            'premium_until'  => null,
+            'counter' => 0,
+            'premium_until' => null,
         ]);
     }
 }

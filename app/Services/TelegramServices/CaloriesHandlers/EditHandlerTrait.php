@@ -139,7 +139,6 @@ trait EditHandlerTrait
             $productTranslation['said_name']
         );
 
-
         Log::info('messageText');
         Log::info(print_r($this->messageText, true));
 

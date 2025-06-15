@@ -15,13 +15,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-//        $this->app->singleton(AudioConversionService::class, function ($app) {
-//            return new AudioConversionService($app->make(SpeechToTextService::class));
-//        });
-//
-//        $this->app->singleton(DiaryApiService::class, function ($app) {
-//            return new DiaryApiService;
-//        });
+        //        $this->app->singleton(AudioConversionService::class, function ($app) {
+        //            return new AudioConversionService($app->make(SpeechToTextService::class));
+        //        });
+        //
+        //        $this->app->singleton(DiaryApiService::class, function ($app) {
+        //            return new DiaryApiService;
+        //        });
     }
 
     /**

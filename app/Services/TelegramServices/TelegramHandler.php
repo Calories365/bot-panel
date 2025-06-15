@@ -11,6 +11,7 @@ use Telegram\Bot\Objects\Update;
 class TelegramHandler
 {
     protected array $strategies;
+
     /**
      * @var callable|\Closure
      */
@@ -24,7 +25,7 @@ class TelegramHandler
         Request2Service $request2Service,
         CaloriesService $caloriesService,
         TikTokService $tikTokService,
-        callable $apiFactory = null
+        ?callable $apiFactory = null
     ) {
         $this->strategies = [
             'Approval' => $approvalService,
@@ -46,7 +47,7 @@ class TelegramHandler
             return;
         }
 
-//        $telegram = new Api($bot->token);
+        //        $telegram = new Api($bot->token);
         $telegram = ($this->apiFactory)($bot);
         $update = new Update($request->all());
 

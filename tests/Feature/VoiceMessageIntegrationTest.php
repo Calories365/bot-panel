@@ -2,14 +2,16 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Bot, BotUser, Subscription};
-use App\Services\{
-    AudioConversionService,
-    DiaryApiService,
-    TelegramServices\TelegramHandler
-};
+use App\Models\Bot;
+use App\Models\BotUser;
+use App\Models\Subscription;
+use App\Services\AudioConversionService;
+use App\Services\DiaryApiService;
+use App\Services\TelegramServices\TelegramHandler;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\{Cache, Http, Storage};
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Telegram\Bot\Api;
 use Telegram\Bot\Objects\Message;
@@ -51,15 +53,15 @@ class VoiceMessageIntegrationTest extends TestCase
 
         $card = $this->sent[0]['text'];
 
-        $this->assertStringContainsString('Вы сказали: Творог',      $card);
+        $this->assertStringContainsString('Вы сказали: Творог', $card);
         $this->assertStringContainsString('| Параметр | 100г | 225г |', $card);
-        $this->assertStringContainsString('| Калории  | 136  | 306',    $card);
-        $this->assertStringContainsString('| Белки',                    $card);
+        $this->assertStringContainsString('| Калории  | 136  | 306', $card);
+        $this->assertStringContainsString('| Белки', $card);
 
-        $kb   = json_decode($this->sent[1]['reply_markup'], true);
+        $kb = json_decode($this->sent[1]['reply_markup'], true);
         $flat = array_map(fn ($row) => array_column($row, 'callback_data'), $kb['inline_keyboard']);
         $this->assertEquals(
-            [['save_morning','save_dinner'],['save_supper','cancel']],
+            [['save_morning', 'save_dinner'], ['save_supper', 'cancel']],
             $flat
         );
 
@@ -67,14 +69,13 @@ class VoiceMessageIntegrationTest extends TestCase
         $this->assertArrayHasKey(24794, Cache::get('user_products_111111'));
     }
 
-
     /* ----------------------------------------------------------------- */
     private function prepareBotAndPayload(): array
     {
         $bot = Bot::factory()->active()->create(['name' => 'Calories365Test_bot']);
 
         BotUser::factory()->locale('ru')->create([
-            'bot_id'      => $bot->id,
+            'bot_id' => $bot->id,
             'telegram_id' => 111111,
             'calories_id' => 555,
         ]);
@@ -95,16 +96,17 @@ class VoiceMessageIntegrationTest extends TestCase
         $api = Mockery::mock(Api::class);
 
         $api->shouldReceive('getFile')
-            ->andReturn((object)['file_path' => 'voice/file_11.oga']);
+            ->andReturn((object) ['file_path' => 'voice/file_11.oga']);
 
         $api->shouldReceive('sendMessage')
             ->andReturnUsing(function (array $p) {
                 $this->sent[] = $p;
+
                 return new Message([
                     'message_id' => random_int(1e3, 9e3),
-                    'chat'       => ['id' => $p['chat_id'], 'type' => 'private'],
-                    'date'       => time(),
-                    'text'       => 'stub',
+                    'chat' => ['id' => $p['chat_id'], 'type' => 'private'],
+                    'date' => time(),
+                    'text' => 'stub',
                 ]);
             });
 
@@ -112,6 +114,7 @@ class VoiceMessageIntegrationTest extends TestCase
             $ref = new \ReflectionProperty($h, 'apiFactory');
             $ref->setAccessible(true);
             $ref->setValue($h, fn () => $api);
+
             return $h;
         });
     }
@@ -119,8 +122,7 @@ class VoiceMessageIntegrationTest extends TestCase
     /* ------------------- AudioConversionService ---------------------- */
     private function mockAudioConversionService(): void
     {
-        $this->partialMock(AudioConversionService::class, fn ($m) =>
-        $m->shouldReceive('processAudioMessage')->andReturn('Творог - 225 грамм'));
+        $this->partialMock(AudioConversionService::class, fn ($m) => $m->shouldReceive('processAudioMessage')->andReturn('Творог - 225 грамм'));
     }
 
     /* ----------------------- Diary API ------------------------------- */
@@ -138,14 +140,14 @@ class VoiceMessageIntegrationTest extends TestCase
     /* -------------------- HTTP ------------------------------- */
     private function fakeExternalHttp(): void
     {
-        $oga  = file_get_contents(base_path('tests/Fixtures/Audio/file.oga'));
-        $wh   = file_get_contents(base_path('tests/Fixtures/OpenAI/whisper_success.json'));
-        $gpt  = file_get_contents(base_path('tests/Fixtures/OpenAI/gpt_food_found.json'));
+        $oga = file_get_contents(base_path('tests/Fixtures/Audio/file.oga'));
+        $wh = file_get_contents(base_path('tests/Fixtures/OpenAI/whisper_success.json'));
+        $gpt = file_get_contents(base_path('tests/Fixtures/OpenAI/gpt_food_found.json'));
 
         Http::fake([
-            'api.telegram.org/file/bot*'             => Http::response($oga, 200),
+            'api.telegram.org/file/bot*' => Http::response($oga, 200),
             'api.openai.com/v1/audio/transcriptions' => Http::response($wh, 200),
-            'api.openai.com/v1/chat/completions'     => Http::response($gpt, 200),
+            'api.openai.com/v1/chat/completions' => Http::response($gpt, 200),
         ]);
     }
 

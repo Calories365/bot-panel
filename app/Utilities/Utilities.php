@@ -202,9 +202,9 @@ class Utilities
     public static function parseAIGeneratedNutritionalData(string $raw): array
     {
         $map = [
-            mb_strtolower(__('calories365-bot.calories'))      => 'calories',
-            mb_strtolower(__('calories365-bot.proteins'))      => 'proteins',
-            mb_strtolower(__('calories365-bot.fats'))          => 'fats',
+            mb_strtolower(__('calories365-bot.calories')) => 'calories',
+            mb_strtolower(__('calories365-bot.proteins')) => 'proteins',
+            mb_strtolower(__('calories365-bot.fats')) => 'fats',
             mb_strtolower(__('calories365-bot.carbohydrates')) => 'carbohydrates',
         ];
 
@@ -222,8 +222,8 @@ class Utilities
         }
 
         $out += [
-            'edited'       => 1,
-            'verified'     => 1,
+            'edited' => 1,
+            'verified' => 1,
             'ai_generated' => true,
         ];
 

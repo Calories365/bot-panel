@@ -3,9 +3,6 @@
 namespace App\Services\ChatGPTServices;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Psr7\MultipartStream;
-use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -51,9 +48,9 @@ class SpeechToTextService
         };
 
         $response = Http::timeout(45)
-            ->attach('file',        fopen($filePath, 'r'), basename($filePath))
-            ->attach('model',       'whisper-1')
-            ->attach('language',    $languageCode)
+            ->attach('file', fopen($filePath, 'r'), basename($filePath))
+            ->attach('model', 'whisper-1')
+            ->attach('language', $languageCode)
             ->withHeaders([
                 'Authorization' => 'Bearer '.$this->getApiKey(),
             ])
@@ -82,7 +79,7 @@ class SpeechToTextService
                     'Authorization' => 'Bearer '.$this->getApiKey(),
                 ])
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model'    => 'gpt-4o',
+                    'model' => 'gpt-4o',
                     'messages' => [['role' => 'user', 'content' => $prompt]],
                 ])
                 ->throw()
@@ -108,7 +105,7 @@ class SpeechToTextService
                     'Authorization' => 'Bearer '.$this->getApiKey(),
                 ])
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model'    => 'gpt-4o',
+                    'model' => 'gpt-4o',
                     'messages' => [['role' => 'user', 'content' => $prompt]],
                 ])
                 ->throw()
@@ -166,7 +163,7 @@ class SpeechToTextService
                     'Authorization' => 'Bearer '.$this->getApiKey(),
                 ])
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model'    => 'gpt-4o',
+                    'model' => 'gpt-4o',
                     'messages' => [['role' => 'user', 'content' => $prompt]],
                 ])
                 ->throw()
