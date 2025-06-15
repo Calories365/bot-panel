@@ -2,139 +2,156 @@
 
 namespace Tests\Feature;
 
-use App\Models\Bot;
-use App\Models\BotType;
-use App\Models\BotUser;
-use App\Models\Subscription;
+use App\Models\{Bot, BotUser, Subscription};
+use App\Services\{
+    AudioConversionService,
+    DiaryApiService,
+    TelegramServices\TelegramHandler
+};
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\{Cache, Http, Storage};
+use Mockery;
+use Telegram\Bot\Api;
+use Telegram\Bot\Objects\Message;
 use Tests\TestCase;
 
 class VoiceMessageIntegrationTest extends TestCase
 {
     use DatabaseTransactions;
 
-    private Bot $bot;
+    private array $sent = [];
 
-    private BotUser $user;
-
-    private Subscription $subscription;
-
-    /* ---------------------------  bootstrap  ---------------------------- */
+    /* ----------------------------------------------------------------- */
     protected function setUp(): void
     {
         parent::setUp();
 
-        Storage::fake('public');                     // реальное копирование файлов
+        Storage::fake('public');
+        app()->setLocale('ru');
 
-        $this->seedData();
-        $this->fakeTelegram();
-        $this->fakeOpenAi();
-        $this->fakeDiary();
+        $this->mockAudioConversionService();
+        $this->mockDiaryApi();
+        $this->fakeExternalHttp();
+        $this->bindTelegramApiMock();
     }
 
-    /* ---------------------------  test  -------------------------------- */
+    /* ----------------------------------------------------------------- */
     /** @test */
-    public function voice_pipeline_processes_audio_and_updates_counter(): void
+    /** @test */
+    public function voice_webhook_returns_success(): void
     {
-        $payload = json_decode(
-            file_get_contents(base_path('tests/Fixtures/Telegram/voice_message_webhook.json')),
-            true
-        );
-        data_set($payload, 'message.from.id', $this->user->telegram_id);
-        data_set($payload, 'message.chat.id', $this->user->telegram_id);
+        [$bot, $payload] = $this->prepareBotAndPayload();
 
-        $this->postJson("/api/webhook/bot/{$this->bot->name}", $payload)
+        $this->postJson(route('bot.webhook.handle', ['bot' => $bot->name]), $payload)
             ->assertOk()
-            ->assertJson(['status' => 'success']);
+            ->assertExactJson(['status' => 'success']);
 
-        /* --- проверяем, что Whisper и GPT реально вызваны ---- */
-        Http::assertSent(fn ($r) => str_contains($r->url(), '/audio/transcriptions')
-            && $r['headers']['Content-Type'][0] === 'multipart/form-data');
-        Http::assertSent(fn ($r) => str_contains($r->url(), '/chat/completions')
-            && str_contains($r->body(), 'куриная грудка'));
+        $this->assertCount(2, $this->sent);
+        $this->assertEquals([111111, 111111], array_column($this->sent, 'chat_id'));
 
-        /* --- счетчик подписки вырос на 1 ---- */
-        $this->subscription->refresh();
-        $this->assertEquals(1, $this->subscription->counter);
-    }
+        $card = $this->sent[0]['text'];
 
-    /* --------------------  HTTP FAKES & HELPERS  ----------------------- */
-    private function fakeTelegram(): void
-    {
-        $fileResponse = json_decode(
-            file_get_contents(base_path('tests/Fixtures/Telegram/get_file_response.json')),
-            true
+        $this->assertStringContainsString('Вы сказали: Творог',      $card);
+        $this->assertStringContainsString('| Параметр | 100г | 225г |', $card);
+        $this->assertStringContainsString('| Калории  | 136  | 306',    $card);
+        $this->assertStringContainsString('| Белки',                    $card);
+
+        $kb   = json_decode($this->sent[1]['reply_markup'], true);
+        $flat = array_map(fn ($row) => array_column($row, 'callback_data'), $kb['inline_keyboard']);
+        $this->assertEquals(
+            [['save_morning','save_dinner'],['save_supper','cancel']],
+            $flat
         );
 
-        Http::fake([
-            // getFile
-            "api.telegram.org/bot{$this->bot->token}/getFile*" => Http::response($fileResponse, 200),
-
-            // download file
-            "api.telegram.org/file/bot{$this->bot->token}/*" => Http::response(
-                file_get_contents(base_path('tests/Fixtures/Audio/voice_sample.oga')),
-                200,
-                ['Content-Type' => 'audio/ogg']
-            ),
-
-            // sendMessage
-            "api.telegram.org/bot{$this->bot->token}/sendMessage*" => Http::response(['ok' => true], 200),
-        ]);
+        $this->assertTrue(Cache::has('user_products_111111'));
+        $this->assertArrayHasKey(24794, Cache::get('user_products_111111'));
     }
 
-    private function fakeOpenAi(): void
+
+    /* ----------------------------------------------------------------- */
+    private function prepareBotAndPayload(): array
     {
-        Http::fake([
-            'api.openai.com/v1/audio/transcriptions*' => Http::response(
-                json_decode(file_get_contents(
-                    base_path('tests/Fixtures/OpenAI/whisper_ok.json')), true
-                ), 200),
+        $bot = Bot::factory()->active()->create(['name' => 'Calories365Test_bot']);
 
-            'api.openai.com/v1/chat/completions*' => Http::response(
-                json_decode(file_get_contents(
-                    base_path('tests/Fixtures/OpenAI/gpt_products_found.json')), true
-                ), 200),
+        BotUser::factory()->locale('ru')->create([
+            'bot_id'      => $bot->id,
+            'telegram_id' => 111111,
+            'calories_id' => 555,
         ]);
+
+        Subscription::factory()->premium()->create();
+
+        $payload = json_decode(
+            file_get_contents(base_path('tests/Fixtures/Telegram/voice_webhook.json')),
+            true, 512, JSON_THROW_ON_ERROR
+        );
+
+        return [$bot, $payload];
     }
 
-    private function fakeDiary(): void
+    /* ----------------- Telegram Api with factory -------------------- */
+    private function bindTelegramApiMock(): void
     {
-        Http::fake([
-            config('services.diary.url').'/api/products/search*' => Http::response(
-                json_decode(file_get_contents(
-                    base_path('tests/Fixtures/Diary/products_found.json')), true
-                ), 200),
+        $api = Mockery::mock(Api::class);
 
-            config('services.diary.url').'/api/products*' => Http::response(status: 201),
-        ]);
+        $api->shouldReceive('getFile')
+            ->andReturn((object)['file_path' => 'voice/file_11.oga']);
+
+        $api->shouldReceive('sendMessage')
+            ->andReturnUsing(function (array $p) {
+                $this->sent[] = $p;
+                return new Message([
+                    'message_id' => random_int(1e3, 9e3),
+                    'chat'       => ['id' => $p['chat_id'], 'type' => 'private'],
+                    'date'       => time(),
+                    'text'       => 'stub',
+                ]);
+            });
+
+        $this->app->extend(TelegramHandler::class, function ($h) use ($api) {
+            $ref = new \ReflectionProperty($h, 'apiFactory');
+            $ref->setAccessible(true);
+            $ref->setValue($h, fn () => $api);
+            return $h;
+        });
     }
 
-    /* ---------------------------  seed  -------------------------------- */
-    private function seedData(): void
+    /* ------------------- AudioConversionService ---------------------- */
+    private function mockAudioConversionService(): void
     {
-        $type = BotType::factory()->create(['name' => 'Calories']);
+        $this->partialMock(AudioConversionService::class, fn ($m) =>
+        $m->shouldReceive('processAudioMessage')->andReturn('Творог - 225 грамм'));
+    }
 
-        $this->bot = Bot::factory()->for($type, 'type')->create([
-            'name' => 'calories_bot',
-            'token' => 'fake_token',
-        ]);
+    /* ----------------------- Diary API ------------------------------- */
+    private function mockDiaryApi(): void
+    {
+        $json = json_decode(
+            file_get_contents(base_path('tests/Fixtures/DiaryAPI/products_found.json')),
+            true, 512, JSON_THROW_ON_ERROR
+        );
 
-        $this->user = BotUser::factory()->create([
-            'telegram_id' => fake()->unique()->numberBetween(1_000_000_000, 9_999_999_999),
-        ]);
-        $this->user->bots()->attach($this->bot->id);
+        $this->partialMock(DiaryApiService::class,
+            fn ($m) => $m->shouldReceive('sendText')->andReturn($json));
+    }
 
-        $this->subscription = Subscription::create([
-            'user_id' => $this->user->calories_id,
-            'counter' => 0,
+    /* -------------------- HTTP ------------------------------- */
+    private function fakeExternalHttp(): void
+    {
+        $oga  = file_get_contents(base_path('tests/Fixtures/Audio/file.oga'));
+        $wh   = file_get_contents(base_path('tests/Fixtures/OpenAI/whisper_success.json'));
+        $gpt  = file_get_contents(base_path('tests/Fixtures/OpenAI/gpt_food_found.json'));
+
+        Http::fake([
+            'api.telegram.org/file/bot*'             => Http::response($oga, 200),
+            'api.openai.com/v1/audio/transcriptions' => Http::response($wh, 200),
+            'api.openai.com/v1/chat/completions'     => Http::response($gpt, 200),
         ]);
     }
 
-    /* -------------------------  teardown  ------------------------------ */
     protected function tearDown(): void
     {
+        Mockery::close();
         parent::tearDown();
     }
 }

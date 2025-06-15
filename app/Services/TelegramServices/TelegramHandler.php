@@ -11,6 +11,11 @@ use Telegram\Bot\Objects\Update;
 class TelegramHandler
 {
     protected array $strategies;
+    /**
+     * @var callable|\Closure
+     */
+    /** @var callable(Bot): Api */
+    private $apiFactory;
 
     public function __construct(
         ApprovalService $approvalService,
@@ -19,6 +24,7 @@ class TelegramHandler
         Request2Service $request2Service,
         CaloriesService $caloriesService,
         TikTokService $tikTokService,
+        callable $apiFactory = null
     ) {
         $this->strategies = [
             'Approval' => $approvalService,
@@ -28,6 +34,7 @@ class TelegramHandler
             'Calories' => $caloriesService,
             'TikTok' => $tikTokService,
         ];
+        $this->apiFactory = $apiFactory ?: static fn (Bot $bot) => new Api($bot->token);
     }
 
     public function handle($botName, $request): void
@@ -39,7 +46,8 @@ class TelegramHandler
             return;
         }
 
-        $telegram = new Api($bot->token);
+//        $telegram = new Api($bot->token);
+        $telegram = ($this->apiFactory)($bot);
         $update = new Update($request->all());
 
         if (! array_key_exists($botTypeName, $this->strategies)) {

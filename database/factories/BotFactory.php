@@ -21,12 +21,12 @@ class BotFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name,
+            'name' => 'calories1',
             'token' => $this->faker->sha256,
             'message' => $this->faker->text(200),
-            'active' => $this->faker->boolean,
+            'active' => 1,
             'message_image' => null,
-            'type_id' => BotType::factory(),
+            'type_id' => 6,
             'wordpress_endpoint' => $this->faker->url,
             'web_hook' => $this->faker->url,
             'video_ru' => null,

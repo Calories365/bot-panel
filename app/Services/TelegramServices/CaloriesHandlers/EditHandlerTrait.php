@@ -139,6 +139,10 @@ trait EditHandlerTrait
             $productTranslation['said_name']
         );
 
+
+        Log::info('messageText');
+        Log::info(print_r($this->messageText, true));
+
         $userId = auth()->user()->id ?? request()->userId ?? null;
         $clickCount = Cache::get("product_click_count_{$userId}_{$productId}", 0);
 

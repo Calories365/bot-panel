@@ -55,11 +55,11 @@ class SubscriptionFactory extends Factory
     /**
      * Indicate that the subscription is new (no usage).
      */
-    public function new(): static
+    public function fresh(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'counter' => 0,
-            'premium_until' => null,
+        return $this->state(fn () => [
+            'counter'        => 0,
+            'premium_until'  => null,
         ]);
     }
 }

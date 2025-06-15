@@ -36,14 +36,10 @@ class AudioConversionService
 
         try {
             $downloadLink = $this->getDownloadLink($telegram, $bot, $message);
-
             [$localPath, $fullLocalPath] = $this->downloadAudio($downloadLink);
-
             [$convertedLocal, $convertedPath] = $this->convertToMp3($localPath, $fullLocalPath);
-
             if ($convertedPath) {
                 $text = $this->speechToTextService->convertSpeechToText($convertedPath);
-
                 return $text;
             } else {
                 Log::error('Audio conversion failed.');

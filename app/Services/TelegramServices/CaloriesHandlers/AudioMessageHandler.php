@@ -57,7 +57,6 @@ class AudioMessageHandler implements MessageHandlerInterface
                     $subscription->incrementTranscribeCounter();
                 }
             }
-
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
 
             if ($text) {
@@ -66,6 +65,9 @@ class AudioMessageHandler implements MessageHandlerInterface
                 $caloriesId = $botUser->calories_id;
 
                 $responseArray = $this->diaryApiService->sendText($text, $caloriesId, $locale);
+
+                Log::info('$responseArray: ');
+                Log::info(print_r($responseArray, true));
 
                 if (isset($responseArray['error'])) {
                     $telegram->sendMessage([
