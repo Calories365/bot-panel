@@ -26,10 +26,10 @@ jobs:
               working-directory: ${{ github.workspace }}
               run: |
                   export DOCKER_BUILDKIT=1
-                  docker compose up -d --build
+                  docker-compose up -d --build
                   docker builder prune --filter "until=168h" --force
 
             # 4. Запускаем миграции внутри PHP-контейнера
             - name: Run Laravel migrations
               working-directory: ${{ github.workspace }}
-              run: docker compose exec bot_panel_php php artisan migrate --force
+              run: docker-compose exec bot_panel_php php artisan migrate --force
