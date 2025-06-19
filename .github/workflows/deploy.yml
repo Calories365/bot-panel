@@ -1,28 +1,35 @@
-name: Deploy to Server
+name: Deploy bot-panel
 
 on:
-  push:
-    branches: [ "main" ]
+    push:
+        branches: [ main ]
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+    deploy:
+        # работаем на своём сервере-раннере
+        runs-on: self-hosted
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+        steps:
+            # 1. Забираем свежий коммит репо в $GITHUB_WORKSPACE
+            - name: Checkout repo
+              uses: actions/checkout@v4
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            export DOCKER_BUILDKIT=1
-            cd /home/maxim/var/www/bot-panel/src
-            git pull
-            cd ..
-            docker-compose up -d --build
-            docker builder prune --filter "until=168h" --force
-            docker-compose exec bot_panel_php php artisan migrate --force
+            # 2. (необязательно) — отдельный git pull именно в src
+            #    если у вас там доп-remote / submodule и т.п.
+            - name: Pull src only
+              working-directory: ${{ github.workspace }}/src
+              run: git pull
+
+            # 3. Собираем/обновляем контейнеры — команда выполняется из корня,
+            #    где лежит docker-compose.yml
+            - name: Build & restart stack
+              working-directory: ${{ github.workspace }}
+              run: |
+                  export DOCKER_BUILDKIT=1
+                  docker compose up -d --build
+                  docker builder prune --filter "until=168h" --force
+
+            # 4. Запускаем миграции внутри PHP-контейнера
+            - name: Run Laravel migrations
+              working-directory: ${{ github.workspace }}
+              run: docker compose exec bot_panel_php php artisan migrate --force

@@ -21,7 +21,7 @@ class AdminController extends BaseController
 
         Paginator::currentPageResolver(function () use ($page) {
             return $page;
-        });
+        });//
 
         $bots = BotAdmin::paginate($perPage);
 
