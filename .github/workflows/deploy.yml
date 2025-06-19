@@ -1,5 +1,5 @@
 # .github/workflows/deploy.yml
-name: Deploy bot-panel
+name: Deploy bot-panel (host-runner)
 
 on:
     push:
@@ -7,38 +7,29 @@ on:
 
 jobs:
     deploy:
-        # работаем на своём self-hosted-раннере
-        runs-on: self-hosted
+        # рабочая машина — ваш self-hosted runner «maximserv»
+        runs-on: self-hosted     # хватит дефолтного лейбла; при желании можно
+        # указать runs-on: [self-hosted, Linux, X64]
 
         steps:
-            # 1. Клонируем свежий коммит репозитория
-            - name: Checkout repo
-              uses: actions/checkout@v4
+            # 1. синхронизируем прод-код с GitHub-ом
+            - name: Git pull → /var/www/bot-panel/src
+              run: |
+                  cd /home/maxim/var/www/bot-panel/src
+                  # надёжнее, чем просто `git pull`
+                  git fetch origin main
+                  git reset --hard origin/main
 
-            # 2. Обновляем вложенный src (можно убрать, если не нужно)
-            - name: git pull src
-              working-directory: ${{ github.workspace }}/src
-              run: git pull || true
+            # 2. пересобираем и перезапускаем стек
+            - name: Docker compose up --build
+              working-directory: /home/maxim/var/www/bot-panel
+              run: |
+                  export DOCKER_BUILDKIT=1
+                  docker compose up -d --build
+                  docker builder prune --filter "until=168h" --force
 
-            - name: Where am I?
-              run: echo "$GITHUB_WORKSPACE" && pwd && ls
-
-            - name: Where am I2?
-              working-directory: ${{ github.workspace }}/..
-              run: echo "$GITHUB_WORKSPACE" && pwd && ls
-
-
-
-#            # 3. Собираем и перезапускаем весь стек
-#            - name: Build & restart stack
-#                # docker-compose.yml лежит на уровень выше, поэтому «..»
-#              working-directory: ${{ github.workspace }}/..
-#              run: |
-#                  export DOCKER_BUILDKIT=1
-#                  docker-compose up -d --build
-#                  docker builder prune --filter "until=168h" --force
-#
-#            # 4. Прогоняем миграции Laravel внутри PHP-контейнера
-#            - name: Run Laravel migrations
-#              working-directory: ${{ github.workspace }}/..
-#              run: docker-compose exec bot_panel_php php artisan migrate --force
+            # 3. миграции БД
+            - name: Laravel migrate --force
+              working-directory: /home/maxim/var/www/bot-panel
+                # -T → не ждать stdin
+              run: docker compose exec -T bot_panel_php php artisan migrate --force
