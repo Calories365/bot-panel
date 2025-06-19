@@ -21,11 +21,11 @@ jobs:
               run: git pull || true
 
             - name: Where am I?
-              run: echo "$GITHUB_WORKSPACE" && pwd
+              run: echo "$GITHUB_WORKSPACE" && pwd && ls
 
             - name: Where am I2?
               working-directory: ${{ github.workspace }}/..
-              run: echo "$GITHUB_WORKSPACE" && pwd
+              run: echo "$GITHUB_WORKSPACE" && pwd && ls
 
 
 
