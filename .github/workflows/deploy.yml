@@ -15,7 +15,7 @@ jobs:
               uses: actions/checkout@v4
 
             -   name: Where am I?
-                run: echo "$GITHUB_WORKSPACE" && pwd
+                run: echo "$GITHUB_WORKSPACE" && pwd && ls
 
             # 2. (необязательно) — отдельный git pull именно в src
             #    если у вас там доп-remote / submodule и т.п.
