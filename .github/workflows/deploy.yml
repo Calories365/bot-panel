@@ -14,6 +14,9 @@ jobs:
             - name: Checkout repo
               uses: actions/checkout@v4
 
+            -   name: Where am I?
+                run: echo "$GITHUB_WORKSPACE" && pwd
+
             # 2. (необязательно) — отдельный git pull именно в src
             #    если у вас там доп-remote / submodule и т.п.
             - name: Pull src only
