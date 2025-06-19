@@ -1,38 +1,44 @@
+# .github/workflows/deploy.yml
 name: Deploy bot-panel
 
 on:
     push:
-        branches: [ main ]
+        branches: [main]
 
 jobs:
     deploy:
-        # работаем на своём сервере-раннере
+        # работаем на своём self-hosted-раннере
         runs-on: self-hosted
 
         steps:
-            # 1. Забираем свежий коммит репо в $GITHUB_WORKSPACE
+            # 1. Клонируем свежий коммит репозитория
             - name: Checkout repo
               uses: actions/checkout@v4
 
-            -   name: Where am I?
-                run: echo "$GITHUB_WORKSPACE" && pwd && ls
-
-            # 2. (необязательно) — отдельный git pull именно в src
-            #    если у вас там доп-remote / submodule и т.п.
-            - name: Pull src only
+            # 2. Обновляем вложенный src (можно убрать, если не нужно)
+            - name: git pull src
               working-directory: ${{ github.workspace }}/src
-              run: git pull
+              run: git pull || true
 
-            # 3. Собираем/обновляем контейнеры — команда выполняется из корня,
-            #    где лежит docker-compose.yml
-            - name: Build & restart stack
-              working-directory: ${{ github.workspace }}
-              run: |
-                  export DOCKER_BUILDKIT=1
-                  docker-compose up -d --build
-                  docker builder prune --filter "until=168h" --force
+            - name: Where am I?
+              run: echo "$GITHUB_WORKSPACE" && pwd
 
-            # 4. Запускаем миграции внутри PHP-контейнера
-            - name: Run Laravel migrations
-              working-directory: ${{ github.workspace }}
-              run: docker-compose exec bot_panel_php php artisan migrate --force
+            - name: Where am I2?
+              working-directory: ${{ github.workspace }}/..
+              run: echo "$GITHUB_WORKSPACE" && pwd
+
+
+
+#            # 3. Собираем и перезапускаем весь стек
+#            - name: Build & restart stack
+#                # docker-compose.yml лежит на уровень выше, поэтому «..»
+#              working-directory: ${{ github.workspace }}/..
+#              run: |
+#                  export DOCKER_BUILDKIT=1
+#                  docker-compose up -d --build
+#                  docker builder prune --filter "until=168h" --force
+#
+#            # 4. Прогоняем миграции Laravel внутри PHP-контейнера
+#            - name: Run Laravel migrations
+#              working-directory: ${{ github.workspace }}/..
+#              run: docker-compose exec bot_panel_php php artisan migrate --force
