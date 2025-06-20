@@ -12,7 +12,6 @@ jobs:
             - name: Git pull → /var/www/bot-panel/src
               run: |
                   cd /home/maxim/var/www/bot-panel/src
-                  # надёжнее, чем просто `git pull`
                   git fetch origin main
                   git reset --hard origin/main
 

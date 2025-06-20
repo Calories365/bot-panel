@@ -11,6 +11,7 @@ use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class AudioMessageHandler implements MessageHandlerInterface
 {
@@ -61,16 +62,20 @@ class AudioMessageHandler implements MessageHandlerInterface
             }
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
 
-            if ($text) {
+            if (
+                $text &&
+                ! Str::contains(Str::lower($text), [
+                    'продуктів немає',
+                    'продуктов нет',
+                    'no products',
+                ])
+            ) {
 
                 $locale = $botUser->locale;
 
                 $caloriesId = $botUser->calories_id;
 
                 $responseArray = $this->diaryApiService->sendText($text, $caloriesId, $locale);
-
-                Log::info('$responseArray: ');
-                Log::info(print_r($responseArray, true));
 
                 if (isset($responseArray['error'])) {
                     $telegram->sendMessage([
@@ -94,7 +99,8 @@ class AudioMessageHandler implements MessageHandlerInterface
                             $productId = $productTranslation['id'];
 
                         } else {
-                            $said = $productInfo['said_name'] ?? 'Продукт';
+
+                            $said = $productInfo['said_name'];
                             $grams = $productInfo['quantity_grams'] ?? 100;
 
                             $generated = $this->generateProduct($said, $grams);
