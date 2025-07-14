@@ -3,6 +3,7 @@
 namespace App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers;
 
 use App\Models\BotUser;
+use App\Models\Subscription;
 use App\Services\DiaryApiService;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
@@ -64,6 +65,11 @@ class StartMessageHandler implements MessageHandlerInterface
                     'calories',
                     $result,
                     $locale
+                );
+
+                Subscription::updateOrCreate(
+                    ['user_id' => $caloriesUserId],
+                    ['premium_until' => $result['premium_until']]
                 );
 
                 $botUser->calories_id = $caloriesUserId;
