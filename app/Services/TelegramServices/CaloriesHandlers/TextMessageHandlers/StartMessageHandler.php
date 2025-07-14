@@ -8,6 +8,7 @@ use App\Services\DiaryApiService;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -69,7 +70,10 @@ class StartMessageHandler implements MessageHandlerInterface
 
                 Subscription::updateOrCreate(
                     ['user_id' => $caloriesUserId],
-                    ['premium_until' => $result['premium_until']]
+                    [
+                        'premium_until' => Carbon::parse($result['premium_until'])
+                            ->setTimezone('Europe/Kyiv'),
+                    ],
                 );
 
                 $botUser->calories_id = $caloriesUserId;
