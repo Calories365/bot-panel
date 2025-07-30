@@ -30,27 +30,29 @@ class CallbackQueryHandler implements UpdateHandlerInterface
             $action = $action.'_'.$parts[1];
         }
 
-        if (isset($this->callbackQueryHandlers[$action])) {
-
-            $handler = $this->callbackQueryHandlers[$action];
-            $isBlocked = Cache::get("command_block{$userId}", 0);
-
-            if (! $isBlocked || ! $handler->blockAble) {
-
-                $handler->handle($bot, $telegram, $callbackQuery, $botUser);
-            } else {
-
-                $telegram->answerCallbackQuery([
-                    'callback_query_id' => $callbackQuery->getId(),
-                    'text' => __('calories365-bot.exit_edit_mode'),
-                    'show_alert' => true,
-                ]);
-            }
+        if (! isset($this->callbackQueryHandlers[$action])) {
+            Log::info('Unknown callback query: '.$action);
 
             return true;
         }
 
-        Log::info('Unknown callback query: '.$action);
+        $handler = &$this->callbackQueryHandlers[$action];
+
+        if ($handler instanceof \Closure) {
+            $handler = $this->callbackQueryHandlers[$action] = $handler();
+        }
+
+        $isBlocked = Cache::get("command_block{$userId}", 0);
+
+        if (! $isBlocked || ! $handler->blockAble) {
+            $handler->handle($bot, $telegram, $callbackQuery, $botUser);
+        } else {
+            $telegram->answerCallbackQuery([
+                'callback_query_id' => $callbackQuery->getId(),
+                'text' => __('calories365-bot.exit_edit_mode'),
+                'show_alert' => true,
+            ]);
+        }
 
         return true;
     }

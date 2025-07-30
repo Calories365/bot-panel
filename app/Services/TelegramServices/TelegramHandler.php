@@ -3,6 +3,7 @@
 namespace App\Services\TelegramServices;
 
 use App\Models\Bot;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Api;
@@ -10,32 +11,27 @@ use Telegram\Bot\Objects\Update;
 
 class TelegramHandler
 {
+    /** @var array<string, callable|BotHandlerStrategy> */
     protected array $strategies;
 
-    /**
-     * @var callable|\Closure
-     */
     /** @var callable(Bot): Api */
     private $apiFactory;
 
     public function __construct(
-        ApprovalService $approvalService,
-        DefaultService $defaultService,
-        RequestService $requestService,
-        Request2Service $request2Service,
-        CaloriesService $caloriesService,
-        TikTokService $tikTokService,
+        Container $app,
         ?callable $apiFactory = null
     ) {
         $this->strategies = [
-            'Approval' => $approvalService,
-            'Default' => $defaultService,
-            'Request' => $requestService,
-            'Request2' => $request2Service,
-            'Calories' => $caloriesService,
-            'TikTok' => $tikTokService,
+            'Approval' => static fn () => $app->make(ApprovalService::class),
+            'Default' => static fn () => $app->make(DefaultService::class),
+            'Request' => static fn () => $app->make(RequestService::class),
+            'Request2' => static fn () => $app->make(Request2Service::class),
+            'Calories' => static fn () => $app->make(CaloriesService::class),
+            'TikTok' => static fn () => $app->make(TikTokService::class),
         ];
-        $this->apiFactory = $apiFactory ?: static fn (Bot $bot) => new Api($bot->token);
+
+        $this->apiFactory = $apiFactory
+            ?: static fn (Bot $bot) => new Api($bot->token);
     }
 
     public function handle($botName, $request): void
@@ -47,32 +43,33 @@ class TelegramHandler
             return;
         }
 
-        //        $telegram = new Api($bot->token);
         $telegram = ($this->apiFactory)($bot);
         $update = new Update($request->all());
 
-        if (! array_key_exists($botTypeName, $this->strategies)) {
-
-            Log::error('Unknown bot type: '.$botTypeName);
+        if (! isset($this->strategies[$botTypeName])) {
+            Log::error("Unknown bot type: {$botTypeName}");
 
             return;
-
         }
 
         $strategy = $this->strategies[$botTypeName];
+        if ($strategy instanceof \Closure) {
+            $strategy = $this->strategies[$botTypeName] = $strategy();
+        }
 
-        $passable = $this->runMiddlewares($botTypeName, $bot, $telegram, $update, $strategy);
+        $passable = $this->runMiddlewares(
+            $botTypeName,
+            $bot,
+            $telegram,
+            $update,
+            $strategy
+        );
 
         if (! $passable) {
             return;
         }
 
-        if (isset($passable['botUser'])) {
-            $botUser = $passable['botUser'] ?: null;
-        } else {
-            $botUser = null;
-        }
-
+        $botUser = $passable['botUser'] ?? null;
         $strategy->handle($bot, $telegram, $update, $botUser);
     }
 
@@ -96,13 +93,9 @@ class TelegramHandler
             return $passable;
         }
 
-        $passable = app(Pipeline::class)
+        return app(Pipeline::class)
             ->send($passable)
             ->through($middlewares[$botTypeName])
-            ->then(function ($passable) {
-                return $passable;
-            });
-
-        return $passable;
+            ->then(fn ($p) => $p);
     }
 }

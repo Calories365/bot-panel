@@ -42,93 +42,73 @@ class CaloriesService extends BaseService
 
     protected function getUpdateHandlers(): array
     {
-        $updateHandlers = parent::getUpdateHandlers();
+        $handlers = parent::getUpdateHandlers();
 
-        $updateHandlers['callback_query'] = app(CallbackQueryHandler::class, [
-            'callbackQueryHandlers' => $this->getCallbackQueryHandlers(),
-        ]);
+        $handlers['callback_query'] = function () {
+            return app(CallbackQueryHandler::class, [
+                'callbackQueryHandlers' => $this->getCallbackQueryHandlers(),
+            ]);
+        };
 
-        return $updateHandlers;
+        return $handlers;
     }
 
     protected function getMessageHandlers(): array
     {
-        $messageHandlers = parent::getMessageHandlers();
+        $handlers = parent::getMessageHandlers();
 
-        $messageHandlers['voice'] = app(AudioMessageHandler::class);
+        $handlers['voice'] = fn () => app(AudioMessageHandler::class);
 
-        return $messageHandlers;
+        return $handlers;
     }
 
     protected function getTextMessageHandlers(): array
     {
-        $textMessageHandlers = parent::getTextMessageHandlers();
+        $h = parent::getTextMessageHandlers();
 
-        $textMessageHandlers['default'] = app(EditMessageHandler::class);
+        $h['default'] = fn () => app(EditMessageHandler::class);
+        $h['/stats'] = fn () => app(StatsMessageHandler::class);
+        $h['/start'] = fn () => app(StartMessageHandler::class);
+        $h['/test'] = fn () => app(TestMessageHandler::class);
+        $h['/language'] = fn () => app(LanguageMessageHandler::class);
+        $h['feedback'] = fn () => app(FeedbackMessageHandler::class);
 
-        $textMessageHandlers['/stats'] = app(StatsMessageHandler::class);
-
-        $textMessageHandlers['/start'] = app(StartMessageHandler::class);
-
-        $textMessageHandlers['/test'] = app(TestMessageHandler::class);
-
-        $synonyms = [
+        Utilities::applySynonyms($h, [
             '/start' => ['Меню', 'Menu'],
-        ];
-
-        Utilities::applySynonyms($textMessageHandlers, $synonyms);
-
-        $textMessageHandlers['/language'] = app(LanguageMessageHandler::class);
-
-        $synonyms = [
             '/stats' => ['Statistics', 'Статистика'],
-        ];
-        Utilities::applySynonyms($textMessageHandlers, $synonyms);
-
-        $synonyms = [
             '/language' => ['Choose language', 'Выбор языка', 'Вибір мови'],
-        ];
-        Utilities::applySynonyms($textMessageHandlers, $synonyms);
-
-        $textMessageHandlers['feedback'] = app(FeedbackMessageHandler::class);
-
-        $synonyms = [
             'feedback' => ['Feedback', 'Обратная связь', 'Зворотний зв\'язок'],
-        ];
+        ]);
 
-        Utilities::applySynonyms($textMessageHandlers, $synonyms);
-
-        return $textMessageHandlers;
+        return $h;
     }
 
     protected function getCallbackQueryHandlers(): array
     {
-        $callbackQueryHandlers = parent::getCallbackQueryHandlers();
+        $h = parent::getCallbackQueryHandlers();
 
-        $callbackQueryHandlers['cancel'] = app(CancelCallbackQueryHandler::class);
-        $callbackQueryHandlers['save'] = app(SaveCallbackQueryHandler::class);
-        $callbackQueryHandlers['edit'] = app(EditCallbackQueryHandler::class);
-        $callbackQueryHandlers['destroy'] = app(DeleteCallbackQueryHandler::class);
+        $h['cancel'] = fn () => app(CancelCallbackQueryHandler::class);
+        $h['save'] = fn () => app(SaveCallbackQueryHandler::class);
+        $h['edit'] = fn () => app(EditCallbackQueryHandler::class);
+        $h['destroy'] = fn () => app(DeleteCallbackQueryHandler::class);
 
-        $callbackQueryHandlers['editing_save'] = app(EditingSaveCallbackQueryHandler::class);
-        $callbackQueryHandlers['editing_cancel'] = app(EditingCancelCallbackQueryHandler::class);
-        $callbackQueryHandlers['editing_skip'] = app(EditingSkipCallbackQueryHandler::class);
+        $h['editing_save'] = fn () => app(EditingSaveCallbackQueryHandler::class);
+        $h['editing_cancel'] = fn () => app(EditingCancelCallbackQueryHandler::class);
+        $h['editing_skip'] = fn () => app(EditingSkipCallbackQueryHandler::class);
 
-        $callbackQueryHandlers['search'] = app(SearchCallbackQueryHandler::class);
-        $callbackQueryHandlers['delete_meal'] = app(DeleteMealCallbackQueryHandler::class);
+        $h['search'] = fn () => app(SearchCallbackQueryHandler::class);
+        $h['delete_meal'] = fn () => app(DeleteMealCallbackQueryHandler::class);
 
-        $callbackQueryHandlers['English'] = app(SetEnglishLanguageCallbackQueryHandler::class);
-        $callbackQueryHandlers['Russian'] = app(SetRussianLanguageCallbackQueryHandler::class);
-        $callbackQueryHandlers['Ukrainian'] = app(SetUkrainianLanguageCallbackQueryHandler::class);
+        $h['English'] = fn () => app(SetEnglishLanguageCallbackQueryHandler::class);
+        $h['Russian'] = fn () => app(SetRussianLanguageCallbackQueryHandler::class);
+        $h['Ukrainian'] = fn () => app(SetUkrainianLanguageCallbackQueryHandler::class);
 
-        $callbackQueryHandlers['Stats'] = app(StatsCallbackQueryHandler::class);
+        $h['Stats'] = fn () => app(StatsCallbackQueryHandler::class);
 
-        $synonyms = [
+        Utilities::applySynonyms($h, [
             'Stats' => ['Breakfast', 'Dinner', 'Supper', 'AllDay'],
-        ];
+        ]);
 
-        Utilities::applySynonyms($callbackQueryHandlers, $synonyms);
-
-        return $callbackQueryHandlers;
+        return $h;
     }
 }

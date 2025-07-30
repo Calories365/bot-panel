@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
- * Интеграционный тест с реальным FFMpeg
- * Запускается только если ffmpeg установлен в системе
+ * Integration test using real FFMpeg.
+ * Will only run if ffmpeg is installed on the system.
  */
 class AudioConversionIntegrationTest extends TestCase
 {
@@ -21,14 +21,14 @@ class AudioConversionIntegrationTest extends TestCase
     {
         parent::setUp();
 
-        // Проверяем наличие ffmpeg
+        // Check if ffmpeg binary exists
         if (! file_exists('/usr/bin/ffmpeg')) {
             $this->markTestSkipped('FFMpeg binary not installed at /usr/bin/ffmpeg');
         }
 
         Storage::fake('public');
 
-        // Используем реальный сервис без моков
+        // Use the real service (no mocks for audio conversion)
         $this->service = new AudioConversionService(
             $this->createMock(SpeechToTextService::class)
         );
@@ -50,27 +50,27 @@ class AudioConversionIntegrationTest extends TestCase
             $fullOgaPath
         );
 
-        // Проверяем успешность конвертации
+        // Ensure conversion returned non-null paths
         $this->assertNotNull($convertedLocalPath);
         $this->assertNotNull($convertedFullPath);
 
-        // Проверяем, что файл действительно создался
+        // Ensure converted file exists
         $this->assertTrue(
             Storage::disk('public')->exists($convertedLocalPath),
             'Converted MP3 file should exist'
         );
 
-        // Проверяем расширение
+        // Ensure file has .mp3 extension
         $this->assertStringEndsWith('.mp3', $convertedLocalPath);
 
-        // Проверяем, что файл не пустой
+        // Ensure file is not empty
         $this->assertGreaterThan(
             0,
             Storage::disk('public')->size($convertedLocalPath),
             'Converted file should not be empty'
         );
 
-        // Проверяем MP3 сигнатуру
+        // Ensure MP3 header is valid
         $this->assertTrue(
             $this->isValidMp3File($convertedFullPath),
             'File should have valid MP3 signature'
@@ -83,7 +83,7 @@ class AudioConversionIntegrationTest extends TestCase
     /** @test */
     public function handles_invalid_audio_file(): void
     {
-        // Создаем поврежденный файл
+        // Create a corrupted audio file
         $corruptedPath = 'audios/corrupted.oga';
         Storage::disk('public')->put($corruptedPath, 'not_audio_content');
 
@@ -94,7 +94,7 @@ class AudioConversionIntegrationTest extends TestCase
             $fullCorruptedPath
         );
 
-        // Конвертация должна завершиться ошибкой
+        // Conversion should fail and return null
         $this->assertNull($convertedLocalPath);
         $this->assertNull($convertedFullPath);
 
@@ -103,7 +103,7 @@ class AudioConversionIntegrationTest extends TestCase
     }
 
     /**
-     * Проверяет валидность MP3 файла по сигнатуре
+     * Checks for a valid MP3 file based on header signature
      */
     private function isValidMp3File(string $filePath): bool
     {
@@ -119,14 +119,14 @@ class AudioConversionIntegrationTest extends TestCase
         $header = fread($file, 10);
         fclose($file);
 
-        // Проверяем ID3v2 или MPEG сигнатуру
+        // Check for ID3v2 or MPEG header
         return str_starts_with($header, 'ID3') ||
-               (strlen($header) >= 2 && substr($header, 0, 2) === "\xFF\xFB");
+            (strlen($header) >= 2 && substr($header, 0, 2) === "\xFF\xFB");
     }
 
     protected function tearDown(): void
     {
-        // Дополнительная очистка всех аудио файлов
+        // Clean up all audio files from disk
         $files = Storage::disk('public')->files('audios');
         foreach ($files as $file) {
             Storage::disk('public')->delete($file);

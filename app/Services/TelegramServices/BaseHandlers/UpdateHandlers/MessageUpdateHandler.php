@@ -30,12 +30,19 @@ class MessageUpdateHandler
     public function handle($bot, $telegram, $update, $botUser)
     {
         $message = $update->getMessage();
-        foreach ($this->messageHandlers as $type => $handler) {
-            if (isset($message[$type])) {
-                $handler->handle($bot, $telegram, $message, $botUser);
 
-                return;
+        foreach ($this->messageHandlers as $type => &$handler) {
+            if (! isset($message[$type])) {
+                continue;
             }
+
+            if ($handler instanceof \Closure) {
+                $handler = $this->messageHandlers[$type] = $handler();
+            }
+
+            $handler->handle($bot, $telegram, $message, $botUser);
+
+            return;
         }
 
         Log::info('Unknown message type: '.json_encode($message));

@@ -39,18 +39,20 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getUpdateHandlers(): array
     {
-        $messageUpdateHandler = app(MessageUpdateHandler::class, [
-            'messageHandlers' => $this->getMessageHandlers(),
-        ]);
-        $myChatMemberUpdateHandler = app(MyChatMemberUpdateHandler::class);
-        $callbackQueryHandler = app(CallbackQueryHandler::class, [
-            'callbackQueryHandlers' => $this->getCallbackQueryHandlers(),
-        ]);
-
         return [
-            'message' => $messageUpdateHandler,
-            'my_chat_member' => $myChatMemberUpdateHandler,
-            'callback_query' => $callbackQueryHandler,
+            'message' => function () {
+                return app(MessageUpdateHandler::class, [
+                    'messageHandlers' => $this->getMessageHandlers(),
+                ]);
+            },
+            'my_chat_member' => function () {
+                return app(MyChatMemberUpdateHandler::class);
+            },
+            'callback_query' => function () {
+                return app(CallbackQueryHandler::class, [
+                    'callbackQueryHandlers' => $this->getCallbackQueryHandlers(),
+                ]);
+            },
         ];
     }
 
@@ -60,14 +62,15 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getMessageHandlers(): array
     {
-        $textMessageHandler = app(TextMessageHandler::class, [
-            'textMessageHandlers' => $this->getTextMessageHandlers(),
-        ]);
-        $audioMessageHandler = app(AudioMessageHandler::class);
-
         return [
-            'text' => $textMessageHandler,
-            'voice' => $audioMessageHandler,
+            'text' => function () {
+                return app(TextMessageHandler::class, [
+                    'textMessageHandlers' => $this->getTextMessageHandlers(),
+                ]);
+            },
+            'voice' => function () {
+                return app(AudioMessageHandler::class);
+            },
         ];
     }
 
@@ -77,11 +80,9 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getTextMessageHandlers(): array
     {
-        $startTextMessageHandler = app(StartMessageHandler::class);
-
         return [
-            '/start' => $startTextMessageHandler,
-            '/default' => $startTextMessageHandler,
+            '/start' => static fn () => app(StartMessageHandler::class),
+            '/default' => static fn () => app(StartMessageHandler::class),
         ];
     }
 
@@ -91,12 +92,7 @@ class BaseService implements BotHandlerStrategy
      */
     protected function getCallbackQueryHandlers(): array
     {
-
-        $callbackQueryHandler = app(CallbackQueryHandler::class);
-
-        return [
-
-        ];
+        return [];
     }
 
     /**
@@ -115,8 +111,15 @@ class BaseService implements BotHandlerStrategy
     public function handle(Bot $bot, Api $telegram, Update $update, ?BotUser $botUser): void
     {
         $updateType = $update->detectType();
+
         if (isset($this->updateHandlers[$updateType])) {
-            $this->updateHandlers[$updateType]->handle($bot, $telegram, $update, $botUser);
+            $handler = $this->updateHandlers[$updateType];
+
+            if ($handler instanceof \Closure) {
+                $handler = $this->updateHandlers[$updateType] = $handler();
+            }
+
+            $handler->handle($bot, $telegram, $update, $botUser);
         } else {
             Log::info('Unhandled update type: '.$updateType);
         }

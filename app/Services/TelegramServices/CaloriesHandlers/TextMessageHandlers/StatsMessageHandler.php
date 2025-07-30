@@ -3,9 +3,10 @@
 namespace App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers;
 
 use App\Services\DiaryApiService;
+use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use Telegram\Bot\Keyboard\Keyboard;
 
-class StatsMessageHandler
+class StatsMessageHandler implements MessageHandlerInterface
 {
     protected DiaryApiService $diaryApiService;
 

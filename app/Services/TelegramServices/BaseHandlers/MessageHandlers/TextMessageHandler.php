@@ -23,26 +23,26 @@ class TextMessageHandler
         $chatId = $message->getChat()->getId();
 
         $commandParts = explode(' ', $text);
-
-        if ($commandParts[0] == '/start') {
+        if ($commandParts[0] === '/start') {
             $text = $commandParts[0];
         }
 
-        if (isset($this->textMessageHandlers[$text])) {
-            $isBlocked = Cache::get("command_block{$userId}", 0);
-            if (! $isBlocked) {
-                $this->textMessageHandlers[$text]->handle($bot, $telegram, $message, $botUser);
-            } else {
-                $sentMessage = $telegram->sendMessage([
-                    'chat_id' => $chatId,
-                    'text' => 'действие невозможно',
-                    'parse_mode' => 'Markdown',
-                ]);
+        $key = $this->textMessageHandlers[$text] ?? $this->textMessageHandlers['default'];
 
-                return;
-            }
+        if ($key instanceof \Closure) {
+            $key = $this->textMessageHandlers[$text] = $key();
+        }
+
+        $isBlocked = Cache::get("command_block{$userId}", 0);
+
+        if (! $isBlocked || ! ($key->blockAble ?? false)) {
+            $key->handle($bot, $telegram, $message, $botUser);
         } else {
-            $this->textMessageHandlers['default']->handle($bot, $telegram, $message, $botUser);
+            $telegram->sendMessage([
+                'chat_id' => $chatId,
+                'text' => 'действие невозможно',
+                'parse_mode' => 'Markdown',
+            ]);
         }
     }
 }
