@@ -71,27 +71,20 @@ class CheckUserAuthAndLocale
         return $next($passable);
     }
 
-    /**
-     * Получаем userId (chat_id) из сообщения или колбэка.
-     */
+
     private function getUserId(Update $update): ?int
     {
         return $update->getMessage()?->getChat()?->getId()
             ?: $update->getCallbackQuery()?->getChat()?->getId();
     }
 
-    /**
-     * Получаем languageCode из сообщения или колбэка.
-     */
+
     private function getUserLanguage(Update $update): ?string
     {
         return $update->getMessage()?->getFrom()?->getLanguageCode()
             ?: $update->getCallbackQuery()?->getFrom()?->getLanguageCode();
     }
 
-    /**
-     * Устанавливаем локаль, если есть.
-     */
     private function checkAndSetLocale(?BotUser $botUser, ?string $language): void
     {
         if ($botUser && $botUser->locale) {
@@ -106,9 +99,6 @@ class CheckUserAuthAndLocale
         }
     }
 
-    /**
-     * Проверяем, является ли команда "excluded" (не обрабатывается в этом middleware).
-     */
     private function isExcludedCommand(?string $text, array $excludedCommands): bool
     {
         if (! $text) {
@@ -124,9 +114,6 @@ class CheckUserAuthAndLocale
         return false;
     }
 
-    /**
-     * Отправляем пользователю сообщение, что он должен быть авторизован.
-     */
     private function sendMustBeAuthorized($telegram, ?int $userId): void
     {
         if ($userId) {
@@ -138,7 +125,7 @@ class CheckUserAuthAndLocale
     }
 
     /**
-     * Раз в n минут (например, 5 минут) обновляем last_active_at.
+     * Once every n minutes (for example, 5 minutes) we update last_active_at.
      */
     private function throttleLastActiveUpdate(BotUser $botUser, int $minutes = 5): void
     {
@@ -163,8 +150,8 @@ class CheckUserAuthAndLocale
     }
 
     /**
-     * Проверяем изменения в имени/username/premium и при необходимости
-     * вызываем SaveAndNotifyJob (но только если данные изменились).
+     *  Check for changes in name/username/premium and if necessary
+     *  call SaveAndNotifyJob (but only if the data has changed).
      */
     private function checkAndUpdateUserData(Update $update, BotUser $botUser, $bot): void
     {

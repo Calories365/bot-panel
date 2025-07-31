@@ -3,6 +3,7 @@
 namespace App\Services\TelegramServices;
 
 use App\Models\Bot;
+use App\Services\TelegramServices\Middleware\CheckUserAuthAndLocale;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\Log;
@@ -77,7 +78,7 @@ class TelegramHandler
     {
         $middlewares = [
             'Calories' => [
-                \App\Services\TelegramServices\Middleware\CheckUserAuthAndLocale::class,
+                CheckUserAuthAndLocale::class,
             ],
         ];
 
