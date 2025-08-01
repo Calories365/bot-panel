@@ -78,7 +78,7 @@ Telegram-бот працює в окремому застосунку («Bot Pan
 - **Docker-оточення:** одна команда підіймає весь стек, включно з Ngrok для віддаленого доступу.
 - **Автоустановка вебхука:** під час запуску контейнера вебхук Telegram-бота встановлюється автоматично.
 
-Детальніше: див. [README по Docker конфігураціях](https://github.com/Calories365/Configs/blob/main/README.ua.md)
+Детальніше: див. [README по Docker конфігураціях](https://github.com/Calories365/Configs/blob/main/README.uk.md)
 
 ---
 
@@ -88,7 +88,7 @@ Telegram-бот працює в окремому застосунку («Bot Pan
 * Використовуються Docker і docker-compose: кожен проєкт (Calories365 і Bot Panel) має набір контейнерів (PHP, Nginx, Redis, MySQL, Meilisearch та ін.), що взаємодіють через спільну внутрішню Docker-мережу.
 * Доступ по SSH також здійснюється через Cloudflare Zero Trust Tunnel з авторизацією за приватними ключами та OAuth.
 
-Детальніше: див. [README по Docker конфігураціях](https://github.com/Calories365/Configs/blob/main/README.ua.md)
+Детальніше: див. [README по Docker конфігураціях](https://github.com/Calories365/Configs/blob/main/README.uk.md)
 
 ---
 
