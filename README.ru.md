@@ -9,7 +9,9 @@
 ![OAuth](https://img.shields.io/badge/OAuth-black?logo=Google)
 ![Docker](https://img.shields.io/badge/Docker-black?logo=Docker)
 ![Cloudflare](https://img.shields.io/badge/Cloudflare-black?logo=Cloudflare)
-
+![Larastan](https://img.shields.io/badge/Larastan-black?logo=laravel)
+![Laravel Pint](https://img.shields.io/badge/Laravel%20Pint-black?logo=laravel)
+![Prettier](https://img.shields.io/badge/Prettier-black?logo=prettier)
 ---
 
 ## 1. Суть проекта
@@ -36,7 +38,7 @@ Calories365 — моё полнофункциональное веб-прило�
 <p align="center">
   <img src="./public/cal.gif" width="500" alt="Demo GIF">
 </p>
----
+
 
 ## 2. Архитектурные особенности
 
@@ -68,7 +70,7 @@ Telegram-бот работает в отдельном приложении («B
 
 Это позволяет добавлять/убирать поля и столбцы без изменения кода компонентов.
 
-Подробнее: см. [README по Docker-конфигам](./README.DynamicFormsAndTables.ru.md)
+Подробнее: см. [README по динамическим формам/таблицам](./README.DynamicFormsAndTables.ru.md)
 
 ---
 
@@ -87,7 +89,7 @@ Telegram-бот работает в отдельном приложении («B
 * Используется Docker и docker-compose: каждый проект (Calories365 и Bot Panel) имеет набор контейнеров (PHP, Nginx, Redis, MySQL, Meilisearch и др.), взаимодействующих через общую внутреннюю Docker-сеть.
 * Доступ по SSH так же осуществляется через Cloudflare Zero Trust Tunnel с авторизацией по приватным ключам и OAuth.
 
-Подробнее: см. [README по Docker-конфигам](./README.DockerConfigs.ru.md).
+Подробнее: см. [README по Docker-конфигам](https://github.com/Calories365/Configs/blob/main/README.ru.md)
 
 ---
 
