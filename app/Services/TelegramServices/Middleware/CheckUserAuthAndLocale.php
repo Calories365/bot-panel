@@ -71,13 +71,11 @@ class CheckUserAuthAndLocale
         return $next($passable);
     }
 
-
     private function getUserId(Update $update): ?int
     {
         return $update->getMessage()?->getChat()?->getId()
             ?: $update->getCallbackQuery()?->getChat()?->getId();
     }
-
 
     private function getUserLanguage(Update $update): ?string
     {
