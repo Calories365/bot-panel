@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\Bot;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class SaveBotImages extends Command
@@ -28,7 +27,6 @@ class SaveBotImages extends Command
 
                 if ($uploadedImageUrl) {
                     $bot->update(['message_image' => $uploadedImageUrl]);
-                    Log::info("Updated image for {$bot->name} with new URL: {$uploadedImageUrl}");
                     $this->info("Updated image for {$bot->name} with new URL: {$uploadedImageUrl}");
                 } else {
                     $this->error("Failed to upload image for {$bot->name}");

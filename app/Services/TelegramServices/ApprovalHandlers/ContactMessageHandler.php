@@ -56,7 +56,6 @@ class ContactMessageHandler implements MessageHandlerInterface
             $url = $bot->wordpress_endpoint;
             //            $response = Http::asForm()->post($url, $data);
             //            $body = $response->body();
-            //            Log::info(print_r($body, true));
 
             $body = '/ID already exists/';
 

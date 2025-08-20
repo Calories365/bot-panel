@@ -22,8 +22,6 @@ class SpeechToTextService
     {
         $locale = app()->getLocale();
 
-        Log::info('$locale: '.$locale);
-
         switch ($locale) {
             case 'ua':
                 return env('OPENAI_API_KEY_UK');
@@ -67,8 +65,6 @@ class SpeechToTextService
     /* ---------- analyzeFoodIntake ---------- */
     public function analyzeFoodIntake(string $text)
     {
-        Log::info('prompt: '.$text);
-
         $prompt = __('calories365-bot.prompt_analyze_food_intake', [
             'text' => $text,
         ]);

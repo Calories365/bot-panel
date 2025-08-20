@@ -15,7 +15,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         protected DiaryApiService $diaryApiService
     ) {}
 
-    public function handle($bot, $telegram, $callbackQuery, $botUser)
+    public function handle($bot, $telegram, $callbackQuery, $botUser): void
     {
         $userId = $callbackQuery->getFrom()->getId();
         $chatId = $callbackQuery->getMessage()->getChat()->getId();
@@ -89,7 +89,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         ]);
     }
 
-    protected function saveProduct($product, $productTranslation, $diaryUserId, $partOfTheDay, $calories_id, $locale, $chat_id)
+    protected function saveProduct($product, $productTranslation, $diaryUserId, $partOfTheDay, $calories_id, $locale, $chat_id): void
     {
         $postData = [
             'user_id' => $diaryUserId,
@@ -114,7 +114,7 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
         }
     }
 
-    protected function saveFoodConsumption($product, $diaryUserId, $partOfTheDay, $calories_id, $locale)
+    protected function saveFoodConsumption($product, $diaryUserId, $partOfTheDay, $calories_id, $locale): void
     {
         $postData = [
             'user_id' => $diaryUserId,
@@ -128,12 +128,10 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
 
         if (isset($response['error'])) {
             Log::error('Error saving food consumption: '.$response['error']);
-        } else {
-            Log::info('Food consumption saved successfully.');
         }
     }
 
-    protected function deleteProductMessages($telegram, $chatId, $data, $callbackQuery)
+    protected function deleteProductMessages($telegram, $chatId, $data, $callbackQuery): void
     {
         foreach ($data as $productData) {
             if (isset($productData['message_id'])) {

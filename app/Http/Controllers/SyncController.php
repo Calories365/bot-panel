@@ -28,7 +28,6 @@ class SyncController extends Controller
 
     public function updatePremiumStatus(Request $request)
     {
-        Log::info('start: ');
         if (! $request->has('payload.calories_id')) {
             return response()->json([
                 'status' => 'error',

@@ -143,7 +143,6 @@ class Bot extends Model
 
             $nextManager->save();
 
-            Log::info('Preparing to send message( '.$message.') to manager: '.$nextManager->name);
             SendManagerNotification::dispatch($bot, $nextManager, $message);
         }
     }

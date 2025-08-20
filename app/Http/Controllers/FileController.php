@@ -14,13 +14,12 @@ class FileController extends Controller
 
         if (Storage::disk('public')->exists($filePath)) {
             $content = Storage::disk('public')->get($filePath);
-            Log::info("Содержимое файла $filename:\n".$content);
 
             return Response::download(storage_path('app/'.$filePath));
         } else {
-            Log::error("Файл $filename не найден.");
+            Log::error("File $filename did not find.");
 
-            return response()->json(['message' => "Файл $filename не найден."], 404);
+            return response()->json(['message' => "File $filename did not find."], 404);
         }
     }
 }

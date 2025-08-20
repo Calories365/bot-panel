@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 /**
  * @property int $id
@@ -88,7 +87,6 @@ class BotUser extends Model
 
     public static function addOrUpdateUser($chatId, $firstName, $lastName, $username, $botId, $premium, $source = null, $result = null, $locale = null)
     {
-        Log::info($locale);
         $fullName = $firstName.($lastName ? " {$lastName}" : '');
 
         $botUser = self::firstOrNew(['telegram_id' => $chatId]);

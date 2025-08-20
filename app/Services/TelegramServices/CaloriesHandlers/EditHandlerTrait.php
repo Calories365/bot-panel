@@ -56,9 +56,8 @@ trait EditHandlerTrait
         Cache::forget("command_block{$userId}");
     }
 
-    protected function updateProductMessage($telegram, $chatId, $productData)
+    protected function updateProductMessage($telegram, $chatId, $productData): void
     {
-        Log::info(print_r($productData, true));
         $messageId = $productData['message_id'];
 
         $productTranslation = $productData['product_translation'];
@@ -87,7 +86,7 @@ trait EditHandlerTrait
         }
     }
 
-    protected function deleteEditingMessage($telegram, $chatId, $messageId)
+    protected function deleteEditingMessage($telegram, $chatId, $messageId): void
     {
         try {
             $telegram->deleteMessage([
@@ -99,7 +98,7 @@ trait EditHandlerTrait
         }
     }
 
-    protected function editEditingMessage($telegram, $chatId, $messageId, $newText)
+    protected function editEditingMessage($telegram, $chatId, $messageId, $newText): void
     {
         $replyMarkup = json_encode([
             'inline_keyboard' => [
@@ -123,7 +122,7 @@ trait EditHandlerTrait
         }
     }
 
-    protected function generateTableBody($product, $productTranslation, $productId)
+    protected function generateTableBody($product, $productTranslation, $productId): true
     {
         $productArray = [
             [__('calories365-bot.calories'),      $product['calories'],      round($product['calories'] / 100 * $product['quantity_grams'], 1)],
@@ -138,9 +137,6 @@ trait EditHandlerTrait
             $productArray,
             $productTranslation['said_name']
         );
-
-        Log::info('messageText');
-        Log::info(print_r($this->messageText, true));
 
         $userId = auth()->user()->id ?? request()->userId ?? null;
         $clickCount = Cache::get("product_click_count_{$userId}_{$productId}", 0);

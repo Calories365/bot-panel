@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Services\AudioConversionService;
 use App\Services\ChatGPTServices\SpeechToTextService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 class testApi extends Command
 {
@@ -15,7 +14,6 @@ class testApi extends Command
 
     public function handle()
     {
-        Log::info('Testing audio conversion');
         //        $fullLocalPath = '/var/www/bot-panel/storage/app/public/audios/file_110.oga';
         //        $localPath = 'audios/file_110.oga';
         //

@@ -36,7 +36,7 @@ class AdminController extends BaseController
     public function create(Request $request): \Illuminate\Http\JsonResponse
     {
         $data = $request->all();
-        $botAdmin = BotAdmin::create($data); //
+        $botAdmin = BotAdmin::create($data);
 
         return response()->json(['id' => $botAdmin->id]);
     }

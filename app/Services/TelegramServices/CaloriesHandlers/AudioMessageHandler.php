@@ -10,7 +10,6 @@ use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInt
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class AudioMessageHandler implements MessageHandlerInterface
@@ -197,7 +196,6 @@ class AudioMessageHandler implements MessageHandlerInterface
     private function generateProduct(string $saidName, float $quantityGrams): array
     {
         $raw = $this->speechToTextService->generateNewProductData($saidName);
-        Log::info('AI RAW for "'.$saidName.'": '.$raw);
 
         if (! $raw || preg_match('/(sorry|извин|вибач|cannot|не могу|не можу|ошиб|error|помил)/iu', $raw)) {
             $nutritional = [

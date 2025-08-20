@@ -8,7 +8,6 @@ use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInt
 use App\Services\TelegramServices\CaloriesHandlers\EditHandlerTrait;
 use App\Traits\BasicDataExtractor;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class TestMessageHandler implements MessageHandlerInterface
 {
@@ -34,9 +33,6 @@ class TestMessageHandler implements MessageHandlerInterface
 
         // Get text from message or use test text
         $text = $message->getText() ?: 'Творог - 320 грамм;';
-
-        // Process the text if it's not empty
-        Log::info('Product list: '.$text);
 
         $locale = $botUser->locale;
         $caloriesId = $botUser->calories_id;

@@ -3,7 +3,6 @@
 namespace App\Utilities;
 
 use App\Models\BotUser;
-use Illuminate\Support\Facades\Log;
 
 class Utilities
 {
@@ -41,7 +40,6 @@ class Utilities
         $adminMessage = $text;
         $messageText = "Сообщение: {$adminMessage} пользователь: {$userMention}";
 
-        Log::info('notifyAllManagers');
         $bot->notifyAllManagers($bot, $messageText);
 
         return true;

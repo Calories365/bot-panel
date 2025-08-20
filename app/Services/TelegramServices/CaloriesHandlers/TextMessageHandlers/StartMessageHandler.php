@@ -80,8 +80,6 @@ class StartMessageHandler implements MessageHandlerInterface
                 $botUser->locale = $locale;
                 $botUser->save();
 
-                Log::info("User {$chatId} linked with calories ID {$caloriesUserId}");
-
                 $this->sendWelcome($bot, $telegram, $message, $commonData);
 
                 return;

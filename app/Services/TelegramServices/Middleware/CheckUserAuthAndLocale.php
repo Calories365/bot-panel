@@ -9,7 +9,6 @@ use Carbon\Carbon;
 use Closure;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Objects\Update;
 
 class CheckUserAuthAndLocale
@@ -29,8 +28,6 @@ class CheckUserAuthAndLocale
         $text = $update->getMessage()?->getText();
         $userId = $this->getUserId($update);
         $language = $this->getUserLanguage($update);
-
-        Log::info('$language: '.$language);
 
         // Initialize botUser to avoid undefined variable errors
         $botUser = null;
