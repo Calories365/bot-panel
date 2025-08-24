@@ -1,3 +1,4 @@
+//beta version
 import { createRouter, createWebHistory } from "vue-router";
 import routes from "./routes.js";
 import store from "@/store/store.js";
@@ -21,7 +22,7 @@ router.beforeEach((to, from, next) => {
             (isLoading) => {
                 if (!isLoading) {
                     unwatch();
-                    next();
+                    next(to);
                 }
             }
         );
@@ -58,7 +59,6 @@ router.beforeEach((to, from, next) => {
 
     next();
 });
-
 
 router.onError((err) => {
     console.error("[Router Error]", err);
