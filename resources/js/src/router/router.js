@@ -8,6 +8,10 @@ const router = createRouter({
     history: createWebHistory(),
     linkActiveClass: "active",
     routes,
+    scrollBehavior(to, from, savedPosition) {
+        if (savedPosition) return savedPosition;
+        return { left: 0, top: 0 };
+    },
 });
 
 router.beforeEach((to, from, next) => {
@@ -17,29 +21,47 @@ router.beforeEach((to, from, next) => {
             (isLoading) => {
                 if (!isLoading) {
                     unwatch();
-                    next(to);
+                    next();
                 }
-            },
+            }
         );
-    } else {
-        if (to.meta.needAuth) {
-            if (store.getters[getterTypes.isLoggedIn]) {
-                next();
-            } else {
-                const message = i18n.global.t("Notification.Error.NeedAuth");
-                store.dispatch("setError", message, { root: true });
-                next({ name: "login" });
-            }
-        } else if (to.meta.needNotAuth) {
-            if (!store.getters[getterTypes.isLoggedIn]) {
-                next();
-            } else {
-                next({ name: "showBots" });
-            }
-        } else {
-            next();
-        }
+        return;
     }
+
+    if (to.meta.needAuth) {
+        if (store.getters[getterTypes.isLoggedIn]) {
+            next();
+        } else {
+            const message = i18n.global.t("Notification.Error.NeedAuth");
+            store.dispatch("setError", message, { root: true });
+            if (to.name !== "login") {
+                next({ name: "login" });
+            } else {
+                next();
+            }
+        }
+        return;
+    }
+
+    if (to.meta.needNotAuth) {
+        if (!store.getters[getterTypes.isLoggedIn]) {
+            next();
+        } else {
+            if (to.name !== "showBots") {
+                next({ name: "showBots" });
+            } else {
+                next();
+            }
+        }
+        return;
+    }
+
+    next();
+});
+
+
+router.onError((err) => {
+    console.error("[Router Error]", err);
 });
 
 export default router;
