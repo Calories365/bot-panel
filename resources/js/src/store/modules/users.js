@@ -108,7 +108,7 @@ export const actionTypes = {
 const actions = {
     async [actionTypes.getUsers](
         { commit, state },
-        { botId, page, perPage } = {},
+        { botId, page, perPage } = {}
     ) {
         commit(mutationTypes.getUsersStart);
         try {
@@ -124,7 +124,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.getUsersFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -152,7 +152,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.deleteUserFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -173,7 +173,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.exportUsersFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }

@@ -37,7 +37,7 @@ watch(
             imageUrl.value = newVal.image_url;
             file.value = newVal.image_file;
         }
-    },
+    }
 );
 </script>
 

@@ -14,7 +14,7 @@ export class BotCreateValidator extends BaseValidator {
         if (this.data.type_id.type_id === 1 && !this.data.message) {
             this.addError(
                 "message",
-                'Сообщение обязательно для типа "Default"',
+                'Сообщение обязательно для типа "Default"'
             );
         }
         if (this.data.type_id.type_id === 2 && !this.data.web_hook) {

@@ -9,7 +9,6 @@ const messages = {
     ua,
 };
 
-
 const i18n = createI18n({
     legacy: false,
     locale: "en",

@@ -47,7 +47,7 @@ export const actionTypes = {
 const actions = {
     async [actionTypes.toggleRussianLanguage](
         { commit, dispatch },
-        { enabled },
+        { enabled }
     ) {
         commit(mutationTypes.toggleRussianLanguageStart);
         try {
@@ -62,7 +62,7 @@ const actions = {
             dispatch("addError", errorMessage, { root: true });
             commit(
                 mutationTypes.toggleRussianLanguageFailure,
-                error.response?.data || error,
+                error.response?.data || error
             );
             throw error;
         }

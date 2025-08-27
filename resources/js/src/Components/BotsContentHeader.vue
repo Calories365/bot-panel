@@ -10,7 +10,7 @@ const store = useStore();
 
 const breadcrumbs = computed(() => {
     let matched = route.matched.filter(
-        (record) => record.meta && record.meta.breadcrumb,
+        (record) => record.meta && record.meta.breadcrumb
     );
     let breadcrumbs = matched.map((record) => ({
         text: record.meta.breadcrumb,

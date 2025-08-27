@@ -6,7 +6,10 @@ function formatDate(date) {
         locale = "uk";
     }
     const parsedDate = new Date(date);
-    const monthKey = `${parsedDate.toLocaleString(locale, { month: "long", timeZone: "UTC" })}`;
+    const monthKey = `${parsedDate.toLocaleString(locale, {
+        month: "long",
+        timeZone: "UTC",
+    })}`;
     const year = parsedDate.getFullYear();
 
     return `${monthKey} ${year}`;

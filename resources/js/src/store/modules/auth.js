@@ -212,14 +212,14 @@ const actions = {
                 .then((response) => {
                     context.commit(
                         mutationTypes.registerSuccess,
-                        response.data.user,
+                        response.data.user
                     );
                     resolve(response.data.user);
                 })
                 .catch((result) => {
                     context.commit(
                         mutationTypes.registerFailure,
-                        result.response.data.errors,
+                        result.response.data.errors
                     );
                 });
         });
@@ -232,7 +232,7 @@ const actions = {
                 .then((response) => {
                     context.commit(
                         mutationTypes.loginSuccess,
-                        response.data.user,
+                        response.data.user
                     );
 
                     context.dispatch(actionTypes.getCurrentUser);
@@ -244,7 +244,7 @@ const actions = {
                 .catch((result) => {
                     context.commit(
                         mutationTypes.loginFailure,
-                        result.response.data.errors,
+                        result.response.data.errors
                     );
                 });
         });
@@ -257,7 +257,7 @@ const actions = {
                 .then((response) => {
                     context.commit(
                         mutationTypes.getCurrentUserSuccess,
-                        response.data,
+                        response.data
                     );
                     resolve(response.data);
                 })
@@ -274,14 +274,14 @@ const actions = {
                 .then((user) => {
                     context.commit(
                         mutationTypes.updateCurrentUserSuccess,
-                        user,
+                        user
                     );
                     resolve(user);
                 })
                 .catch((result) => {
                     context.commit(
                         mutationTypes.updateCurrentUserFailure,
-                        result.result.data.errors,
+                        result.result.data.errors
                     );
                 });
         });
@@ -322,19 +322,19 @@ const actions = {
                 .then((response) => {
                     context.commit(mutationTypes.recoveryWithTokenSuccess);
                     const message = i18n.global.t(
-                        "Notification.Success.PasswordWasUpdated",
+                        "Notification.Success.PasswordWasUpdated"
                     );
                     context.dispatch("setSuccess", message, { root: true });
                     resolve(response.data);
                 })
                 .catch((result) => {
                     const message = i18n.global.t(
-                        "Notification.Error.PasswordUpdatedFailed",
+                        "Notification.Error.PasswordUpdatedFailed"
                     );
                     context.dispatch("setError", message, { root: true });
                     context.commit(
                         mutationTypes.recoveryWithTokenFailure,
-                        result.response.data.errors,
+                        result.response.data.errors
                     );
                 });
         });
@@ -351,14 +351,14 @@ const actions = {
                 .resendVerificationEmail()
                 .then((response) => {
                     context.commit(
-                        mutationTypes.resendVerificationEmailSuccess,
+                        mutationTypes.resendVerificationEmailSuccess
                     );
                     resolve(response.data);
                 })
                 .catch((result) => {
                     context.commit(
                         mutationTypes.resendVerificationEmailFailure,
-                        result.response.data.errors,
+                        result.response.data.errors
                     );
                 });
         });
@@ -372,11 +372,11 @@ const actions = {
                 .then((user) => {
                     context.commit(
                         mutationTypes.updateUsersPasswordSuccess,
-                        user,
+                        user
                     );
 
                     const message = i18n.global.t(
-                        "Notification.Success.PasswordWasUpdated",
+                        "Notification.Success.PasswordWasUpdated"
                     );
                     context
                         .dispatch("setSuccess", message, { root: true })
@@ -387,13 +387,13 @@ const actions = {
                 })
                 .catch((result) => {
                     const message = i18n.global.t(
-                        "Notification.Error.PasswordUpdatedFailed",
+                        "Notification.Error.PasswordUpdatedFailed"
                     );
                     context.dispatch("setError", message, { root: true });
 
                     context.commit(
                         mutationTypes.updateUsersPasswordFailure,
-                        result.result.data.errors,
+                        result.result.data.errors
                     );
                 });
         });
@@ -407,11 +407,11 @@ const actions = {
                 .then((user) => {
                     context.commit(
                         mutationTypes.updateUsersPasswordSuccess,
-                        user,
+                        user
                     );
 
                     const message = i18n.global.t(
-                        "Notification.Success.NameWasUpdated",
+                        "Notification.Success.NameWasUpdated"
                     );
                     context
                         .dispatch("setSuccess", message, { root: true })
@@ -423,13 +423,13 @@ const actions = {
                 })
                 .catch((result) => {
                     const message = i18n.global.t(
-                        "Notification.Error.NameUpdationFiled",
+                        "Notification.Error.NameUpdationFiled"
                     );
                     context.dispatch("setError", message, { root: true });
 
                     context.commit(
                         mutationTypes.updateUsersPasswordFailure,
-                        result.result.data.errors,
+                        result.result.data.errors
                     );
                 });
         });

@@ -4,7 +4,7 @@ import { actionTypes } from "@/store/modules/bots.js";
 export default function usePagination(
     dispatch,
     fetchDataFunction = null,
-    botId = null,
+    botId = null
 ) {
     const currentPage = ref(1);
     const pageSize = ref(10);

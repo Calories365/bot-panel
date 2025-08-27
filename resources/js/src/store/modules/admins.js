@@ -132,7 +132,7 @@ export const actionTypes = {
 const actions = {
     async [actionTypes.getAllAdmins](
         { commit, state },
-        { page, perPage } = {},
+        { page, perPage } = {}
     ) {
         commit(mutationTypes.getAllAdminsStart);
         try {
@@ -147,7 +147,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.getAllAdminsFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -177,7 +177,7 @@ const actions = {
             dispatch("addError", "Ошибка удаления!", { root: true });
             commit(
                 mutationTypes.deleteAdminFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -191,7 +191,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.getAdminFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -201,7 +201,7 @@ const actions = {
         try {
             const response = await adminsApi.updateAdmin(
                 state.admin.id,
-                adminData,
+                adminData
             );
             commit(mutationTypes.updateAdminSuccess, response.data);
             dispatch("addSuccess", "Админ обновлен!", { root: true });
@@ -209,7 +209,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.updateAdminFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             dispatch("addError", "Ошибка обновления!", { root: true });
             throw error;
@@ -225,7 +225,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.createAdminFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             dispatch("addError", "Ошибка создания!", { root: true });
             throw error;

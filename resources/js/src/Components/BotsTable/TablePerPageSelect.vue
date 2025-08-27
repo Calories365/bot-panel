@@ -29,7 +29,7 @@ watch(
             emit("update:value", selectedValue.value);
         }
     },
-    { immediate: true },
+    { immediate: true }
 );
 
 const handleChange = (event) => {
