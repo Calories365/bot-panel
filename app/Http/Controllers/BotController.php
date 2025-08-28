@@ -6,14 +6,15 @@ use App\Http\Requests\BotDataRequest;
 use App\Http\Resources\AllManagersResource;
 use App\Http\Resources\BotResource;
 use App\Http\Resources\BotTypesCollection;
+use App\Jobs\ProcessTelegramUpdate;
 use App\Models\Bot;
 use App\Models\BotType;
 use App\Models\Manager;
 use App\Services\BotManagmentService;
 use App\Services\BotUsersService;
-use App\Services\TelegramServices\TelegramHandler;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller as BaseController;
@@ -114,14 +115,23 @@ class BotController extends BaseController
         return response()->json($data);
     }
 
-    public function handle(TelegramHandler $telegramHandler, $bot, Request $request)
+    public function handle(string $bot, Request $request): JsonResponse
     {
         try {
-            $telegramHandler->handle($bot, $request);
+            $updateId = $request->input('update_id');
+            ProcessTelegramUpdate::dispatch(
+                $bot,
+                $request->all(),
+                $updateId !== null ? (int) $updateId : null
+            )->onQueue('telegram');
 
             return response()->json(['status' => 'success']);
-        } catch (\Exception $e) {
-            Log::error('Error in handle: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            Log::critical('Webhook dispatch error', [
+                'bot' => $bot,
+                'err' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return response()->json(['status' => 'success']);
         }

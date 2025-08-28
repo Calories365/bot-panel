@@ -10,7 +10,7 @@ function prepareDateAndCalendarInfo(currentTime) {
     const daysInMonth = new Date(
         currentTime.getFullYear(),
         month + 1,
-        0,
+        0
     ).getDate();
     let startDayOfWeek = new Date(currentTime.getFullYear(), month, 1).getDay();
     if (startDayOfWeek === 0) {

@@ -15,6 +15,7 @@
         "eslint-plugin-vue": "^10.1.0",
         "globals": "^16.2.0",
         "laravel-vite-plugin": "^0.8.0",
+        "prettier-plugin-vue": "^1.1.6",
         "postcss": "^8.4.32",
         "sass": "^1.69.5",
         "scss": "^0.2.4",

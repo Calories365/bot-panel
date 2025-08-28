@@ -248,7 +248,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.getAllBotsFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -278,7 +278,7 @@ const actions = {
             dispatch("addError", "Ошибка удаления!", { root: true });
             commit(
                 mutationTypes.deleteBotFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -292,7 +292,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.getBotFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -306,7 +306,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.getBotTypesFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -320,7 +320,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.getBotManagersFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -332,7 +332,7 @@ const actions = {
                 dispatch,
                 botsApi.updateBot,
                 data,
-                state.bot.id,
+                state.bot.id
             );
             dispatch("addSuccess", "Бот обновлен!", { root: true });
             return response;
@@ -346,7 +346,7 @@ const actions = {
                 commit,
                 dispatch,
                 botsApi.createBot,
-                data,
+                data
             );
             dispatch("addSuccess", "Бот создан!", { root: true });
             return response;
@@ -364,7 +364,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.updateWebhookFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -379,7 +379,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.getBotUserDataFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -394,7 +394,7 @@ async function handleBotData(
     dispatch,
     botApiFunction,
     botData,
-    botId = null,
+    botId = null
 ) {
     commit(mutationTypes.upsertBotStart);
 
@@ -414,7 +414,7 @@ async function handleBotData(
                 ) {
                     formData.append(
                         "managers",
-                        JSON.stringify(botData.managers),
+                        JSON.stringify(botData.managers)
                     );
                 } else if (botData[key] instanceof File) {
                     formData.append(key, botData[key], botData[key].name);
@@ -426,7 +426,7 @@ async function handleBotData(
 
         const response = await botApiFunction(
             botId ? botId : formData,
-            formData,
+            formData
         );
         commit(mutationTypes.upsertBotSuccess, response.data);
         return response.data;

@@ -6,6 +6,7 @@ use App\Models\Bot;
 use App\Services\TelegramServices\Middleware\CheckUserAuthAndLocale;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Pipeline\Pipeline;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Api;
 use Telegram\Bot\Objects\Update;
@@ -37,7 +38,9 @@ class TelegramHandler
 
     public function handle($botName, $request): void
     {
-        $bot = Bot::with('type')->where('name', $botName)->firstOrFail();
+        $bot = Cache::remember("bot:{$botName}", 300, fn () =>
+        Bot::with('type')->where('name', $botName)->firstOrFail()
+        );
         $botTypeName = $bot->type->name ?? 'unknown';
 
         if (! $bot->active) {

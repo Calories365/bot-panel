@@ -53,7 +53,7 @@ function fetchData(botId) {
         .then(() => {
             console.log(
                 "Users loaded successfully",
-                botId ? `for bot: ${botId}` : "for all bots",
+                botId ? `for bot: ${botId}` : "for all bots"
             );
         })
         .catch((error) => {
@@ -68,7 +68,7 @@ watch(
             currentPage.value = 1;
             fetchData(newId);
         }
-    },
+    }
 );
 
 onMounted(() => {

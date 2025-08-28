@@ -132,7 +132,7 @@ export const actionTypes = {
 const actions = {
     async [actionTypes.getAllManagers](
         { commit, state },
-        { page, perPage } = {},
+        { page, perPage } = {}
     ) {
         commit(mutationTypes.getAllManagersStart);
         try {
@@ -147,7 +147,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.getAllManagersFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -177,7 +177,7 @@ const actions = {
             dispatch("addError", "Ошибка удаления!", { root: true });
             commit(
                 mutationTypes.deleteManagerFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
@@ -191,20 +191,20 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.getManagerFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             throw error;
         }
     },
     async [actionTypes.updateManager](
         { commit, state, dispatch },
-        managerData,
+        managerData
     ) {
         commit(mutationTypes.updateManagerStart);
         try {
             const response = await managersApi.updateManager(
                 state.manager.id,
-                managerData,
+                managerData
             );
             commit(mutationTypes.updateManagerSuccess, response.data);
             dispatch("addSuccess", "Менеджер обновлен!", { root: true });
@@ -212,7 +212,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.updateManagerFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             dispatch("addError", "Ошибка обновления!", { root: true });
             throw error;
@@ -220,7 +220,7 @@ const actions = {
     },
     async [actionTypes.createManager](
         { commit, state, dispatch },
-        managerData,
+        managerData
     ) {
         commit(mutationTypes.createManagerStart);
         try {
@@ -231,7 +231,7 @@ const actions = {
         } catch (error) {
             commit(
                 mutationTypes.createManagerFailure,
-                error.response ? error.response.data : error,
+                error.response ? error.response.data : error
             );
             dispatch("addError", "Ошибка создания!", { root: true });
             throw error;

@@ -2,10 +2,9 @@
 
 namespace App\Providers;
 
-use App\Services\AudioConversionService;
-use App\Services\ChatGPTServices\SpeechToTextService;
-use App\Services\DiaryApiService;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,24 +12,25 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
-    {
-        //        $this->app->singleton(AudioConversionService::class, function ($app) {
-        //            return new AudioConversionService($app->make(SpeechToTextService::class));
-        //        });
-        //
-        //        $this->app->singleton(DiaryApiService::class, function ($app) {
-        //            return new DiaryApiService;
-        //        });
-    }
+    public function register(): void {}
 
     /**
      * Bootstrap any application services.
      */
     public function boot(): void
     {
-        JsonResource::withoutWrapping(); // убрать любой обертку, по умолчанию data
-        //        JsonResource::wrap('test');//задать глобально обертку
+        JsonResource::withoutWrapping();
+
+        RateLimiter::for('telegram', function ($job) {
+            $bot = $job->botName ?? 'unknown-bot';
+            $chatId =
+                data_get($job->payload, 'message.chat.id') ??
+                data_get($job->payload, 'callback_query.message.chat.id') ??
+                data_get($job->payload, 'my_chat_member.chat.id') ??
+                'unknown-chat';
+
+            return Limit::perMinute(60)->by("bot:$bot|chat:$chatId");
+        });
 
     }
 }
