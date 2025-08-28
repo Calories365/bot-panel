@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Exceptions\TelegramResponseException;
 
@@ -53,26 +52,6 @@ class ProcessTelegramUpdate implements ShouldBeUnique, ShouldQueue
     public function middleware(): array
     {
         return [
-            new class
-            {
-                public function handle($job, $next)
-                {
-                    $cacheKey = 'tg:update:'.$job->uniqueKey;
-
-                    if (! Cache::add($cacheKey, 1, now()->addMinutes(10))) {
-                        $job->delete();
-
-                        return;
-                    }
-
-                    try {
-                        return $next($job);
-                    } finally {
-                        Cache::forget($cacheKey);
-                    }
-                }
-            },
-
             new RateLimited('telegram'),
         ];
     }

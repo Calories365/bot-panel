@@ -14,9 +14,11 @@ use App\Services\BotManagmentService;
 use App\Services\BotUsersService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Log;
 
 class BotController extends BaseController
 {
@@ -113,19 +115,23 @@ class BotController extends BaseController
         return response()->json($data);
     }
 
-    public function handle($bot, Request $request): \Illuminate\Http\JsonResponse
+    public function handle(string $bot, Request $request): JsonResponse
     {
         try {
             $updateId = $request->input('update_id');
             ProcessTelegramUpdate::dispatch(
-                (string) $bot,
+                $bot,
                 $request->all(),
-                $updateId ? (int) $updateId : null
+                $updateId !== null ? (int) $updateId : null
             )->onQueue('telegram');
 
             return response()->json(['status' => 'success']);
         } catch (\Throwable $e) {
-            \Log::error('Webhook dispatch error: '.$e->getMessage());
+            Log::critical('Webhook dispatch error', [
+                'bot' => $bot,
+                'err' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return response()->json(['status' => 'success']);
         }
