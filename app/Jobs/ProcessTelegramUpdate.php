@@ -27,7 +27,7 @@ class ProcessTelegramUpdate implements ShouldBeUnique, ShouldQueue
 
     public int $uniqueFor = 600;
 
-    public int $timeout = 180;
+    public int $timeout = 150;
 
     public $backoff = [5, 15, 45, 120];
 
