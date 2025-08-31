@@ -25,12 +25,6 @@ jobs:
           docker compose up -d --build --force-recreate --remove-orphans --scale bot_panel_queue_worker=4
           docker builder prune --filter "until=168h" --force
 
-      - name: Wait for MySQL ready
-        working-directory: /home/maxim/var/www/bot-panel
-        run: |
-          set -euo pipefail
-          docker compose exec -T bot_panel_mysql sh -lc 'until mysqladmin ping -h 127.0.0.1 -p"$MYSQL_ROOT_PASSWORD" --silent; do sleep 1; done'
-
       - name: Laravel migrate --force
         working-directory: /home/maxim/var/www/bot-panel
         run: |
