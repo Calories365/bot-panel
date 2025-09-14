@@ -60,7 +60,6 @@ class AudioMessageHandler implements MessageHandlerInterface
                 }
             }
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
-
             if (
                 $text &&
                 ! Str::contains(Str::lower($text), [
@@ -75,7 +74,6 @@ class AudioMessageHandler implements MessageHandlerInterface
                 $caloriesId = $botUser->calories_id;
 
                 $responseArray = $this->diaryApiService->sendText($text, $caloriesId, $locale);
-
                 if (isset($responseArray['error'])) {
                     $telegram->sendMessage([
                         'chat_id' => $chatId,
@@ -89,9 +87,7 @@ class AudioMessageHandler implements MessageHandlerInterface
                     $products = $responseArray['products'];
 
                     $userProducts = [];
-
                     foreach ($products as $index => $productInfo) {
-
                         if (isset($productInfo['product_translation']) && isset($productInfo['product'])) {
                             $productTranslation = $productInfo['product_translation'];
                             $product = $productInfo['product'];
@@ -103,7 +99,6 @@ class AudioMessageHandler implements MessageHandlerInterface
                             $grams = $productInfo['quantity_grams'] ?? 100;
 
                             $generated = $this->generateProduct($said, $grams);
-
                             $productTranslation = $generated['productTranslation'];
                             $product = $generated['product'];
                             $productId = $generated['productId'];
@@ -186,7 +181,6 @@ class AudioMessageHandler implements MessageHandlerInterface
         }
     }
 
-    /* -------------------------------------------------------------------- */
     /**
      * Generates a product using OpenAI.
      *
@@ -197,18 +191,25 @@ class AudioMessageHandler implements MessageHandlerInterface
     {
         $raw = $this->speechToTextService->generateNewProductData($saidName);
 
-        if (! $raw || preg_match('/(sorry|извин|вибач|cannot|не могу|не можу|ошиб|error|помил)/iu', $raw)) {
-            $nutritional = [
-                'calories' => 0,
-                'proteins' => 0,
-                'carbohydrates' => 0,
-                'fats' => 0,
-                'edited' => 1,
-                'verified' => 1,
-                'ai_generated' => true,
-            ];
-        } else {
-            $nutritional = Utilities::parseAIGeneratedNutritionalData($raw);
+        $defaults = [
+            'calories' => 0.0,
+            'proteins' => 0.0,
+            'carbohydrates' => 0.0,
+            'fats' => 0.0,
+            'edited' => 1,
+            'verified' => 1,
+            'ai_generated' => true,
+        ];
+
+        $nutritional = $defaults;
+
+        if (is_string($raw) && $raw !== '' && ! preg_match('/(sorry|извин|вибач|cannot|не могу|не можу|ошиб|error|помил)/iu', $raw)) {
+            $parsed = Utilities::parseAIGeneratedNutritionalData($raw);
+
+            $allowedKeys = ['calories', 'proteins', 'carbohydrates', 'fats', 'edited', 'verified', 'ai_generated'];
+            $parsedFiltered = array_intersect_key($parsed, array_flip($allowedKeys));
+
+            $nutritional = array_replace($nutritional, $parsedFiltered);
         }
 
         $uniqueId = uniqid('product_', true);
@@ -226,7 +227,7 @@ class AudioMessageHandler implements MessageHandlerInterface
             'product' => array_merge($nutritional, [
                 'id' => $productId,
                 'user_id' => null,
-                'fibers' => 0,
+                'fibers' => 0.0,
                 'quantity_grams' => $quantityGrams,
             ]),
             'productId' => $productId,

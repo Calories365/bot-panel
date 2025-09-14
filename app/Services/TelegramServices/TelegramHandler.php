@@ -38,8 +38,7 @@ class TelegramHandler
 
     public function handle($botName, $request): void
     {
-        $bot = Cache::remember("bot:{$botName}", 300, fn () =>
-        Bot::with('type')->where('name', $botName)->firstOrFail()
+        $bot = Cache::remember("bot:{$botName}", 300, fn () => Bot::with('type')->where('name', $botName)->firstOrFail()
         );
         $botTypeName = $bot->type->name ?? 'unknown';
 
