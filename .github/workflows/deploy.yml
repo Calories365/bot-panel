@@ -16,13 +16,13 @@ jobs:
           git fetch origin main
           git reset --hard origin/main
 
-      - name: Docker compose up --build (+scale, recreate)
+      - name: Docker compose up --build (recreate)
         working-directory: /home/maxim/var/www/bot-panel
         env:
           DOCKER_BUILDKIT: "1"
         run: |
           set -euo pipefail
-          docker compose up -d --build --force-recreate --remove-orphans --scale bot_panel_queue_worker=4
+          docker compose up -d --build --force-recreate --remove-orphans
           docker builder prune --filter "until=168h" --force
 
       - name: Laravel migrate --force
@@ -31,8 +31,9 @@ jobs:
           set -euo pipefail
           docker compose exec -T bot_panel_php php artisan migrate --force --no-interaction
 
-      - name: Graceful restart queue workers
+      - name: Graceful restart Horizon
         working-directory: /home/maxim/var/www/bot-panel
         run: |
           set -euo pipefail
-          docker compose exec -T bot_panel_php php artisan queue:restart
+          docker compose exec -T bot_panel_horizon php artisan optimize:clear
+          docker compose exec -T bot_panel_horizon php artisan horizon:terminate
