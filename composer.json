@@ -11,6 +11,7 @@
         "irazasyed/telegram-bot-sdk": "^3.14",
         "laravel/fortify": "^1.28",
         "laravel/framework": "^12.0",
+        "laravel/horizon": "^5.33",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.8",
         "php-ffmpeg/php-ffmpeg": "^1.2",
