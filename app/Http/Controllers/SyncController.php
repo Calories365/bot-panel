@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\CaloriesUser;
 use App\Models\Subscription;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SyncController extends Controller
 {
-    public function storeNewUser(Request $request)
+    public function storeNewUser(Request $request): JsonResponse
     {
         $payload = $request->input('payload', []);
 
@@ -26,7 +27,7 @@ class SyncController extends Controller
         return response()->json(['status' => 'ok', 'created_id' => $newUser->id], 201);
     }
 
-    public function updatePremiumStatus(Request $request)
+    public function updatePremiumStatus(Request $request): JsonResponse
     {
         if (! $request->has('payload.calories_id')) {
             return response()->json([
