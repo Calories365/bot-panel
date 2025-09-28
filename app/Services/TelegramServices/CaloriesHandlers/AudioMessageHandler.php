@@ -10,6 +10,7 @@ use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInt
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class AudioMessageHandler implements MessageHandlerInterface
@@ -190,7 +191,8 @@ class AudioMessageHandler implements MessageHandlerInterface
     private function generateProduct(string $saidName, float $quantityGrams): array
     {
         $raw = $this->speechToTextService->generateNewProductData($saidName);
-
+        Log::info('answer: ');
+        Log::info(print_r($raw ,true));
         $defaults = [
             'calories' => 0.0,
             'proteins' => 0.0,
