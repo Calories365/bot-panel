@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Log;
+use PHPUnit\TextUI\Command\ListGroupsCommand;
 
 class BotController extends BaseController
 {
@@ -119,6 +120,7 @@ class BotController extends BaseController
     {
         try {
             $updateId = $request->input('update_id');
+            Log::info(1111);
             ProcessTelegramUpdate::dispatch(
                 $bot,
                 $request->all(),

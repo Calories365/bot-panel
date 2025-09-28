@@ -59,6 +59,7 @@ class ProcessTelegramUpdate implements ShouldBeUnique, ShouldQueue
     public function handle(TelegramHandler $telegramHandler): void
     {
         try {
+            Log::info(2222);
             $req = new Request;
             $req->replace($this->payload);
 

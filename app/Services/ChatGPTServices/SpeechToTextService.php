@@ -56,7 +56,10 @@ class SpeechToTextService
             ->throw();
 
         $data = $response->json();
-
+        Log::info('data');
+        Log::info($data);
+        $res = isset($data['text']);
+        Log::info($res);
         return isset($data['text'])
             ? $this->analyzeFoodIntake($data['text'])
             : false;
@@ -68,7 +71,8 @@ class SpeechToTextService
         $prompt = __('calories365-bot.prompt_analyze_food_intake', [
             'text' => $text,
         ]);
-
+        Log::info('$prompt: ');
+        Log::info($prompt);
         try {
             $result = Http::timeout(45)
                 ->withHeaders([
@@ -81,6 +85,8 @@ class SpeechToTextService
                 ->throw()
                 ->json();
 
+            Log::info('Res: ');
+            Log::info(print_r($result, true));
             return $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
         } catch (\Throwable $e) {
