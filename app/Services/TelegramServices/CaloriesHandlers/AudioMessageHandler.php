@@ -106,7 +106,7 @@ class AudioMessageHandler implements MessageHandlerInterface
                             $productId = $generated['productId'];
                         }
 
-                        $this->generateTableBody($product, $productTranslation, $productId);
+                        $this->generateTableBody($product, $productTranslation, $productId, (bool) ($botUser->big_font ?? false));
 
                         $sentMessage = $telegram->sendMessage([
                             'chat_id' => $chatId,
@@ -193,7 +193,7 @@ class AudioMessageHandler implements MessageHandlerInterface
     {
         $raw = $this->speechToTextService->generateNewProductData($saidName);
         Log::info('answer: ');
-        Log::info(print_r($raw ,true));
+        Log::info(print_r($raw, true));
         $defaults = [
             'calories' => 0.0,
             'proteins' => 0.0,

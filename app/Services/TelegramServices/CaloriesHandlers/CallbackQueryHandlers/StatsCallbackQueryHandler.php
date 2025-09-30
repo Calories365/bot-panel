@@ -65,14 +65,16 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
             return;
         }
 
+        $useBigFont = (bool) ($botUser->big_font ?? false);
+
         if ($partOfDay) {
-            $this->formatAndSendPartOfDay($telegram, $chatId, $meals, $date, $partOfDay, $locale);
+            $this->formatAndSendPartOfDay($telegram, $chatId, $meals, $date, $partOfDay, $locale, $useBigFont);
         } else {
-            $this->formatAndSendAllDay($telegram, $chatId, $meals, $date, $locale);
+            $this->formatAndSendAllDay($telegram, $chatId, $meals, $date, $locale, $useBigFont);
         }
     }
 
-    private function formatAndSendPartOfDay($telegram, $chatId, $meals, $date, $partOfDay, $locale)
+    private function formatAndSendPartOfDay($telegram, $chatId, $meals, $date, $partOfDay, $locale, bool $useBigFont)
     {
         $total = [
             'calories' => 0,
@@ -101,10 +103,9 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
                 [__('calories365-bot.carbohydrates', [], $locale), round($carbohydrates)],
             ];
 
-            $mealMessage = Utilities::generateTableType2(
-                $meal['name']." ({$meal['quantity']}г)",
-                $productArray
-            );
+            $mealMessage = $useBigFont
+                ? Utilities::generateTableType2ForBigFont($meal['name']." ({$meal['quantity']}г)", $productArray)
+                : Utilities::generateTableType2($meal['name']." ({$meal['quantity']}г)", $productArray);
 
             $inlineKeyboard = [
                 [
@@ -137,10 +138,9 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
             default => __('calories365-bot.total_for_day', [], $locale)
         };
 
-        $finalMessageText = Utilities::generateTableType2(
-            __('calories365-bot.total_for_part_of_day', ['partOfDayName' => $partOfDayName], $locale),
-            $productArray
-        );
+        $finalMessageText = $useBigFont
+            ? Utilities::generateTableType2ForBigFont(__('calories365-bot.total_for_part_of_day', ['partOfDayName' => $partOfDayName], $locale), $productArray)
+            : Utilities::generateTableType2(__('calories365-bot.total_for_part_of_day', ['partOfDayName' => $partOfDayName], $locale), $productArray);
 
         $sent = $telegram->sendMessage([
             'chat_id' => $chatId,
@@ -158,7 +158,7 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
         ], 1800);
     }
 
-    private function formatAndSendAllDay($telegram, $chatId, $meals, $date, $locale)
+    private function formatAndSendAllDay($telegram, $chatId, $meals, $date, $locale, bool $useBigFont)
     {
 
         $partsOfDay = [
@@ -229,7 +229,10 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
                 [__('calories365-bot.carbohydrates', [], $locale), round($part['carbohydrates'])],
             ];
 
-            $messageText .= Utilities::generateTableType2($part['name'], $productArray)."\n\n";
+            $messageText .= ($useBigFont
+                ? Utilities::generateTableType2ForBigFont($part['name'], $productArray)
+                : Utilities::generateTableType2($part['name'], $productArray)
+            )."\n\n";
         }
 
         $productArray = [
@@ -239,9 +242,9 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
             [__('calories365-bot.carbohydrates', [], $locale), round($total['carbohydrates'])],
         ];
 
-        $messageText .= Utilities::generateTableType2(
-            __('calories365-bot.total_for_day', [], $locale),
-            $productArray
+        $messageText .= ($useBigFont
+            ? Utilities::generateTableType2ForBigFont(__('calories365-bot.total_for_day', [], $locale), $productArray)
+            : Utilities::generateTableType2(__('calories365-bot.total_for_day', [], $locale), $productArray)
         );
 
         $sent = $telegram->sendMessage([

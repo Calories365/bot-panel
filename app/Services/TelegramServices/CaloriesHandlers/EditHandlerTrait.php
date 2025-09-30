@@ -2,6 +2,7 @@
 
 namespace App\Services\TelegramServices\CaloriesHandlers;
 
+use App\Models\BotUser;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -64,7 +65,15 @@ trait EditHandlerTrait
         $product = $productData['product'];
         $productId = $productTranslation['id'];
 
-        $this->generateTableBody($product, $productTranslation, $productId);
+        $useBigFont = false;
+        try {
+            $botUser = BotUser::where('telegram_id', $chatId)->first();
+            $useBigFont = (bool) ($botUser->big_font ?? false);
+        } catch (\Throwable $e) {
+            Log::error('Failed to load BotUser for big_font: '.$e->getMessage());
+        }
+
+        $this->generateTableBody($product, $productTranslation, $productId, $useBigFont);
 
         try {
             $telegram->editMessageText([
@@ -122,7 +131,7 @@ trait EditHandlerTrait
         }
     }
 
-    protected function generateTableBody($product, $productTranslation, $productId): true
+    protected function generateTableBody($product, $productTranslation, $productId, bool $useBigFont): true
     {
         $productArray = [
             [__('calories365-bot.calories'),      $product['calories'],      round($product['calories'] / 100 * $product['quantity_grams'], 1)],
@@ -131,29 +140,32 @@ trait EditHandlerTrait
             [__('calories365-bot.carbohydrates'), $product['carbohydrates'], round($product['carbohydrates'] / 100 * $product['quantity_grams'], 1)],
         ];
 
-        $this->messageText = Utilities::generateTable(
-            $productTranslation['name'],
-            $product['quantity_grams'],
-            $productArray,
-            $productTranslation['said_name']
-        );
+        if ($useBigFont) {
+            $this->messageText = Utilities::generateTableForBigFont(
+                $productTranslation['name'],
+                $product['quantity_grams'],
+                $productArray,
+                $productTranslation['said_name']
+            );
+        } else {
+            $this->messageText = Utilities::generateTable(
+                $productTranslation['name'],
+                $product['quantity_grams'],
+                $productArray,
+                $productTranslation['said_name']
+            );
+        }
 
         $userId = auth()->user()->id ?? request()->userId ?? null;
         $clickCount = Cache::get("product_click_count_{$userId}_{$productId}", 0);
 
-        // Define the button text based on the scenario
         $saidName = $productTranslation['said_name'] ?? '';
         $originalName = $productTranslation['original_name'] ?? '';
 
-        // / Check if the product was already generated using the OpenAI API
         $wasGeneratedByOpenAI = (isset($product['edited']) && $product['edited'] == 1 &&
                 isset($product['verified']) && $product['verified'] == 1) ||
             (isset($product['ai_generated']) && $product['ai_generated'] === true);
 
-        // If the product was already generated via OpenAI or the click count > 0,
-        // show "Generate with AI"
-        // If this is the first click and the name differs from the original,
-        // show "Search"
         $useSearchButton = ! $wasGeneratedByOpenAI && $clickCount === 0 && $saidName !== $originalName && ! empty($originalName);
         $searchButtonText = $useSearchButton
             ? __('calories365-bot.search')

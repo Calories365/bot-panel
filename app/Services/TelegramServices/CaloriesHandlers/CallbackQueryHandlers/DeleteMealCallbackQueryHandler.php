@@ -80,7 +80,8 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
 
                         Cache::forget($cacheKey);
                     } else {
-                        $newText = $this->generateUpdatedStatsText($meals, $date, $partOfDay, $cachedLocale);
+                        $useBigFont = (bool) ($botUser->big_font ?? false);
+                        $newText = $this->generateUpdatedStatsText($meals, $date, $partOfDay, $cachedLocale, $useBigFont);
 
                         try {
                             $telegram->editMessageText([
@@ -98,7 +99,7 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
         }
     }
 
-    private function generateUpdatedStatsText(array $meals, string $date, ?string $partOfDay, string $locale): string
+    private function generateUpdatedStatsText(array $meals, string $date, ?string $partOfDay, string $locale, bool $useBigFont): string
     {
         if ($partOfDay) {
             $total = [
@@ -128,11 +129,19 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                 default => __('calories365-bot.total_for_day', [], $locale)
             };
 
-            return \App\Utilities\Utilities::generateTableType2(
-                __('calories365-bot.total_for_part_of_day', [
-                    'partOfDayName' => $partOfDayName,
-                ], $locale),
-                $productArray
+            return ($useBigFont
+                ? \App\Utilities\Utilities::generateTableType2ForBigFont(
+                    __('calories365-bot.total_for_part_of_day', [
+                        'partOfDayName' => $partOfDayName,
+                    ], $locale),
+                    $productArray
+                )
+                : \App\Utilities\Utilities::generateTableType2(
+                    __('calories365-bot.total_for_part_of_day', [
+                        'partOfDayName' => $partOfDayName,
+                    ], $locale),
+                    $productArray
+                )
             );
         } else {
             $partsOfDay = [
@@ -200,7 +209,10 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                     [__('calories365-bot.fats', [], $locale), round($p['fats'])],
                     [__('calories365-bot.carbohydrates', [], $locale), round($p['carbohydrates'])],
                 ];
-                $text .= \App\Utilities\Utilities::generateTableType2($p['name'], $table)."\n\n";
+                $text .= ($useBigFont
+                    ? \App\Utilities\Utilities::generateTableType2ForBigFont($p['name'], $table)
+                    : \App\Utilities\Utilities::generateTableType2($p['name'], $table)
+                )."\n\n";
             }
 
             $table = [
@@ -209,9 +221,9 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                 [__('calories365-bot.fats', [], $locale), round($total['fats'])],
                 [__('calories365-bot.carbohydrates', [], $locale), round($total['carbohydrates'])],
             ];
-            $text .= \App\Utilities\Utilities::generateTableType2(
-                __('calories365-bot.total_for_day', [], $locale),
-                $table
+            $text .= ($useBigFont
+                ? \App\Utilities\Utilities::generateTableType2ForBigFont(__('calories365-bot.total_for_day', [], $locale), $table)
+                : \App\Utilities\Utilities::generateTableType2(__('calories365-bot.total_for_day', [], $locale), $table)
             );
 
             return $text;

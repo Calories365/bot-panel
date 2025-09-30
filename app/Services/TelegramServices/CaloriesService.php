@@ -3,6 +3,7 @@
 namespace App\Services\TelegramServices;
 
 use App\Services\TelegramServices\CaloriesHandlers\AudioMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\BigFontCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CancelCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\DeleteCallbackQueryHandler;
@@ -20,6 +21,7 @@ use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\StatsCa
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\EditMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FeedbackMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\LanguageMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FontMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\TestMessageHandler;
@@ -71,6 +73,7 @@ class CaloriesService extends BaseService
         $h['/start'] = fn () => app(StartMessageHandler::class);
         $h['/test'] = fn () => app(TestMessageHandler::class);
         $h['/language'] = fn () => app(LanguageMessageHandler::class);
+        $h['font'] = fn () => app(FontMessageHandler::class);
         $h['feedback'] = fn () => app(FeedbackMessageHandler::class);
 
         Utilities::applySynonyms($h, [
@@ -78,6 +81,7 @@ class CaloriesService extends BaseService
             '/stats' => ['Statistics', 'Статистика'],
             '/language' => ['Choose language', 'Выбор языка', 'Вибір мови'],
             'feedback' => ['Feedback', 'Обратная связь', 'Зворотний зв\'язок'],
+            'font' => ['Font', 'font', 'Шрифт', 'шрифт', 'Большой шрифт', 'Великий шрифт', 'Large font', 'Big font'],
         ]);
 
         return $h;
@@ -104,6 +108,7 @@ class CaloriesService extends BaseService
         $h['Ukrainian'] = fn () => app(SetUkrainianLanguageCallbackQueryHandler::class);
 
         $h['Stats'] = fn () => app(StatsCallbackQueryHandler::class);
+        $h['bigfont'] = fn () => app(BigFontCallbackQueryHandler::class);
 
         Utilities::applySynonyms($h, [
             'Stats' => ['Breakfast', 'Dinner', 'Supper', 'AllDay'],

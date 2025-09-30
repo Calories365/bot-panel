@@ -43,6 +43,7 @@ class BotUser extends Model
     protected $casts = [
         'premium' => 'boolean',
         'is_banned' => 'boolean',
+        'big_font' => 'boolean',
         'last_active_at' => 'datetime',
     ];
 

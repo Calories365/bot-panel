@@ -60,6 +60,7 @@ class SpeechToTextService
         Log::info($data);
         $res = isset($data['text']);
         Log::info($res);
+
         return isset($data['text'])
             ? $this->analyzeFoodIntake($data['text'])
             : false;
@@ -87,6 +88,7 @@ class SpeechToTextService
 
             Log::info('Res: ');
             Log::info(print_r($result, true));
+
             return $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
         } catch (\Throwable $e) {

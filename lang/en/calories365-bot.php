@@ -219,4 +219,11 @@ EOT,
     'whole_day' => 'Whole day',
     'send_feedback_email' => 'You can send your feedback to the administrator:  @calories365_admin',
     'generate_with_ai' => 'Generate with AI',
+    // Font settings
+    'font' => 'Font',
+    'big_font_question' => 'Do you prefer large font?',
+    'yes' => 'Yes',
+    'no' => 'No',
+    'big_font_enabled' => 'Large font enabled',
+    'regular_font_selected' => 'Regular font selected',
 ];

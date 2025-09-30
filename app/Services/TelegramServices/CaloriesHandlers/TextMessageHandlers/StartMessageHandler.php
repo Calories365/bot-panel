@@ -29,7 +29,6 @@ class StartMessageHandler implements MessageHandlerInterface
     public function handle($bot, $telegram, $message, $botUser)
     {
         $text = $message->getText();
-
         $commonData = self::extractCommonData($message);
         $chatId = $commonData['chatId'];
 
@@ -82,6 +81,10 @@ class StartMessageHandler implements MessageHandlerInterface
 
                 $this->sendWelcome($bot, $telegram, $message, $commonData);
 
+                if ($botUser && $botUser->big_font === null) {
+                    $this->askBigFont($telegram, $chatId);
+                }
+
                 return;
             } else {
                 $telegram->sendMessage([
@@ -89,20 +92,29 @@ class StartMessageHandler implements MessageHandlerInterface
                     'text' => __('calories365-bot.invalid_or_used_code'),
                 ]);
 
+                if ($botUser && $botUser->big_font === null) {
+                    $this->askBigFont($telegram, $chatId);
+                }
+
                 return;
             }
         }
 
         if ($botUser && $botUser->calories_id) {
 
-            // already existed acc
-
             $this->sendWelcome($bot, $telegram, $message, $commonData);
+
+            Log::info(print_r($botUser, true));
+            if ($botUser->big_font === null) {
+                $this->askBigFont($telegram, $chatId);
+            }
+
+            // already existed acc
 
         } else {
 
             // from bot
-            Utilities::saveAndNotify(
+            $savedUser = Utilities::saveAndNotify(
                 $commonData['chatId'],
                 $commonData['firstName'],
                 $commonData['lastName'],
@@ -120,7 +132,29 @@ class StartMessageHandler implements MessageHandlerInterface
                 'chat_id' => $chatId,
                 'text' => __('calories365-bot.seems_you_are_new', ['lang' => App::getLocale()]),
             ]);
+
+            if ($savedUser && $savedUser->big_font === null) {
+                $this->askBigFont($telegram, $chatId);
+            }
         }
+    }
+
+    protected function askBigFont($telegram, $chatId): void
+    {
+        $inlineKeyboard = Keyboard::make([
+            'inline_keyboard' => [
+                [
+                    ['text' => __('calories365-bot.yes'), 'callback_data' => 'bigfont_yes'],
+                    ['text' => __('calories365-bot.no'),  'callback_data' => 'bigfont_no'],
+                ],
+            ],
+        ]);
+
+        $telegram->sendMessage([
+            'chat_id' => $chatId,
+            'text' => __('calories365-bot.big_font_question'),
+            'reply_markup' => $inlineKeyboard,
+        ]);
     }
 
     protected function sendWelcome($bot, $telegram, $message, array $commonData): void
@@ -142,6 +176,9 @@ class StartMessageHandler implements MessageHandlerInterface
             ])
             ->row([
                 ['text' => __('calories365-bot.choose_language')],
+                ['text' => __('calories365-bot.font')],
+            ])
+            ->row([
                 ['text' => __('calories365-bot.feedback')],
             ]);
 
