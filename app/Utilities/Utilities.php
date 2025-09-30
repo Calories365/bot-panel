@@ -142,7 +142,7 @@ class Utilities
     public static function generateTableForBigFont($title, $quantity, $dataArray, $saidProduct)
     {
         $youSaid = __('calories365-bot.you_said').$saidProduct."\n\n";
-        $title = $title."\n\n";
+        $foundTitle = __('calories365-bot.found').': '.$title."\n\n";
 
         $fmt = static function ($v): string {
             if (! is_numeric($v)) {
@@ -160,14 +160,14 @@ class Utilities
             $block100 .= "• {$name}: {$val100}\n";
         }
 
-        $blockQ = $quantity.__('calories365-bot.g').":\n";
+        $blockQ = __('calories365-bot.you_consumed').' '.$quantity.__('calories365-bot.g').":\n";
         foreach ($dataArray as $row) {
             $name = (string) $row[0];
             $valQ = $fmt($row[2]);
             $blockQ .= "• {$name}: {$valQ}\n";
         }
 
-        return $youSaid.$title.$block100."\n".$blockQ;
+        return $youSaid.$foundTitle.$block100."\n".$blockQ;
     }
 
     public static function generateTableType2($title, $dataArray)

@@ -46,6 +46,9 @@ class SetRussianLanguageCallbackQueryHandler implements CallbackQueryHandlerInte
             ])
             ->row([
                 ['text' => __('calories365-bot.choose_language')],
+                ['text' => __('calories365-bot.font')],
+            ])
+            ->row([
                 ['text' => __('calories365-bot.feedback')],
             ]);
 
