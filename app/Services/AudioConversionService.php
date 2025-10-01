@@ -39,9 +39,8 @@ class AudioConversionService
             [$localPath, $fullLocalPath] = $this->downloadAudio($downloadLink);
             [$convertedLocal, $convertedPath] = $this->convertToMp3($localPath, $fullLocalPath);
             if ($convertedPath) {
-                $text = $this->speechToTextService->convertSpeechToText($convertedPath);
-                Log::info($text);
-                return $text;
+                // передается сконвертированое в mp3 аудио
+                return $this->speechToTextService->convertSpeechToText($convertedPath);
             } else {
                 Log::error('Audio conversion failed.');
 

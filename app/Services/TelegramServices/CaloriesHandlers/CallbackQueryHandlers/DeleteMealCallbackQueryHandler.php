@@ -129,7 +129,7 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                 default => __('calories365-bot.total_for_day', [], $locale)
             };
 
-            return ($useBigFont
+            return $useBigFont
                 ? \App\Utilities\Utilities::generateTableType2ForBigFont(
                     __('calories365-bot.total_for_part_of_day', [
                         'partOfDayName' => $partOfDayName,
@@ -141,8 +141,7 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                         'partOfDayName' => $partOfDayName,
                     ], $locale),
                     $productArray
-                )
-            );
+                );
         } else {
             $partsOfDay = [
                 'morning' => [

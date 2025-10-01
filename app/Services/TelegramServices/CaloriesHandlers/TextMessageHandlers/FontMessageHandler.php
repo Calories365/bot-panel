@@ -31,4 +31,3 @@ class FontMessageHandler implements MessageHandlerInterface
         ]);
     }
 }
-

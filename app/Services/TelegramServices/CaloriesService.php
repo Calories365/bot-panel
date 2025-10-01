@@ -20,8 +20,8 @@ use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SearchC
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\StatsCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\EditMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FeedbackMessageHandler;
-use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\LanguageMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FontMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\LanguageMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\TestMessageHandler;

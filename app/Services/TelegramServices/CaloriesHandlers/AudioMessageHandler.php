@@ -60,8 +60,8 @@ class AudioMessageHandler implements MessageHandlerInterface
                     $subscription->incrementTranscribeCounter();
                 }
             }
+            // передается аудио и превращается в текст
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
-            Log::info(print_r($text, true));
             if (
                 $text &&
                 ! Str::contains(Str::lower($text), [

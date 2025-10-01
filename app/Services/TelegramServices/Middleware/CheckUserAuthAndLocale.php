@@ -39,7 +39,7 @@ class CheckUserAuthAndLocale
                 'tg_bot_user_'.$userId,
                 300,
                 static function () use ($userId) {
-                    return BotUser::select('id', 'telegram_id', 'calories_id', 'locale', 'premium','big_font')
+                    return BotUser::select('id', 'telegram_id', 'calories_id', 'locale', 'premium', 'big_font')
                         ->where('telegram_id', $userId)
                         ->first();
                 }

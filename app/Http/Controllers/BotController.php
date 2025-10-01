@@ -119,7 +119,6 @@ class BotController extends BaseController
     {
         try {
             $updateId = $request->input('update_id');
-            Log::info(1111);
             ProcessTelegramUpdate::dispatch(
                 $bot,
                 $request->all(),

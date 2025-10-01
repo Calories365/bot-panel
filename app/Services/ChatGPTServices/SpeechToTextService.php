@@ -56,10 +56,12 @@ class SpeechToTextService
             ->throw();
 
         $data = $response->json();
-        Log::info('data');
-        Log::info($data);
         $res = isset($data['text']);
-        Log::info($res);
+
+        Log::info('-----------------------');
+        Log::info('Сконвертированый текст с помощью Whisper: ');
+        Log::info(print_r($res, true));
+        Log::info('-----------------------');
 
         return isset($data['text'])
             ? $this->analyzeFoodIntake($data['text'])
@@ -72,8 +74,6 @@ class SpeechToTextService
         $prompt = __('calories365-bot.prompt_analyze_food_intake', [
             'text' => $text,
         ]);
-        Log::info('$prompt: ');
-        Log::info($prompt);
         try {
             $result = Http::timeout(45)
                 ->withHeaders([
@@ -86,11 +86,15 @@ class SpeechToTextService
                 ->throw()
                 ->json();
 
-            Log::info('Res: ');
-            Log::info(print_r($result, true));
-
-            return $result['choices'][0]['message']['content']
+            $final_result = $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
+
+            Log::info('-----------------------');
+            Log::info('Проанализированый текст с помощью gpt-4o: ');
+            Log::info(print_r($final_result, true));
+            Log::info('-----------------------');
+
+            return $final_result;
         } catch (\Throwable $e) {
             return ['error' => $e->getMessage()];
         }
@@ -115,8 +119,15 @@ class SpeechToTextService
                 ->throw()
                 ->json();
 
-            return $result['choices'][0]['message']['content']
+            $final_result = $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
+
+            Log::info('-----------------------');
+            Log::info('Сгенерированые данные продукта помощью gpt-4o: ');
+            Log::info(print_r($final_result, true));
+            Log::info('-----------------------');
+
+            return $final_result;
         } catch (\Throwable $e) {
             return ['error' => $e->getMessage()];
         }
