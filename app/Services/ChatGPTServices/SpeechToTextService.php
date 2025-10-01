@@ -60,7 +60,7 @@ class SpeechToTextService
 
         Log::info('-----------------------');
         Log::info('Сконвертированый текст с помощью Whisper: ');
-        Log::info(print_r($res, true));
+        Log::info(print_r($data['text'], true));
         Log::info('-----------------------');
 
         return isset($data['text'])
