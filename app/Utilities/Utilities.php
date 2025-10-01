@@ -153,7 +153,7 @@ class Utilities
             return rtrim(rtrim($s, '0'), '.');
         };
 
-        $block100 = __('calories365-bot.100g').":\n";
+        $block100 = __('calories365-bot.for_100g').":\n";
         foreach ($dataArray as $row) {
             $name = (string) $row[0];
             $val100 = $fmt($row[1]);

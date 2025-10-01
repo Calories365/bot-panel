@@ -104,7 +104,6 @@ class StartMessageHandler implements MessageHandlerInterface
 
             $this->sendWelcome($bot, $telegram, $message, $commonData);
 
-            Log::info(print_r($botUser, true));
             if ($botUser->big_font === null) {
                 $this->askBigFont($telegram, $chatId);
             }

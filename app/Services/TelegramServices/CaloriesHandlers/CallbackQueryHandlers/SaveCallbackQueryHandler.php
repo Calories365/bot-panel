@@ -68,10 +68,18 @@ class SaveCallbackQueryHandler implements CallbackQueryHandlerInterface
             [__('calories365-bot.carbohydrates'), $total['carbohydrates']],
         ];
 
-        $messageText = Utilities::generateTableType2ForBigFont(
-            __('calories365-bot.data_saved_you_consumed'),
-            $productArray
-        )."\n\n";
+        $big_font = $botUser->big_font ?? false;
+        if ($big_font) {
+            $messageText = Utilities::generateTableType2ForBigFont(
+                __('calories365-bot.data_saved_you_consumed'),
+                $productArray
+            )."\n\n";
+        } else {
+            $messageText = Utilities::generateTableType2(
+                __('calories365-bot.data_saved_you_consumed'),
+                $productArray
+            )."\n\n";
+        }
 
         Cache::forget("user_products_{$userId}");
         Cache::forget("user_final_message_id_{$userId}");
