@@ -18,6 +18,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class BotController extends BaseController
@@ -92,7 +93,9 @@ class BotController extends BaseController
             }
         }
 
+        $originalName = null;
         if ($bot) {
+            $originalName = $bot->getOriginal('name');
             $bot->update($data);
         } else {
             $bot = Bot::create($data);
@@ -101,6 +104,11 @@ class BotController extends BaseController
         $this->botManagmentService->syncManagers($request, $bot);
         if ($hasSecret && $secret_token !== null) {
             $bot->updateWeebHook($secret_token);
+        }
+
+        Cache::forget('bot:'.$bot->name);
+        if ($originalName && $originalName !== $bot->name) {
+            Cache::forget('bot:'.$originalName);
         }
 
         return $bot;
