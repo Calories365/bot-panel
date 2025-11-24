@@ -77,7 +77,15 @@ class BotController extends BaseController
     protected function handleBotData(BotDataRequest $request, ?Bot $bot = null): Bot
     {
         $data = $request->validated();
+        $secret_token = $data['secret_token'] ?? null;
+        $hasSecret = ! in_array($secret_token, [null, '', 'null'], true);
 
+        if ($hasSecret) {
+            $data['secret_token'] = hash('sha256', $secret_token);
+        } else {
+            unset($data['secret_token']);
+            $secret_token = null;
+        }
         foreach (['message_image', 'video_ru', 'video_ua', 'video_eng'] as $fileField) {
             if ($request->hasFile($fileField)) {
                 $data[$fileField] = $this->botManagmentService->handleFileUpload($request, $fileField);
@@ -91,7 +99,9 @@ class BotController extends BaseController
         }
 
         $this->botManagmentService->syncManagers($request, $bot);
-        $bot->updateWeebHook();
+        if ($hasSecret && $secret_token !== null) {
+            $bot->updateWeebHook($secret_token);
+        }
 
         return $bot;
     }

@@ -17,6 +17,14 @@ export const create_rows_default = [
         action: null,
     },
     {
+        label: "X-Telegram-Bot-Api-Secret-Token",
+        key: "Secret-Token",
+        type: "default",
+        emit_name: null,
+        placeholder: "enter token",
+        action: null,
+    },
+    {
         label: "Webhook",
         key: "web_hook",
         type: "default",

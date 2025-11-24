@@ -26,12 +26,9 @@ class BotDataRequest extends FormRequest
             'type_id' => 'nullable|exists:bot_types,id',
             'wordpress_endpoint' => 'nullable|string',
             'token' => 'required|string|max:255',
+            'secret_token' => 'nullable|string|max:255',
             'message' => 'nullable|string',
             'active' => 'boolean',
-            //            'message_image' => 'file|mimes:jpeg,jpg,png,mp4,mov,avi',
-            //            'video_ru' => 'file|mimes:jpeg,jpg,png,mp4,mov,avi',
-            //            'video_ua' => 'file|mimes:jpeg,jpg,png,mp4,mov,avi',
-            //            'video_eng' => 'file|mimes:jpeg,jpg,png,mp4,mov,avi',
             'web_hook' => 'required',
             'managers' => 'nullable',
         ];

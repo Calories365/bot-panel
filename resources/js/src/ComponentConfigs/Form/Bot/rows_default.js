@@ -18,6 +18,14 @@ export const rows_default = [
         required: true,
     },
     {
+        label: "X-Telegram-Bot-Api-Secret-Token",
+        key: "secret_token",
+        type: "default",
+        emit_name: null,
+        placeholder: "enter token",
+        action: null,
+    },
+    {
         label: "Webhook",
         key: "web_hook",
         type: "default",

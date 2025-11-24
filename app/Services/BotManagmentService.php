@@ -13,9 +13,8 @@ class BotManagmentService
         }
         $file = $request->file($fieldName);
         $filePath = $file->store('public/bots');
-        $url = Storage::url($filePath);
 
-        return str_replace('/storage/bots', '/images', $url);
+        return Storage::url($filePath);
     }
 
     public function syncManagers($request, $bot): void
