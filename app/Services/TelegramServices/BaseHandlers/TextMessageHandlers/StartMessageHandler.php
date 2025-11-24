@@ -37,7 +37,7 @@ class StartMessageHandler implements MessageHandlerInterface
                         try {
                             $telegram->sendPhoto([
                                 'chat_id' => $commonData['chatId'],
-                                'photo'   => $photo,
+                                'photo' => $photo,
                                 'caption' => $messageText,
                             ]);
                         } catch (\Telegram\Bot\Exceptions\TelegramOtherException $e) {
@@ -60,7 +60,7 @@ class StartMessageHandler implements MessageHandlerInterface
             } else {
                 $telegram->sendMessage([
                     'chat_id' => $commonData['chatId'],
-                    'text'    => $messageText,
+                    'text' => $messageText,
                 ]);
             }
 

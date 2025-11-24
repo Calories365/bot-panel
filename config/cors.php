@@ -19,7 +19,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [
+        'http://bot-panel.org',
+        'https://bot-panel.calories365.com',
+    ],
 
     'allowed_origins_patterns' => [],
 
