@@ -8,6 +8,7 @@ use App\Http\Controllers\NgrokController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
+use App\Http\Middleware\CheckTelegramSecretToken;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -82,7 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::group(['namespace' => 'App\Http\Controllers'], function () {
 
-    Route::post('/webhook/bot/{bot}', [BotController::class, 'handle'])->name('bot.webhook.handle');
+    Route::post('/webhook/bot/{bot}', [BotController::class, 'handle'])->middleware(CheckTelegramSecretToken::class)->name('bot.webhook.handle');
 
 });
 

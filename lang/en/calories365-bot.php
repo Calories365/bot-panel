@@ -170,7 +170,6 @@ Example input text:
 Calories - 890; Proteins - 0.2; Fats - 100; Carbohydrates - 0;
 EOT,
 
-
     'prompt_choose_relevant_products_part' => <<<'EOT'
 Which product best matches the name ":name"? Here are the available options: :productNames.
 EOT,

@@ -34,6 +34,7 @@ class Bot extends Model
     protected $fillable = [
         'name',
         'token',
+        'secret_token',
         'message',
         'active',
         'message_image',
@@ -69,17 +70,24 @@ class Bot extends Model
         return $this->belongsToMany(BotUser::class, 'bot_user_bans')->withTimestamps();
     }
 
-    public function updateWeebHook(): bool
+    public function updateWeebHook($secret_token = null): bool
     {
         try {
             $telegram = new Api($this->token);
             $webHook = $this->web_hook;
             $url = $webHook.'/api/webhook/bot/'.$this->name;
-            $telegram->setWebhook(['url' => $url]);
+
+            $params = ['url' => $url];
+
+            if ($secret_token !== null) {
+                $params['secret_token'] = $secret_token;
+            }
+
+            $telegram->setWebhook($params);
 
             return true;
         } catch (\Exception $e) {
-            Log::info('error during updating webhook');
+            Log::info('error during updating webhook: '.$e->getMessage());
 
             return false;
         }

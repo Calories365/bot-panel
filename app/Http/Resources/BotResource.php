@@ -63,6 +63,7 @@ class BotResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'token' => $this->token,
+            'secret_token' => null,
             'message' => $this->message,
             'message_image' => $imageInfo,
             'video_eng' => $video_engInfo,

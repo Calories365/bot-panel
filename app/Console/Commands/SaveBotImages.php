@@ -42,8 +42,6 @@ class SaveBotImages extends Command
         $targetPath = 'public/bots/'.basename($sourcePath);
         Storage::put($targetPath, $fileContents);
 
-        $url = Storage::url($targetPath);
-
-        return str_replace('/storage/bots', '/images', $url);
+        return Storage::url($targetPath);
     }
 }
