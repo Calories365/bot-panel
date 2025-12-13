@@ -28,7 +28,7 @@ class TelegramHandler
             'Default' => static fn () => $app->make(DefaultService::class),
             'Request' => static fn () => $app->make(RequestService::class),
             'Request2' => static fn () => $app->make(Request2Service::class),
-            'Calories' => static fn () => $app->make(CaloriesService::class),
+            'Calories' => static fn () => $app->make(CaloresService::class),
             'TikTok' => static fn () => $app->make(TikTokService::class),
         ];
 
