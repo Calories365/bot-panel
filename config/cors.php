@@ -22,7 +22,7 @@ return [
     'allowed_origins' => [
         'http://bot-panel.org',
         'https://bot-panel.calories365.com',
-        'https://bot-panel.calories365.online',
+        'https://bot-panel.calories365.com',
     ],
 
     'allowed_origins_patterns' => [],
