@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Bot;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 
 class CheckTelegramSecretToken
@@ -24,7 +25,9 @@ class CheckTelegramSecretToken
         }
 
         $botName = $request->route('bot');
-        $bot = Bot::where('name', $botName)->first();
+        $bot = Cache::remember("bot:{$botName}", 300, function () use ($botName) {
+            return Bot::where('name', $botName)->first();
+        });
 
         if ($bot === null) {
             return response()->json(['error' => 'Bot not found'], 404);
