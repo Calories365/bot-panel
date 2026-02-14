@@ -71,15 +71,26 @@ class ProcessTelegramUpdate implements ShouldBeUnique, ShouldQueue
 
                 return;
             }
+
+            if (str_contains($e->getMessage(), 'Forbidden:')) {
+                Log::info('Telegram bot blocked/kicked by user', [
+                    'bot' => $this->botName,
+                    'update_id' => $this->payload['update_id'] ?? null,
+                    'err' => $e->getMessage(),
+                ]);
+
+                return;
+            }
+
             Log::error('Telegram API error: '.$e->getMessage());
             throw $e;
         } catch (\Throwable $e) {
             Log::error('ProcessTelegramUpdate failed', [
                 'bot' => $this->botName,
                 'update_id' => $this->payload['update_id'] ?? null,
-                'type' => $this->payload['message'] ? 'message' :
-                    ($this->payload['callback_query'] ? 'callback' :
-                        ($this->payload['my_chat_member'] ? 'my_chat_member' : 'other')),
+                'type' => isset($this->payload['message']) ? 'message' :
+                    (isset($this->payload['callback_query']) ? 'callback' :
+                        (isset($this->payload['my_chat_member']) ? 'my_chat_member' : 'other')),
                 'err' => $e->getMessage(),
             ]);
 
