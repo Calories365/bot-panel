@@ -146,8 +146,8 @@ class VoiceMessageIntegrationTest extends TestCase
 
         Http::fake([
             'api.telegram.org/file/bot*' => Http::response($oga, 200),
-            'api.openai.com/v1/audio/transcriptions' => Http::response($wh, 200),
-            'api.openai.com/v1/chat/completions' => Http::response($gpt, 200),
+            '*audio/transcriptions*' => Http::response($wh, 200),
+            '*chat/completions*' => Http::response($gpt, 200),
         ]);
     }
 
