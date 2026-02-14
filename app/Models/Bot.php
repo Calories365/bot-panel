@@ -124,7 +124,7 @@ class Bot extends Model
                 ['manager_id' => $nextManager->id]
             );
             Log::info('trying to send msg: '.$message.' to manager '.$nextManager->name);
-            SendManagerNotification::dispatch($bot, $nextManager, $message);
+            SendManagerNotification::dispatch($bot, $nextManager, $message)->delay(2);
         } else {
             Log::info('No managers available for bot ID '.$bot->id);
         }
@@ -151,7 +151,7 @@ class Bot extends Model
 
             $nextManager->save();
 
-            SendManagerNotification::dispatch($bot, $nextManager, $message);
+            SendManagerNotification::dispatch($bot, $nextManager, $message)->delay(2);
         }
     }
 }

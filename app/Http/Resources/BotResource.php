@@ -8,6 +8,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class BotResource extends JsonResource
 {
+    private static ?array $cachedManagers = null;
+
+    private static ?array $cachedBotTypes = null;
+
     /**
      * Transform the resource into an array.
      *
@@ -23,19 +27,19 @@ class BotResource extends JsonResource
             ];
         });
 
-        $allManagers = Manager::all()->map(function ($manager) {
+        $allManagers = self::$cachedManagers ??= Manager::all()->map(function ($manager) {
             return [
                 'id' => $manager->id,
                 'name' => $manager->name,
             ];
-        });
+        })->toArray();
 
-        $allBotTypes = BotType::all()->map(function ($type) {
+        $allBotTypes = self::$cachedBotTypes ??= BotType::all()->map(function ($type) {
             return [
                 'id' => $type->id,
                 'name' => $type->name,
             ];
-        });
+        })->toArray();
 
         $typeInfo = [
             'type_id' => (int) $this->type_id,

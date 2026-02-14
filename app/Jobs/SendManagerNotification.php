@@ -33,7 +33,6 @@ class SendManagerNotification implements ShouldQueue
     {
         $telegram = new Api($this->bot->token);
         try {
-            sleep(2);
             $telegram->sendMessage([
                 'chat_id' => $this->manager->telegram_id,
                 'text' => $this->message,
