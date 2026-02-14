@@ -24,7 +24,7 @@ class SpeechToTextService
 
         switch ($locale) {
             case 'ua':
-                return env('OPENAI_API_KEY_UA');
+                return env('OPENAI_API_KEY_UK');
 
             case 'en':
                 return env('OPENAI_API_KEY_EN');
