@@ -38,4 +38,28 @@ return [
         'key' => env('DIARY_API_KEY', null),
     ],
 
+    'openai' => [
+        // Master switch: false -> api.openai.com, true -> local/proxy endpoints.
+        'local_models' => env('LOCAL_MODELS', false),
+
+        // Default public OpenAI base URL.
+        'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com'),
+
+        // Unified proxy endpoint (preferred for local mode).
+        'proxy_base_url' => env('OPENAI_PROXY_URL', null),
+        'proxy_token' => env('OPENAI_PROXY_TOKEN', null),
+
+        // Optional split endpoints/tokens for local mode compatibility.
+        'local_chat_base_url' => env('LLM_URL', null),
+        'local_chat_token' => env('LLM_TOKEN', null),
+        'local_audio_base_url' => env('WHISPER_URL', null),
+        'local_audio_token' => env('WHISPER_TOKEN', null),
+
+        // Request paths and model names.
+        'chat_path' => env('OPENAI_CHAT_PATH', '/v1/chat/completions'),
+        'audio_path' => env('OPENAI_AUDIO_PATH', '/v1/audio/transcriptions'),
+        'chat_model' => env('OPENAI_CHAT_MODEL', 'gpt-4o'),
+        'audio_model' => env('OPENAI_STT_MODEL', 'whisper-1'),
+    ],
+
 ];

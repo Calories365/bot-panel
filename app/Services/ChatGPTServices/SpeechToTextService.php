@@ -34,6 +34,71 @@ class SpeechToTextService
         }
     }
 
+    private function useLocalModels(): bool
+    {
+        return filter_var(config('services.openai.local_models', false), FILTER_VALIDATE_BOOL);
+    }
+
+    private function normalizeBaseUrl(?string $baseUrl): string
+    {
+        return rtrim((string) ($baseUrl ?: config('services.openai.base_url', 'https://api.openai.com')), '/');
+    }
+
+    private function joinBaseAndPath(string $baseUrl, string $path): string
+    {
+        $base = rtrim($baseUrl, '/');
+        $normalizedPath = '/'.ltrim($path, '/');
+
+        // Prevent duplicated /v1 segment when base already ends with /v1.
+        if (str_ends_with($base, '/v1') && str_starts_with($normalizedPath, '/v1/')) {
+            $normalizedPath = substr($normalizedPath, 3);
+        }
+
+        return $base.$normalizedPath;
+    }
+
+    private function getEndpoint(string $type): string
+    {
+        if ($type === 'audio') {
+            $baseUrl = $this->useLocalModels()
+                ? ($this->normalizeBaseUrl(config('services.openai.proxy_base_url')
+                    ?: config('services.openai.local_audio_base_url')))
+                : $this->normalizeBaseUrl(config('services.openai.base_url'));
+
+            return $this->joinBaseAndPath(
+                $baseUrl,
+                config('services.openai.audio_path', '/v1/audio/transcriptions')
+            );
+        }
+
+        $baseUrl = $this->useLocalModels()
+            ? ($this->normalizeBaseUrl(config('services.openai.proxy_base_url')
+                ?: config('services.openai.local_chat_base_url')))
+            : $this->normalizeBaseUrl(config('services.openai.base_url'));
+
+        return $this->joinBaseAndPath(
+            $baseUrl,
+            config('services.openai.chat_path', '/v1/chat/completions')
+        );
+    }
+
+    private function getAuthorizationToken(string $type): string
+    {
+        if (! $this->useLocalModels()) {
+            return $this->getApiKey();
+        }
+
+        if ($type === 'audio') {
+            return config('services.openai.proxy_token')
+                ?: config('services.openai.local_audio_token')
+                ?: $this->getApiKey();
+        }
+
+        return config('services.openai.proxy_token')
+            ?: config('services.openai.local_chat_token')
+            ?: $this->getApiKey();
+    }
+
     /* ---------- convertSpeechToText ---------- */
     public function convertSpeechToText(string $filePath)
     {
@@ -47,12 +112,12 @@ class SpeechToTextService
 
         $response = Http::timeout(45)
             ->attach('file', fopen($filePath, 'r'), basename($filePath))
-            ->attach('model', 'whisper-1')
+            ->attach('model', config('services.openai.audio_model', 'whisper-1'))
             ->attach('language', $languageCode)
             ->withHeaders([
-                'Authorization' => 'Bearer '.$this->getApiKey(),
+                'Authorization' => 'Bearer '.$this->getAuthorizationToken('audio'),
             ])
-            ->post('https://api.openai.com/v1/audio/transcriptions')
+            ->post($this->getEndpoint('audio'))
             ->throw();
 
         $data = $response->json();
@@ -77,10 +142,10 @@ class SpeechToTextService
         try {
             $result = Http::timeout(45)
                 ->withHeaders([
-                    'Authorization' => 'Bearer '.$this->getApiKey(),
+                    'Authorization' => 'Bearer '.$this->getAuthorizationToken('chat'),
                 ])
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => 'gpt-4o',
+                ->post($this->getEndpoint('chat'), [
+                    'model' => config('services.openai.chat_model', 'gpt-4o'),
                     'messages' => [['role' => 'user', 'content' => $prompt]],
                 ])
                 ->throw()
@@ -110,10 +175,10 @@ class SpeechToTextService
         try {
             $result = Http::timeout(45)
                 ->withHeaders([
-                    'Authorization' => 'Bearer '.$this->getApiKey(),
+                    'Authorization' => 'Bearer '.$this->getAuthorizationToken('chat'),
                 ])
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => 'gpt-4o',
+                ->post($this->getEndpoint('chat'), [
+                    'model' => config('services.openai.chat_model', 'gpt-4o'),
                     'messages' => [['role' => 'user', 'content' => $prompt]],
                 ])
                 ->throw()
@@ -175,10 +240,10 @@ class SpeechToTextService
         try {
             $result = Http::timeout(45)
                 ->withHeaders([
-                    'Authorization' => 'Bearer '.$this->getApiKey(),
+                    'Authorization' => 'Bearer '.$this->getAuthorizationToken('chat'),
                 ])
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => 'gpt-4o',
+                ->post($this->getEndpoint('chat'), [
+                    'model' => config('services.openai.chat_model', 'gpt-4o'),
                     'messages' => [['role' => 'user', 'content' => $prompt]],
                 ])
                 ->throw()
