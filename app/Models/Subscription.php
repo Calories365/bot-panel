@@ -35,7 +35,8 @@ class Subscription extends Model
 
     public function isPremium(): bool
     {
-        return $this->premium_until && $this->premium_until->copy()->addDay()->isFuture();
+//        return $this->premium_until && $this->premium_until->copy()->addDay()->isFuture();
+        return true;
     }
 
     public function canTranscribeAudio(): bool

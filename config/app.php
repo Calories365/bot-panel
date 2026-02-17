@@ -7,6 +7,8 @@ return [
 
     'supported_locales' => ['en', 'ru', 'ua'],
 
+    'benchmark_mode' => env('BENCHMARK_MODE', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -173,6 +175,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        ...array_filter([
+            env('BENCHMARK_MODE', false) ? App\Providers\BenchmarkServiceProvider::class : null,
+        ]),
     ])->toArray(),
 
     /*

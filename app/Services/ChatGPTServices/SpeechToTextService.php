@@ -2,6 +2,7 @@
 
 namespace App\Services\ChatGPTServices;
 
+use App\Services\Benchmark\BenchmarkContext;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -110,6 +111,8 @@ class SpeechToTextService
             default => 'uk',
         };
 
+        $t0 = microtime(true);
+
         $response = Http::timeout(45)
             ->attach('file', fopen($filePath, 'r'), basename($filePath))
             ->attach('model', config('services.openai.audio_model', 'whisper-1'))
@@ -120,13 +123,19 @@ class SpeechToTextService
             ->post($this->getEndpoint('audio'))
             ->throw();
 
+        $whisperMs = (microtime(true) - $t0) * 1000;
+
         $data = $response->json();
-        $res = isset($data['text']);
 
         Log::info('-----------------------');
         Log::info('Сконвертированый текст с помощью Whisper: ');
         Log::info(print_r($data['text'], true));
         Log::info('-----------------------');
+
+        if (BenchmarkContext::$currentRequestId) {
+            BenchmarkContext::recordTiming('whisper_ms', $whisperMs);
+            BenchmarkContext::recordData('whisper_text', $data['text'] ?? '');
+        }
 
         return isset($data['text'])
             ? $this->analyzeFoodIntake($data['text'])
@@ -140,6 +149,8 @@ class SpeechToTextService
             'text' => $text,
         ]);
         try {
+            $t0 = microtime(true);
+
             $result = Http::timeout(45)
                 ->withHeaders([
                     'Authorization' => 'Bearer '.$this->getAuthorizationToken('chat'),
@@ -151,6 +162,8 @@ class SpeechToTextService
                 ->throw()
                 ->json();
 
+            $llmMs = (microtime(true) - $t0) * 1000;
+
             $final_result = $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
 
@@ -158,6 +171,11 @@ class SpeechToTextService
             Log::info('Проанализированый текст с помощью gpt-4o: ');
             Log::info(print_r($final_result, true));
             Log::info('-----------------------');
+
+            if (BenchmarkContext::$currentRequestId) {
+                BenchmarkContext::recordTiming('llm_analyze_ms', $llmMs);
+                BenchmarkContext::recordData('llm_analyze_response', $final_result);
+            }
 
             return $final_result;
         } catch (\Throwable $e) {
@@ -173,6 +191,8 @@ class SpeechToTextService
         ]);
 
         try {
+            $t0 = microtime(true);
+
             $result = Http::timeout(45)
                 ->withHeaders([
                     'Authorization' => 'Bearer '.$this->getAuthorizationToken('chat'),
@@ -184,6 +204,8 @@ class SpeechToTextService
                 ->throw()
                 ->json();
 
+            $llmMs = (microtime(true) - $t0) * 1000;
+
             $final_result = $result['choices'][0]['message']['content']
                 ?? __('calories365-bot.data_not_extracted');
 
@@ -191,6 +213,10 @@ class SpeechToTextService
             Log::info('Сгенерированые данные продукта помощью gpt-4o: ');
             Log::info(print_r($final_result, true));
             Log::info('-----------------------');
+
+            if (BenchmarkContext::$currentRequestId) {
+                BenchmarkContext::recordTiming('llm_generate_ms', $llmMs);
+            }
 
             return $final_result;
         } catch (\Throwable $e) {
