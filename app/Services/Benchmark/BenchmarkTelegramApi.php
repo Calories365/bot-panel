@@ -43,6 +43,35 @@ class BenchmarkTelegramApi extends Api
         ]);
     }
 
+    public function editMessageText(array $params): Message
+    {
+        $this->sentMessages[] = array_merge($params, ['_method' => 'editMessageText']);
+
+        Log::debug('BenchmarkTelegramApi::editMessageText', [
+            'request_id' => $this->requestId,
+            'chat_id' => $params['chat_id'] ?? null,
+            'message_id' => $params['message_id'] ?? null,
+            'text_length' => strlen($params['text'] ?? ''),
+        ]);
+
+        return new Message([
+            'message_id' => $params['message_id'] ?? random_int(100000, 999999),
+            'chat' => ['id' => $params['chat_id'] ?? 0, 'type' => 'private'],
+            'date' => time(),
+            'text' => $params['text'] ?? '',
+        ]);
+    }
+
+    public function answerCallbackQuery(array $params): bool
+    {
+        Log::debug('BenchmarkTelegramApi::answerCallbackQuery', [
+            'request_id' => $this->requestId,
+            'callback_query_id' => $params['callback_query_id'] ?? null,
+        ]);
+
+        return true;
+    }
+
     public function getFile(array $params): File
     {
         return new File(['file_id' => $params['file_id'] ?? '', 'file_path' => 'benchmark/fake_audio.oga']);

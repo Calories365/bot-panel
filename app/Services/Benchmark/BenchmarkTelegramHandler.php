@@ -13,8 +13,8 @@ use Telegram\Bot\Api;
  * Wraps TelegramHandler to inject BenchmarkTelegramApi for benchmark requests,
  * while falling back to real Telegram API for normal user requests.
  *
- * Benchmark requests are identified by having a voice file_id that maps
- * to a request_id in Redis (set by BenchmarkCommand).
+ * Benchmark requests are identified by having a voice file_id or callback_query.id
+ * that maps to a request_id in Redis (set by BenchmarkCommand / BenchmarkGenerateCommand).
  */
 class BenchmarkTelegramHandler extends TelegramHandler
 {
@@ -43,8 +43,15 @@ class BenchmarkTelegramHandler extends TelegramHandler
 
     public function handle($botName, $request): void
     {
-        // Extract file_id from the webhook payload to resolve request_id.
+        // Extract file_id or callback_query.id from the webhook payload to resolve request_id.
         $this->pendingRequestId = $this->resolveRequestIdFromPayload($request);
+
+        // Set BenchmarkContext so SpeechToTextService can record timing.
+        // For voice flow, BenchmarkAudioConversionService also sets this (same value).
+        // For callback_query flow, this is the only place it gets set.
+        if ($this->pendingRequestId) {
+            BenchmarkContext::$currentRequestId = $this->pendingRequestId;
+        }
 
         try {
             parent::handle($botName, $request);
@@ -54,6 +61,7 @@ class BenchmarkTelegramHandler extends TelegramHandler
                 $this->currentBenchmarkApi = null;
             }
             $this->pendingRequestId = null;
+            BenchmarkContext::reset();
         }
     }
 
@@ -61,14 +69,21 @@ class BenchmarkTelegramHandler extends TelegramHandler
     {
         $data = method_exists($request, 'all') ? $request->all() : (array) $request;
 
+        // Voice/audio benchmark requests.
         $fileId = $data['message']['voice']['file_id']
             ?? $data['message']['audio']['file_id']
             ?? null;
 
-        if (! $fileId) {
-            return null;
+        if ($fileId) {
+            return Redis::get('benchmark:fileid_to_request:'.$fileId);
         }
 
-        return Redis::get('benchmark:fileid_to_request:'.$fileId);
+        // Callback query benchmark requests (generate KBJU benchmark).
+        $callbackId = $data['callback_query']['id'] ?? null;
+        if ($callbackId) {
+            return Redis::get('benchmark:callbackid_to_request:'.$callbackId);
+        }
+
+        return null;
     }
 }
