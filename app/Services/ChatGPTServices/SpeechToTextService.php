@@ -215,8 +215,8 @@ class SpeechToTextService
             Log::info('-----------------------');
 
             if (BenchmarkContext::$currentRequestId) {
-                BenchmarkContext::recordTiming('llm_generate_ms', $llmMs);
-                BenchmarkContext::recordData('llm_generate_raw', is_string($final_result) ? $final_result : json_encode($final_result));
+                BenchmarkContext::accumulateTiming('llm_generate_ms', $llmMs);
+                BenchmarkContext::appendData('llm_generate_raw', is_string($final_result) ? $final_result : json_encode($final_result));
             }
 
             return $final_result;

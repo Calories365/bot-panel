@@ -19,10 +19,29 @@ class BenchmarkContext
         }
     }
 
+    public static function accumulateTiming(string $key, float $valueMs): void
+    {
+        if (self::$currentRequestId) {
+            $redisKey = 'benchmark:timing:'.self::$currentRequestId;
+            $current = (float) Redis::hget($redisKey, $key);
+            Redis::hset($redisKey, $key, (string) round($current + $valueMs, 2));
+        }
+    }
+
     public static function recordData(string $key, string $value): void
     {
         if (self::$currentRequestId) {
             Redis::hset('benchmark:timing:'.self::$currentRequestId, $key, $value);
+        }
+    }
+
+    public static function appendData(string $key, string $value, string $separator = ' | '): void
+    {
+        if (self::$currentRequestId) {
+            $redisKey = 'benchmark:timing:'.self::$currentRequestId;
+            $current = Redis::hget($redisKey, $key);
+            $new = $current ? $current.$separator.$value : $value;
+            Redis::hset($redisKey, $key, $new);
         }
     }
 

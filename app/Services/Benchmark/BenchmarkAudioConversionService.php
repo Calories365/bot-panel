@@ -77,7 +77,9 @@ class BenchmarkAudioConversionService extends AudioConversionService
             if ($convertedLocal && Storage::disk('public')->exists($convertedLocal)) {
                 Storage::disk('public')->delete($convertedLocal);
             }
-            BenchmarkContext::reset();
+            // BenchmarkContext::reset() is NOT called here — the reset is done
+            // in BenchmarkTelegramHandler::handle() finally block, after the
+            // entire handler chain (including generateProduct AI calls) completes.
         }
     }
 }

@@ -96,15 +96,36 @@ class AudioMessageHandler implements MessageHandlerInterface
                             $product = $productInfo['product'];
                             $productId = $productTranslation['id'];
 
+                            Log::info('Product from DB', [
+                                'said' => $productInfo['said_name'] ?? $productTranslation['said_name'] ?? '',
+                                'found_name' => $productTranslation['name'],
+                                'calories' => $product['calories'],
+                                'proteins' => $product['proteins'],
+                                'fats' => $product['fats'],
+                                'carbs' => $product['carbohydrates'],
+                            ]);
                         } else {
 
                             $said = $productInfo['said_name'];
                             $grams = $productInfo['quantity_grams'] ?? 100;
 
+                            Log::info('Product not found in DB, generating via AI', [
+                                'said' => $said,
+                                'grams' => $grams,
+                            ]);
+
                             $generated = $this->generateProduct($said, $grams);
                             $productTranslation = $generated['productTranslation'];
                             $product = $generated['product'];
                             $productId = $generated['productId'];
+
+                            Log::info('AI generation result', [
+                                'said' => $said,
+                                'calories' => $product['calories'],
+                                'proteins' => $product['proteins'],
+                                'fats' => $product['fats'],
+                                'carbs' => $product['carbohydrates'],
+                            ]);
                         }
 
                         $this->generateTableBody($product, $productTranslation, $productId, (bool) ($botUser->big_font ?? false), $userId);
@@ -193,8 +214,7 @@ class AudioMessageHandler implements MessageHandlerInterface
     private function generateProduct(string $saidName, float $quantityGrams): array
     {
         $raw = $this->speechToTextService->generateNewProductData($saidName);
-        Log::info('answer: ');
-        Log::info(print_r($raw, true));
+
         $defaults = [
             'calories' => 0.0,
             'proteins' => 0.0,
@@ -208,12 +228,20 @@ class AudioMessageHandler implements MessageHandlerInterface
         $nutritional = $defaults;
 
         if (is_string($raw) && $raw !== '' && ! preg_match('/(sorry|извин|вибач|cannot|не могу|не можу|ошиб|error|помил)/iu', $raw)) {
+            Log::info('generateProduct: AI response OK', ['product' => $saidName, 'raw' => $raw]);
+
             $parsed = Utilities::parseAIGeneratedNutritionalData($raw);
 
             $allowedKeys = ['calories', 'proteins', 'carbohydrates', 'fats', 'edited', 'verified', 'ai_generated'];
             $parsedFiltered = array_intersect_key($parsed, array_flip($allowedKeys));
 
             $nutritional = array_replace($nutritional, $parsedFiltered);
+        } else {
+            Log::warning('generateProduct: AI generation failed, using defaults (zeros)', [
+                'product' => $saidName,
+                'raw_type' => gettype($raw),
+                'raw_value' => is_string($raw) ? $raw : json_encode($raw),
+            ]);
         }
 
         $uniqueId = uniqid('product_', true);
