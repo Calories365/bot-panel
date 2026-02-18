@@ -23,16 +23,13 @@ class SpeechToTextService
     {
         $locale = app()->getLocale();
 
-        switch ($locale) {
-            case 'ua':
-                return env('OPENAI_API_KEY_UK');
+        $primaryKey = match ($locale) {
+            'ua' => env('OPENAI_API_KEY_UK'),
+            'en' => env('OPENAI_API_KEY_EN'),
+            default => env('OPENAI_API_KEY_RU'),
+        };
 
-            case 'en':
-                return env('OPENAI_API_KEY_EN');
-
-            default:
-                return env('OPENAI_API_KEY_RU');
-        }
+        return $primaryKey;
     }
 
     private function useLocalModels(): bool
@@ -137,9 +134,13 @@ class SpeechToTextService
             BenchmarkContext::recordData('whisper_text', $data['text'] ?? '');
         }
 
-        return isset($data['text'])
-            ? $this->analyzeFoodIntake($data['text'])
-            : false;
+        if (! isset($data['text'])) {
+            return false;
+        }
+
+        $result = $this->analyzeFoodIntake($data['text']);
+
+        return is_string($result) ? $result : null;
     }
 
     /* ---------- analyzeFoodIntake ---------- */
@@ -175,6 +176,8 @@ class SpeechToTextService
             if (BenchmarkContext::$currentRequestId) {
                 BenchmarkContext::recordTiming('llm_analyze_ms', $llmMs);
                 BenchmarkContext::recordData('llm_analyze_response', $final_result);
+                BenchmarkContext::recordTiming('llm_analyze_prompt_tokens', $result['usage']['prompt_tokens'] ?? 0);
+                BenchmarkContext::recordTiming('llm_analyze_completion_tokens', $result['usage']['completion_tokens'] ?? 0);
             }
 
             return $final_result;
@@ -217,6 +220,8 @@ class SpeechToTextService
             if (BenchmarkContext::$currentRequestId) {
                 BenchmarkContext::accumulateTiming('llm_generate_ms', $llmMs);
                 BenchmarkContext::appendData('llm_generate_raw', is_string($final_result) ? $final_result : json_encode($final_result));
+                BenchmarkContext::accumulateTiming('llm_generate_prompt_tokens', $result['usage']['prompt_tokens'] ?? 0);
+                BenchmarkContext::accumulateTiming('llm_generate_completion_tokens', $result['usage']['completion_tokens'] ?? 0);
             }
 
             return $final_result;

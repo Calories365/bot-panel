@@ -350,6 +350,8 @@ class BenchmarkGenerateCommand extends Command
         $run = $task['run'];
 
         $llmGenerateMs = $result['llm_generate_ms'] ?? '';
+        $llmGeneratePromptTokens = $result['llm_generate_prompt_tokens'] ?? '';
+        $llmGenerateCompletionTokens = $result['llm_generate_completion_tokens'] ?? '';
         $generatedKbjuRaw = $result['llm_generate_raw'] ?? '';
         $botMessage = $this->extractEditedMessage($result);
 
@@ -363,6 +365,8 @@ class BenchmarkGenerateCommand extends Command
             'concurrency' => $concurrency,
             'total_latency_ms' => round($totalMs, 2),
             'llm_generate_ms' => $llmGenerateMs,
+            'llm_generate_prompt_tokens' => $llmGeneratePromptTokens,
+            'llm_generate_completion_tokens' => $llmGenerateCompletionTokens,
             'generated_kbju_raw' => $generatedKbjuRaw,
             'bot_message' => $botMessage,
             'timestamp' => now()->toIso8601String(),
@@ -428,6 +432,7 @@ class BenchmarkGenerateCommand extends Command
         $headers = [
             'label', 'model', 'gpu', 'product_name', 'lang', 'run', 'concurrency',
             'total_latency_ms', 'llm_generate_ms',
+            'llm_generate_prompt_tokens', 'llm_generate_completion_tokens',
             'generated_kbju_raw', 'bot_message', 'timestamp',
         ];
 
@@ -446,6 +451,8 @@ class BenchmarkGenerateCommand extends Command
             $row['concurrency'],
             $row['total_latency_ms'],
             $row['llm_generate_ms'],
+            $row['llm_generate_prompt_tokens'],
+            $row['llm_generate_completion_tokens'],
             $this->csvEscape((string) $row['generated_kbju_raw']),
             $this->csvEscape((string) $row['bot_message']),
             $row['timestamp'],

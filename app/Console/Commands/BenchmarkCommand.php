@@ -81,6 +81,12 @@ class BenchmarkCommand extends Command
             return 1;
         }
 
+        // Limit audio files to concurrency count — concurrency defines how many
+        // files are sent simultaneously in a single batch.
+        if ($concurrency < count($audioFiles)) {
+            $audioFiles = array_slice($audioFiles, 0, $concurrency);
+        }
+
         $this->info("Benchmark: {$label}");
         $this->info("Model: {$model} | GPU: {$gpu} | Lang: {$lang} | Concurrency: {$concurrency}");
         $this->info('Audio files: '.count($audioFiles));
@@ -109,8 +115,7 @@ class BenchmarkCommand extends Command
             $this->line('');
         }
 
-        // Build task list: run-first ordering so each batch has different files.
-        // Order: file1_run1, file2_run1, ..., fileN_run1, file1_run2, file2_run2, ...
+        // Build task list: all selected files dispatched simultaneously per run.
         $tasks = [];
         for ($run = 1; $run <= $runs; $run++) {
             foreach ($audioFiles as $audioFile) {
@@ -317,6 +322,10 @@ class BenchmarkCommand extends Command
         $whisperMs = $result['whisper_ms'] ?? '';
         $llmAnalyzeMs = $result['llm_analyze_ms'] ?? '';
         $llmGenerateMs = $result['llm_generate_ms'] ?? '';
+        $llmAnalyzePromptTokens = $result['llm_analyze_prompt_tokens'] ?? '';
+        $llmAnalyzeCompletionTokens = $result['llm_analyze_completion_tokens'] ?? '';
+        $llmGeneratePromptTokens = $result['llm_generate_prompt_tokens'] ?? '';
+        $llmGenerateCompletionTokens = $result['llm_generate_completion_tokens'] ?? '';
 
         // Extract product names from bot messages ("You said: X" lines).
         $detectedProducts = $this->extractDetectedProducts($result);
@@ -334,6 +343,10 @@ class BenchmarkCommand extends Command
             'whisper_latency_ms' => $whisperMs,
             'llm_analyze_ms' => $llmAnalyzeMs,
             'llm_generate_ms' => $llmGenerateMs,
+            'llm_analyze_prompt_tokens' => $llmAnalyzePromptTokens,
+            'llm_analyze_completion_tokens' => $llmAnalyzeCompletionTokens,
+            'llm_generate_prompt_tokens' => $llmGeneratePromptTokens,
+            'llm_generate_completion_tokens' => $llmGenerateCompletionTokens,
             'spoken_text_expected' => $spokenTextExpected,
             'whisper_text_actual' => $whisperText,
             'detected_products' => $detectedProducts,
@@ -417,6 +430,8 @@ class BenchmarkCommand extends Command
         $headers = [
             'label', 'model', 'gpu', 'audio_file', 'lang', 'run', 'concurrency',
             'total_latency_ms', 'whisper_latency_ms', 'llm_analyze_ms', 'llm_generate_ms',
+            'llm_analyze_prompt_tokens', 'llm_analyze_completion_tokens',
+            'llm_generate_prompt_tokens', 'llm_generate_completion_tokens',
             'spoken_text_expected', 'whisper_text_actual',
             'detected_products', 'llm_detection_response', 'bot_messages', 'timestamp',
         ];
@@ -438,6 +453,10 @@ class BenchmarkCommand extends Command
             $row['whisper_latency_ms'],
             $row['llm_analyze_ms'],
             $row['llm_generate_ms'],
+            $row['llm_analyze_prompt_tokens'],
+            $row['llm_analyze_completion_tokens'],
+            $row['llm_generate_prompt_tokens'],
+            $row['llm_generate_completion_tokens'],
             $this->csvEscape((string) $row['spoken_text_expected']),
             $this->csvEscape((string) $row['whisper_text_actual']),
             $this->csvEscape((string) $row['detected_products']),
