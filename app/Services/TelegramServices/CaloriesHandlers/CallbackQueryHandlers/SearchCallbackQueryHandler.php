@@ -65,7 +65,9 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
                     $resp = $this->diaryApiService->getTheMostRelevantProduct($formattedText, $calories_id, $locale);
                     $product = $resp['product'] ?? null;
 
-                    if (! $product) {
+                    if ($product) {
+                        $this->updateFromDb($products, $productId, $userId, $telegram, $chatId, $callbackQuery, $product);
+                    } else {
                         $this->updateViaAi($products, $productId, $userId, $telegram, $chatId, $callbackQuery);
                     }
                 } else {
@@ -82,10 +84,47 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
         }
     }
 
+    private function updateFromDb(&$products, $productId, $userId, $telegram, $chatId, $callbackQuery, array $wrapper): void
+    {
+        $actualProduct = $wrapper['product'] ?? [];
+        $dbTranslation = $wrapper['product_translation'] ?? null;
+
+        foreach (['calories', 'proteins', 'fats', 'carbohydrates', 'fibers', 'quantity_grams'] as $key) {
+            if (isset($actualProduct[$key])) {
+                $products[$productId]['product'][$key] = $actualProduct[$key];
+            }
+        }
+
+        if (isset($actualProduct['id'])) {
+            $products[$productId]['product']['id'] = $actualProduct['id'];
+        }
+
+        unset(
+            $products[$productId]['product']['edited'],
+            $products[$productId]['product']['verified'],
+            $products[$productId]['product']['ai_generated']
+        );
+
+        if ($dbTranslation) {
+            $products[$productId]['product_translation']['name'] = $dbTranslation['name'] ?? $products[$productId]['product_translation']['said_name'];
+            $products[$productId]['product_translation']['original_name'] = $dbTranslation['name'] ?? '';
+        }
+
+        Cache::put("user_products_{$userId}", $products, now()->addMinutes(30));
+        $this->updateProductMessage($telegram, $chatId, $products[$productId], $userId);
+
+        $telegram->answerCallbackQuery([
+            'callback_query_id' => $callbackQuery->getId(),
+            'text' => __('calories365-bot.product_data_updated'),
+            'show_alert' => false,
+        ]);
+    }
+
     private function updateViaAi(&$products, $productId, $userId, $telegram, $chatId, $callbackQuery): void
     {
         $saidName = $products[$productId]['product_translation']['said_name'];
 
+        $raw = null;
         try {
             $raw = $this->speechToTextService->generateNewProductData($saidName);
         } catch (\Throwable $e) {
@@ -119,7 +158,7 @@ class SearchCallbackQueryHandler implements CallbackQueryHandlerInterface
         $products[$productId]['product_translation']['name'] = $saidName;
 
         Cache::put("user_products_{$userId}", $products, now()->addMinutes(30));
-        $this->updateProductMessage($telegram, $chatId, $products[$productId]);
+        $this->updateProductMessage($telegram, $chatId, $products[$productId], $userId);
 
         $telegram->answerCallbackQuery([
             'callback_query_id' => $callbackQuery->getId(),

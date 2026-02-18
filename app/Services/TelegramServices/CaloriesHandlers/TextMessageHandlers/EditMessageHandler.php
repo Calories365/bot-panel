@@ -171,7 +171,7 @@ class EditMessageHandler implements MessageHandlerInterface
             $editingState['step'] = $nextStep;
             Cache::put("user_editing_{$userId}", $editingState, now()->addMinutes(30));
 
-            $this->updateProductMessage($telegram, $chatId, $userProducts[$productId]);
+            $this->updateProductMessage($telegram, $chatId, $userProducts[$productId], $userId);
 
             $this->editEditingMessage($telegram, $chatId, $messageId, $nextPrompt);
         } else {
