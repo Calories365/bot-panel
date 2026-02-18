@@ -58,7 +58,7 @@ class TestMessageHandler implements MessageHandlerInterface
                     $productTranslation = $productInfo['product_translation'];
                     $product = $productInfo['product'];
                     $productId = $productTranslation['id'];
-                    $this->generateTableBody($product, $productTranslation, $productId, (bool) ($botUser->big_font ?? false));
+                    $this->generateTableBody($product, $productTranslation, $productId, (bool) ($botUser->big_font ?? false), $userId);
 
                     $sentMessage = $telegram->sendMessage([
                         'chat_id' => $chatId,

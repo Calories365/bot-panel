@@ -15,7 +15,7 @@ trait EditHandlerTrait
 
     protected function saveEditing($telegram, $chatId, $userId, &$userProducts, $productId, $messageId, $botUser, $callbackQueryId = false)
     {
-        $this->updateProductMessage($telegram, $chatId, $userProducts[$productId]);
+        $this->updateProductMessage($telegram, $chatId, $userProducts[$productId], $userId);
 
         if ($callbackQueryId) {
             $telegram->answerCallbackQuery([
@@ -37,7 +37,7 @@ trait EditHandlerTrait
             Cache::put("user_products_{$userId}", $userProducts, now()->addMinutes(30));
         }
 
-        $this->updateProductMessage($telegram, $chatId, $userProducts[$productId]);
+        $this->updateProductMessage($telegram, $chatId, $userProducts[$productId], $userId);
 
         if ($callbackQueryId) {
             $telegram->answerCallbackQuery([
@@ -57,7 +57,7 @@ trait EditHandlerTrait
         Cache::forget("command_block{$userId}");
     }
 
-    protected function updateProductMessage($telegram, $chatId, $productData): void
+    protected function updateProductMessage($telegram, $chatId, $productData, ?int $userId = null): void
     {
         $messageId = $productData['message_id'];
 
@@ -73,7 +73,7 @@ trait EditHandlerTrait
             Log::error('Failed to load BotUser for big_font: '.$e->getMessage());
         }
 
-        $this->generateTableBody($product, $productTranslation, $productId, $useBigFont);
+        $this->generateTableBody($product, $productTranslation, $productId, $useBigFont, $userId);
 
         try {
             $telegram->editMessageText([
@@ -131,7 +131,7 @@ trait EditHandlerTrait
         }
     }
 
-    protected function generateTableBody($product, $productTranslation, $productId, bool $useBigFont): true
+    protected function generateTableBody($product, $productTranslation, $productId, bool $useBigFont, ?int $userId = null): true
     {
         $productArray = [
             [__('calories365-bot.calories'),      $product['calories'],      round($product['calories'] / 100 * $product['quantity_grams'], 1)],
@@ -156,7 +156,6 @@ trait EditHandlerTrait
             );
         }
 
-        $userId = auth()->user()->id ?? request()->userId ?? null;
         $clickCount = Cache::get("product_click_count_{$userId}_{$productId}", 0);
 
         $saidName = $productTranslation['said_name'] ?? '';

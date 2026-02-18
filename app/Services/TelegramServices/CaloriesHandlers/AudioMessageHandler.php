@@ -107,7 +107,7 @@ class AudioMessageHandler implements MessageHandlerInterface
                             $productId = $generated['productId'];
                         }
 
-                        $this->generateTableBody($product, $productTranslation, $productId, (bool) ($botUser->big_font ?? false));
+                        $this->generateTableBody($product, $productTranslation, $productId, (bool) ($botUser->big_font ?? false), $userId);
 
                         $sentMessage = $telegram->sendMessage([
                             'chat_id' => $chatId,
