@@ -16,7 +16,7 @@ class SpeechToTextService
     }
 
     /**
-     * Определяем нужный ключ в зависимости от текущей локали
+     * Определяем нужный ключ в зависимости от текущей локал и
      */
     private function getApiKey(): string
     {
