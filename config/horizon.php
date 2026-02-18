@@ -184,14 +184,13 @@ return [
         'supervisor-1' => [
             'connection' => 'redis',
             'queue' => ['telegram', 'default'],
-            'balance' => 'auto',
-            'autoScalingStrategy' => 'time',
+            'balance' => 'false',
             'maxProcesses' => 16,
             'maxTime' => 3600,
             'maxJobs' => 500,
             'memory' => 128,
             'tries' => 5,
-            'timeout' => 60,
+            'timeout' => 120,
             'nice' => 0,
         ],
     ],
@@ -199,16 +198,15 @@ return [
     'environments' => [
         'production' => [
             'supervisor-1' => [
-                'maxProcesses' => 16,
-                'balanceMaxShift' => 1,
-                'balanceCooldown' => 3,
+                'minProcesses' => 30,
+                'maxProcesses' => 30,
             ],
         ],
 
         'local' => [
             'supervisor-1' => [
-                'maxProcesses' => 50,
-                'minProcesses' => 50,
+                'minProcesses' => 30,
+                'maxProcesses' => 30,
             ],
         ],
     ],

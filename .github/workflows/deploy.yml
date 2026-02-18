@@ -2,7 +2,7 @@ name: Deploy bot-panel (host-runner)
 
 on:
   push:
-    branches: [main]
+    branches: [benchmark]
 
 jobs:
   deploy:
@@ -13,8 +13,8 @@ jobs:
         run: |
           set -euo pipefail
           cd /home/maxim/var/www/bot-panel/src
-          git fetch origin main
-          git reset --hard origin/main
+          git fetch origin benchmark
+          git reset --hard origin/benchmark
 
       - name: Docker compose up --build (recreate)
         working-directory: /home/maxim/var/www/bot-panel
