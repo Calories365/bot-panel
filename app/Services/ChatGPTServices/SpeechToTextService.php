@@ -159,6 +159,7 @@ class SpeechToTextService
                 ->post($this->getEndpoint('chat'), [
                     'model' => config('services.openai.chat_model', 'gpt-4o'),
                     'messages' => [['role' => 'user', 'content' => $prompt]],
+                    'temperature' => 0,
                 ])
                 ->throw()
                 ->json();
@@ -203,6 +204,7 @@ class SpeechToTextService
                 ->post($this->getEndpoint('chat'), [
                     'model' => config('services.openai.chat_model', 'gpt-4o'),
                     'messages' => [['role' => 'user', 'content' => $prompt]],
+                    'temperature' => 0,
                 ])
                 ->throw()
                 ->json();
@@ -277,6 +279,7 @@ class SpeechToTextService
                 ->post($this->getEndpoint('chat'), [
                     'model' => config('services.openai.chat_model', 'gpt-4o'),
                     'messages' => [['role' => 'user', 'content' => $prompt]],
+                    'temperature' => 0,
                 ])
                 ->throw()
                 ->json();

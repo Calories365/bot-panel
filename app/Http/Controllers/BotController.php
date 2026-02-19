@@ -51,7 +51,7 @@ class BotController extends BaseController
         return new BotResource($bot);
     }
 
-    public function destroy(Bot $bot): \Illuminate\Http\JsonResponse
+    public function destroy(Bot $bot): \Illuminate\Http\JsonResponse //1
     {
         $bot->delete();
 
