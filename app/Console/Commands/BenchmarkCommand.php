@@ -37,6 +37,8 @@ class BenchmarkCommand extends Command
 
     public function handle(): int
     {
+        $benchmarkStartedAt = microtime(true);
+
         if (! config('app.benchmark_mode')) {
             $this->error('BENCHMARK_MODE is not enabled. Set BENCHMARK_MODE=true in .env and restart containers.');
 
@@ -203,7 +205,17 @@ class BenchmarkCommand extends Command
         $bar->finish();
         $this->line('');
         $this->line('');
+
+        $benchmarkDurationSec = microtime(true) - $benchmarkStartedAt;
+        $benchmarkDurationMs = $benchmarkDurationSec * 1000;
+
         $this->info("Benchmark complete. {$completed}/{$totalRequests} requests processed.");
+        $this->info(sprintf(
+            'Total benchmark time: %s (%.2f sec / %.0f ms)',
+            $this->formatDuration($benchmarkDurationSec),
+            $benchmarkDurationSec,
+            $benchmarkDurationMs
+        ));
         $this->info("Results saved to: {$this->csvPath}");
 
         return 0;
@@ -477,5 +489,14 @@ class BenchmarkCommand extends Command
         }
 
         return $value;
+    }
+
+    private function formatDuration(float $seconds): string
+    {
+        $hours = (int) floor($seconds / 3600);
+        $minutes = (int) floor(($seconds % 3600) / 60);
+        $secs = $seconds - ($hours * 3600) - ($minutes * 60);
+
+        return sprintf('%02d:%02d:%06.3f', $hours, $minutes, $secs);
     }
 }
