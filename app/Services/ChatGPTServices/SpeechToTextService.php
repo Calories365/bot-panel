@@ -24,12 +24,33 @@ class SpeechToTextService
         $locale = app()->getLocale();
 
         $primaryKey = match ($locale) {
-            'ua' => env('OPENAI_API_KEY_UK'),
+            'ua' => $this->pickRandomApiKey([
+                env('OPENAI_API_KEY_UA'),
+                env('OPENAI_API_KEY_UA_2'),
+                env('OPENAI_API_KEY_UK'), // backward compatibility
+            ]) ?? env('OPENAI_API_KEY_RU'),
             'en' => env('OPENAI_API_KEY_EN'),
             default => env('OPENAI_API_KEY_RU'),
         };
 
         return $primaryKey;
+    }
+
+    /**
+     * Picks a random non-empty API key for simple load distribution.
+     */
+    private function pickRandomApiKey(array $keys): ?string
+    {
+        $availableKeys = array_values(array_filter(
+            $keys,
+            static fn ($key) => is_string($key) && $key !== ''
+        ));
+
+        if ($availableKeys === []) {
+            return null;
+        }
+
+        return $availableKeys[random_int(0, count($availableKeys) - 1)];
     }
 
     private function useLocalModels(): bool
