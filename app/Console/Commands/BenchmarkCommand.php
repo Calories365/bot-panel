@@ -18,6 +18,9 @@ class BenchmarkCommand extends Command
         {--runs=3 : Number of runs per audio file}
         {--warmup=1 : Warmup runs (not recorded)}
         {--concurrency=1 : Number of parallel requests}
+        {--max-files= : Limit number of audio files to use (default: all)}
+        {--shuffle-files : Shuffle selected audio files before running}
+        {--seed= : Optional seed for deterministic shuffle}
         {--output= : CSV output directory}
         {--label=default : Label for this benchmark run}
         {--model=gpt-4o : Model name for CSV}
@@ -50,6 +53,9 @@ class BenchmarkCommand extends Command
         $runs = (int) $this->option('runs');
         $warmup = (int) $this->option('warmup');
         $concurrency = (int) $this->option('concurrency');
+        $maxFilesOption = $this->option('max-files');
+        $shuffleFiles = (bool) $this->option('shuffle-files');
+        $seedOption = $this->option('seed');
         $label = $this->option('label');
         $model = $this->option('model');
         $gpu = $this->option('gpu');
@@ -83,15 +89,41 @@ class BenchmarkCommand extends Command
             return 1;
         }
 
-        // Limit audio files to concurrency count — concurrency defines how many
-        // files are sent simultaneously in a single batch.
-        if ($concurrency < count($audioFiles)) {
-            $audioFiles = array_slice($audioFiles, 0, $concurrency);
+        sort($audioFiles);
+
+        if ($shuffleFiles) {
+            if ($seedOption !== null && $seedOption !== '') {
+                mt_srand((int) $seedOption);
+            }
+            shuffle($audioFiles);
+        }
+
+        if ($maxFilesOption !== null && $maxFilesOption !== '') {
+            $maxFiles = (int) $maxFilesOption;
+            if ($maxFiles < 1) {
+                $this->error('--max-files must be >= 1');
+
+                return 1;
+            }
+            $audioFiles = array_slice($audioFiles, 0, $maxFiles);
+        }
+
+        if (empty($audioFiles)) {
+            $this->error('No audio files selected after applying filters.');
+
+            return 1;
         }
 
         $this->info("Benchmark: {$label}");
         $this->info("Model: {$model} | GPU: {$gpu} | Lang: {$lang} | Concurrency: {$concurrency}");
         $this->info('Audio files: '.count($audioFiles));
+        if ($shuffleFiles) {
+            $seedMsg = ($seedOption !== null && $seedOption !== '') ? " (seed={$seedOption})" : '';
+            $this->info("Selection: shuffled{$seedMsg}");
+        }
+        if ($maxFilesOption !== null && $maxFilesOption !== '') {
+            $this->info('Selection limit (--max-files): '.(int) $maxFilesOption);
+        }
         $this->info("Runs: {$runs} + {$warmup} warmup");
         $this->info("Output: {$this->csvPath}");
         $this->line('');
