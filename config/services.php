@@ -60,6 +60,10 @@ return [
         'audio_path' => env('OPENAI_AUDIO_PATH', '/v1/audio/transcriptions'),
         'chat_model' => env('OPENAI_CHAT_MODEL', 'gpt-4o'),
         'audio_model' => env('OPENAI_STT_MODEL', 'whisper-1'),
+
+        // When true: use short system prompt (~200 tok) + JSON schema response.
+        // When false: use original Laravel prompt embedded in user message.
+        'use_short_prompt' => env('OPENAI_USE_SHORT_PROMPT', false),
     ],
 
 ];
