@@ -8,7 +8,7 @@
 
 Webhook принимает [`BotController`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Http/Controllers/BotController.php), контроллер формирует payload и ставит job [`ProcessTelegramUpdate`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Jobs/ProcessTelegramUpdate.php) в очередь `telegram`, которую обслуживает Horizon. Внутри job управление передаётся центральному обработчику — [`TelegramHandler`](https://github.com/Maaaaxim/bot-panel/blob/main/app/Services/TelegramServices/TelegramHandler.php).
 
-Здесь запрос проходит первичную обработку при помощи middleware, реализованных через Laravel Pipeline. Middleware выполняют задачи логирования, фильтрации и авторизации до того, как запрос будет направлен к конкретной стратегии.
+Здесь  запрос проходит первичную обработку при помощи middleware, реализованных через Laravel Pipeline. Middleware выполняют задачи логирования, фильтрации и авторизации до того, как запрос будет направлен к конкретной стратегии.
 
 ### 2. Стратегии
 
