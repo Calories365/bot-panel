@@ -208,6 +208,7 @@ You can also watch an introduction video about the bot.
 
 Start tracking your calories easily and conveniently!
 EOT,
+    'open_mini_app' => '🥗 Open the app',
     'menu' => 'Menu',
     'statistics' => 'Statistics',
     'choose_language' => 'Choose language',

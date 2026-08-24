@@ -168,7 +168,18 @@ class StartMessageHandler implements MessageHandlerInterface
 
         $keyboard = Keyboard::make([
             'resize_keyboard' => true,
-        ])
+        ]);
+
+        if ($bot->web_app_url) {
+            $keyboard->row([
+                [
+                    'text' => __('calories365-bot.open_mini_app'),
+                    'web_app' => ['url' => $bot->web_app_url],
+                ],
+            ]);
+        }
+
+        $keyboard
             ->row([
                 ['text' => __('calories365-bot.menu')],
                 ['text' => __('calories365-bot.statistics')],

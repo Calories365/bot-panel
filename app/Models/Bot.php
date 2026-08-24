@@ -19,6 +19,7 @@ use Telegram\Bot\Api;
  * @property int $type_id
  * @property string|null $wordpress_endpoint
  * @property string|null $web_hook
+ * @property string|null $web_app_url
  * @property string|null $video_ru
  * @property string|null $video_ua
  * @property string|null $video_eng
@@ -41,6 +42,7 @@ class Bot extends Model
         'type_id',
         'wordpress_endpoint',
         'web_hook',
+        'web_app_url',
         'video_ru',
         'video_ua',
         'video_eng',
@@ -88,6 +90,37 @@ class Bot extends Model
             return true;
         } catch (\Exception $e) {
             Log::info('error during updating webhook: '.$e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * Point the bot's chat menu button at the Mini App (or reset it to the
+     * default commands button when no URL is configured).
+     */
+    public function updateMenuButton(?string $text = null): bool
+    {
+        try {
+            $telegram = new Api($this->token);
+
+            if (! $this->web_app_url) {
+                $telegram->post('setChatMenuButton', ['menu_button' => json_encode(['type' => 'commands'])]);
+
+                return true;
+            }
+
+            $telegram->post('setChatMenuButton', [
+                'menu_button' => json_encode([
+                    'type' => 'web_app',
+                    'text' => $text ?: 'Calories365',
+                    'web_app' => ['url' => $this->web_app_url],
+                ]),
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::info('error during updating menu button: '.$e->getMessage());
 
             return false;
         }

@@ -6,6 +6,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\NgrokController;
 use App\Http\Controllers\SyncController;
+use App\Http\Controllers\TelegramWebAppController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
 use App\Http\Middleware\CheckTelegramSecretToken;
@@ -94,4 +95,8 @@ Route::group(['middleware' => 'check.api.key', 'namespace' => 'App\Http\Controll
         ->name('update-premium-status.store');
     Route::get('/subscription-check/{calories_id}', [UsersController::class, 'subscriptionCheck'])
         ->name('subscription-check');
+    Route::post('/telegram/web-app/validate', [TelegramWebAppController::class, 'validateInitData'])
+        ->name('telegram.web-app.validate');
+    Route::post('/telegram/web-app/link', [TelegramWebAppController::class, 'link'])
+        ->name('telegram.web-app.link');
 });

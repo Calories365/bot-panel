@@ -30,6 +30,7 @@ class BotDataRequest extends FormRequest
             'message' => 'nullable|string',
             'active' => 'boolean',
             'web_hook' => 'required',
+            'web_app_url' => 'nullable|string|max:255',
             'managers' => 'nullable',
         ];
     }

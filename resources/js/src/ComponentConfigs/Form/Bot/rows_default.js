@@ -35,6 +35,14 @@ export const rows_default = [
         required: true,
     },
     {
+        label: "Mini App URL",
+        key: "web_app_url",
+        type: "default",
+        emit_name: null,
+        placeholder: "https://calories365.com",
+        action: null,
+    },
+    {
         label: "Bot Type",
         key: "type_id",
         type: "dropdown",

@@ -208,6 +208,7 @@ https://calculator.calories365.xyz?lang=ua
 Почніть вести свій щоденник калорій легко та зручно!
 EOT,
 
+    'open_mini_app' => '🥗 Відкрити застосунок',
     'menu' => 'Меню',
     'statistics' => 'Статистика',
     'choose_language' => 'Вибір мови',

@@ -76,6 +76,7 @@ class BotResource extends JsonResource
             'active' => (int) $this->active,
             'wordpress_endpoint' => $this->wordpress_endpoint,
             'web_hook' => $this->web_hook,
+            'web_app_url' => $this->web_app_url,
             'type_id' => $typeInfo,
             'managers' => [
                 'managers' => $botManagers,

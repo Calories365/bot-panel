@@ -94,8 +94,10 @@ class BotController extends BaseController
         }
 
         $originalName = null;
+        $originalWebAppUrl = null;
         if ($bot) {
             $originalName = $bot->getOriginal('name');
+            $originalWebAppUrl = $bot->getOriginal('web_app_url');
             $bot->update($data);
         } else {
             $bot = Bot::create($data);
@@ -104,6 +106,10 @@ class BotController extends BaseController
         $this->botManagmentService->syncManagers($request, $bot);
         if ($hasSecret && $secret_token !== null) {
             $bot->updateWeebHook($secret_token);
+        }
+
+        if ($originalWebAppUrl !== $bot->web_app_url) {
+            $bot->updateMenuButton();
         }
 
         Cache::forget('bot:'.$bot->name);
