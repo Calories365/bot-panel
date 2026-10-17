@@ -2,11 +2,11 @@
 
 namespace App\Services\TelegramServices\CaloriesHandlers;
 
-use App\Models\Subscription;
 use App\Services\AudioConversionService;
 use App\Services\ChatGPTServices\SpeechToTextService;
 use App\Services\DiaryApiService;
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
+use App\Services\VoiceRateLimiter;
 use App\Traits\BasicDataExtractor;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
@@ -23,14 +23,18 @@ class AudioMessageHandler implements MessageHandlerInterface
 
     protected SpeechToTextService $speechToTextService;
 
+    protected VoiceRateLimiter $voiceRateLimiter;
+
     public function __construct(
         AudioConversionService $audioConversionService,
         DiaryApiService $diaryApiService,
-        SpeechToTextService $speechToTextService
+        SpeechToTextService $speechToTextService,
+        VoiceRateLimiter $voiceRateLimiter
     ) {
         $this->audioConversionService = $audioConversionService;
         $this->diaryApiService = $diaryApiService;
         $this->speechToTextService = $speechToTextService;
+        $this->voiceRateLimiter = $voiceRateLimiter;
     }
 
     public function handle($bot, $telegram, $message, $botUser)
@@ -41,32 +45,22 @@ class AudioMessageHandler implements MessageHandlerInterface
 
         if (isset($message['voice'])) {
 
-            $subscription = null;
+            // No paid limit: only the spam guard, shared with voice input on the site.
+            $caloriesId = (int) $botUser->calories_id;
+            if (! $this->voiceRateLimiter->attempt($caloriesId)) {
+                $telegram->sendMessage([
+                    'chat_id' => $chatId,
+                    'text' => __('calories365-bot.voice_rate_limited', [
+                        'minutes' => $this->voiceRateLimiter->minutesUntilAvailable($caloriesId),
+                    ]),
+                ]);
 
-            // for academic usage
-            if ($bot->name != 'calories365KNU_bot') {
-
-                $subscription = Subscription::firstOrCreate(
-                    ['user_id' => $botUser->calories_id],
-                );
-                if (! $subscription->canTranscribeAudio()) {
-                    $telegram->sendMessage([
-                        'chat_id' => $chatId,
-                        'text' => __('calories365-bot.subscription_required_message'),
-                    ]);
-
-                    return;
-                }
+                return;
             }
+
             // передается аудио и превращается в текст
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
             Log::info(print_r($text, true));
-
-            // An attempt is charged only for speech that was recognised: a failure in
-            // Whisper or GPT is ours, not the user's.
-            if ($text && $subscription && ! $subscription->isPremium()) {
-                $subscription->incrementTranscribeCounter();
-            }
 
             if (
                 $text &&

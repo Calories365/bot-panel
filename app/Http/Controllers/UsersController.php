@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\BotUser;
-use App\Models\Subscription;
 use App\Services\BotUsersService;
 use App\Services\DiaryApiService;
+use App\Services\VoiceRateLimiter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
@@ -98,22 +98,15 @@ class UsersController extends BaseController
         ]);
     }
 
-    public function subscriptionCheck($calories_id): \Illuminate\Http\JsonResponse
+    /**
+     * Whether the account may record one more voice message on the site.
+     *
+     * Only the spam guard shared with the bot applies; there is no paid limit.
+     */
+    public function subscriptionCheck($calories_id, VoiceRateLimiter $voiceRateLimiter): \Illuminate\Http\JsonResponse
     {
-        $subscription = Subscription::firstOrCreate(
-            ['user_id' => $calories_id],
-        );
-
-        // Checked before counting, and premium is not counted — the same rule as
-        // the bot's AudioMessageHandler, so the site and the bot share 11 free uses.
-        $canTranscribeAudio = $subscription->canTranscribeAudio();
-
-        if ($canTranscribeAudio && ! $subscription->isPremium()) {
-            $subscription->incrementTranscribeCounter();
-        }
-
         return response()->json([
-            'canTranscribeAudio' => $canTranscribeAudio,
+            'canTranscribeAudio' => $voiceRateLimiter->attempt((int) $calories_id),
         ]);
     }
 }

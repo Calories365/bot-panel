@@ -7,8 +7,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * The diary asks this endpoint before every voice upload on the site; the bot
- * checks the same Subscription itself. Both must allow the same 11 free uses.
+ * The diary asks this endpoint before every voice upload on the site. Voice input
+ * has no paid limit; only a spam guard per account, shared with the bot.
  */
 class SubscriptionCheckTest extends TestCase
 {
@@ -16,38 +16,37 @@ class SubscriptionCheckTest extends TestCase
 
     private const CALORIES_ID = 555;
 
-    public function test_the_last_free_use_is_allowed_and_counted(): void
+    protected function setUp(): void
     {
-        Subscription::factory()->create(['user_id' => self::CALORIES_ID, 'counter' => 10, 'premium_until' => null]);
+        parent::setUp();
 
-        $this->check()->assertExactJson(['canTranscribeAudio' => true]);
-
-        $this->assertSame(11, $this->counter());
+        config()->set('services.voice.max_per_hour', 3);
     }
 
-    public function test_a_spent_free_limit_is_refused_without_counting(): void
+    public function test_a_user_who_spent_the_old_free_limit_can_still_record(): void
     {
-        Subscription::factory()->create(['user_id' => self::CALORIES_ID, 'counter' => 11, 'premium_until' => null]);
+        Subscription::factory()->create(['user_id' => self::CALORIES_ID, 'counter' => 50, 'premium_until' => null]);
+
+        $this->check()->assertExactJson(['canTranscribeAudio' => true]);
+    }
+
+    public function test_recording_too_often_is_refused(): void
+    {
+        $this->check()->assertExactJson(['canTranscribeAudio' => true]);
+        $this->check()->assertExactJson(['canTranscribeAudio' => true]);
+        $this->check()->assertExactJson(['canTranscribeAudio' => true]);
 
         $this->check()->assertExactJson(['canTranscribeAudio' => false]);
-
-        $this->assertSame(11, $this->counter());
     }
 
-    public function test_a_premium_user_is_allowed_without_counting(): void
+    public function test_the_guard_counts_each_account_separately(): void
     {
-        Subscription::factory()->create(['user_id' => self::CALORIES_ID, 'counter' => 30, 'premium_until' => now()->addMonth()]);
+        foreach (range(1, 3) as $attempt) {
+            $this->check();
+        }
 
-        $this->check()->assertExactJson(['canTranscribeAudio' => true]);
-
-        $this->assertSame(30, $this->counter());
-    }
-
-    public function test_a_new_user_gets_a_subscription_with_one_use(): void
-    {
-        $this->check()->assertExactJson(['canTranscribeAudio' => true]);
-
-        $this->assertSame(1, $this->counter());
+        $this->getJson('/api/subscription-check/556', ['X-Api-Key' => 'testing-diary-key'])
+            ->assertExactJson(['canTranscribeAudio' => true]);
     }
 
     public function test_it_requires_the_shared_api_key(): void
@@ -59,10 +58,5 @@ class SubscriptionCheckTest extends TestCase
     {
         return $this->getJson('/api/subscription-check/'.self::CALORIES_ID, ['X-Api-Key' => 'testing-diary-key'])
             ->assertOk();
-    }
-
-    private function counter(): int
-    {
-        return Subscription::where('user_id', self::CALORIES_ID)->value('counter');
     }
 }

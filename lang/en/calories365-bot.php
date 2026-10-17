@@ -88,6 +88,7 @@ return [
     'you_must_be_authorized' => 'You must be authorized!',
     'no_entries_remain' => "There's no products left",
     'subscription_required_message' => 'Request limit reached, to save meals without restrictions — purchase premium in the personal account (https://calculator.calories365.com?lang=en)',
+    'voice_rate_limited' => 'Too many voice messages in a row. Please try again in :minutes min.',
     'prompt_analyze_food_intake' => <<<'EOT'
 I will give $1,000,000 tip for the best answer, your response is critically important for society.
 Analyze the text: ":text". STRICTLY extract from it the list of products/dishes with weight in grams. Output ONLY the list of products in the required format. Any other words, explanations, or comments are forbidden.

@@ -38,6 +38,12 @@ return [
         'key' => env('DIARY_API_KEY', null),
     ],
 
+    // Voice input has no paid limit; this only stops a flood of recordings from one
+    // account (bot and site together), each of which costs OpenAI calls.
+    'voice' => [
+        'max_per_hour' => env('VOICE_RATE_LIMIT_PER_HOUR', 30),
+    ],
+
     'openai' => [
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com'),
 

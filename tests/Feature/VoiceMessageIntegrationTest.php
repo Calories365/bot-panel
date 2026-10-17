@@ -74,30 +74,35 @@ class VoiceMessageIntegrationTest extends TestCase
         $this->assertArrayHasKey(24794, Cache::get('user_products_111111'));
     }
 
-    public function test_a_failed_recognition_does_not_use_up_the_free_limit(): void
+    public function test_a_user_who_spent_the_old_free_limit_still_gets_an_answer(): void
     {
-        $this->partialMock(AudioConversionService::class, fn ($m) => $m->shouldReceive('processAudioMessage')->andReturn(null));
         [$bot, $payload] = $this->prepareBotAndPayload();
-        $subscription = Subscription::factory()->create(['user_id' => 555, 'counter' => 3, 'premium_until' => null]);
+        Subscription::factory()->create(['user_id' => 555, 'counter' => 50, 'premium_until' => null]);
 
         $this->postJson(route('bot.webhook.handle', ['bot' => $bot->name]), $payload, [
             'X-Telegram-Bot-Api-Secret-Token' => self::SECRET,
         ])->assertOk();
 
-        $this->assertSame(3, $subscription->fresh()->counter);
-        $this->assertSame(__('calories365-bot.failed_to_recognize_audio_message'), end($this->sent)['text']);
+        $this->assertStringContainsString('Творог', $this->sent[0]['text']);
     }
 
-    public function test_a_recognized_message_uses_one_attempt_of_the_free_limit(): void
+    public function test_too_many_voice_messages_in_a_row_are_refused(): void
     {
+        config()->set('services.voice.max_per_hour', 1);
         [$bot, $payload] = $this->prepareBotAndPayload();
-        $subscription = Subscription::factory()->create(['user_id' => 555, 'counter' => 3, 'premium_until' => null]);
+        $headers = ['X-Telegram-Bot-Api-Secret-Token' => self::SECRET];
 
-        $this->postJson(route('bot.webhook.handle', ['bot' => $bot->name]), $payload, [
-            'X-Telegram-Bot-Api-Secret-Token' => self::SECRET,
-        ])->assertOk();
+        $this->postJson(route('bot.webhook.handle', ['bot' => $bot->name]), $payload, $headers)->assertOk();
+        $answered = count($this->sent);
 
-        $this->assertSame(4, $subscription->fresh()->counter);
+        $payload['update_id']++;
+        $this->postJson(route('bot.webhook.handle', ['bot' => $bot->name]), $payload, $headers)->assertOk();
+
+        $this->assertCount($answered + 1, $this->sent);
+        $this->assertStringContainsString(
+            trim(explode(':minutes', __('calories365-bot.voice_rate_limited'))[0]),
+            end($this->sent)['text']
+        );
     }
 
     /* ----------------------------------------------------------------- */
