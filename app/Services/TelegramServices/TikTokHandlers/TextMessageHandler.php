@@ -62,6 +62,13 @@ class TextMessageHandler implements MessageHandlerInterface
             return true;
         }
 
+        $images = $this->extractImages($payload);
+        if ($images) {
+            $this->sendSlideshow($telegram, $message->getChat()->getId(), $images, $payload);
+
+            return true;
+        }
+
         $videoUrl = $payload['play'] ?? $payload['wmplay'] ?? null;
         if (! $videoUrl) {
             $telegram->sendMessage([
@@ -78,5 +85,85 @@ class TextMessageHandler implements MessageHandlerInterface
         ]);
 
         return true;
+    }
+
+    /**
+     * Photo posts (a slideshow of images with music) have no video: the API
+     * returns only a blank clip with the sound for them.
+     */
+    private function extractImages(array $payload): array
+    {
+        $images = $payload['images'] ?? $payload['image_post_info']['images'] ?? [];
+
+        if (! is_array($images)) {
+            return [];
+        }
+
+        $urls = [];
+
+        foreach ($images as $image) {
+            $url = is_array($image)
+                ? ($image['url'] ?? $image['url_list'][0] ?? $image['display_image']['url_list'][0] ?? null)
+                : $image;
+
+            if (is_string($url) && $url !== '') {
+                $urls[] = $url;
+            }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Sends the pictures as albums and the soundtrack as an audio file.
+     */
+    private function sendSlideshow($telegram, $chatId, array $images, array $payload): void
+    {
+        foreach (array_chunk($images, 10) as $chunk) {
+            $this->sendImages($telegram, $chatId, $chunk);
+        }
+
+        $musicUrl = $payload['music_info']['play'] ?? $payload['music'] ?? null;
+        if (! $musicUrl) {
+            return;
+        }
+
+        try {
+            $telegram->sendAudio(array_filter([
+                'chat_id' => $chatId,
+                'audio' => InputFile::create($musicUrl, 'tiktok-audio.mp3'),
+                'title' => $payload['music_info']['title'] ?? null,
+                'performer' => $payload['music_info']['author'] ?? null,
+            ]));
+        } catch (\Throwable $e) {
+            Log::error("TikTok music sending failed: {$e->getMessage()}");
+        }
+    }
+
+    /**
+     * Telegram accepts from 2 to 10 pictures in one album.
+     */
+    private function sendImages($telegram, $chatId, array $urls): void
+    {
+        try {
+            if (count($urls) === 1) {
+                $telegram->sendPhoto([
+                    'chat_id' => $chatId,
+                    'photo' => InputFile::create($urls[0], 'photo.jpg'),
+                ]);
+
+                return;
+            }
+
+            $telegram->sendMediaGroup([
+                'chat_id' => $chatId,
+                'media' => json_encode(array_map(
+                    static fn ($url) => ['type' => 'photo', 'media' => $url],
+                    $urls
+                )),
+            ]);
+        } catch (\Throwable $e) {
+            Log::error("TikTok album sending failed: {$e->getMessage()}");
+        }
     }
 }
