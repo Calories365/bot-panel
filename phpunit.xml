@@ -43,5 +43,11 @@
         <server name="OPENAI_API_KEY_RU" value="testing" force="true"/>
         <server name="OPENAI_API_KEY_UK" value="testing" force="true"/>
         <server name="OPENAI_API_KEY_EN" value="testing" force="true"/>
+        <!-- Symfony Console (artisan migrate:fresh under RefreshDatabase) asks stty for
+             the terminal width when COLUMNS is unset; under `docker exec` without a TTY
+             those shell_exec/proc_open calls made PHP in this image segfault (exit 139)
+             on the full run.
+             getenv() is what Symfony reads, hence env, not server. -->
+        <env name="COLUMNS" value="120" force="true"/>
     </php>
 </phpunit>
