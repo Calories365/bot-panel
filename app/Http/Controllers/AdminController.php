@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Routing\Controller as BaseController;
 
-class AdminController extends BaseController //123
+class AdminController extends BaseController // 123
 {
     use AuthorizesRequests, ValidatesRequests;
 
