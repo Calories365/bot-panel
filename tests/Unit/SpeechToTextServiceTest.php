@@ -38,10 +38,32 @@ class SpeechToTextServiceTest extends TestCase
 
         $this->assertSame('Творог - 225 граммов;', $result);
 
+        // gpt-transcribe takes "languages[]"; gpt-4o and whisper-1 are switched off in 2027.
         Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '/audio/transcriptions')
-            && collect($request->data())->contains(fn ($part) => ($part['name'] ?? null) === 'language' && $part['contents'] === 'ru'));
+            && $this->part($request, 'model') === 'gpt-transcribe'
+            && $this->part($request, 'languages[]') === 'ru'
+            && $this->part($request, 'language') === null);
         Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '/chat/completions')
+            && $request['model'] === 'gpt-6.1-sol'
+            && $request['reasoning_effort'] === 'low'
+            && ! isset($request['temperature'], $request['max_tokens'])
             && str_contains($request['messages'][0]['content'], $transcript));
+    }
+
+    public function test_nutrition_facts_of_a_product_use_the_efficient_model(): void
+    {
+        Http::fake(['*/chat/completions' => Http::response(['choices' => [['message' => ['content' => 'Калории - 120;']]]])]);
+
+        $this->assertSame('Калории - 120;', (new SpeechToTextService)->generateNewProductData('Творог'));
+
+        Http::assertSent(fn (Request $request) => $request['model'] === 'gpt-6-luna');
+    }
+
+    private function part(Request $request, string $name): ?string
+    {
+        $part = collect($request->data())->firstWhere('name', $name);
+
+        return $part['contents'] ?? null;
     }
 
     public function test_it_returns_the_error_when_the_analysis_call_fails(): void

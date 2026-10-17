@@ -39,27 +39,29 @@ return [
     ],
 
     'openai' => [
-        // Master switch: false -> api.openai.com, true -> local/proxy endpoints.
-        'local_models' => env('LOCAL_MODELS', false),
-
-        // Default public OpenAI base URL.
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com'),
 
-        // Unified proxy endpoint (preferred for local mode).
-        'proxy_base_url' => env('OPENAI_PROXY_URL', null),
-        'proxy_token' => env('OPENAI_PROXY_TOKEN', null),
+        // One key per interface language; "ua" uses the _UK one, other locales the _RU one.
+        'keys' => [
+            'ua' => env('OPENAI_API_KEY_UK'),
+            'ru' => env('OPENAI_API_KEY_RU'),
+            'en' => env('OPENAI_API_KEY_EN'),
+        ],
 
-        // Optional split endpoints/tokens for local mode compatibility.
-        'local_chat_base_url' => env('LLM_URL', null),
-        'local_chat_token' => env('LLM_TOKEN', null),
-        'local_audio_base_url' => env('WHISPER_URL', null),
-        'local_audio_token' => env('WHISPER_TOKEN', null),
+        // New variable names on purpose: OPENAI_CHAT_MODEL and OPENAI_STT_MODEL in
+        // existing .env files still say gpt-4o and whisper-1, which OpenAI switches
+        // off in January and February 2027.
+        'models' => [
+            // What the user ate, from speech: accuracy matters more than price.
+            'meal_analysis' => env('OPENAI_MEAL_ANALYSIS_MODEL', 'gpt-6.1-sol'),
+            // Nutrition facts of a single product: short and frequent.
+            'product' => env('OPENAI_PRODUCT_MODEL', 'gpt-6-luna'),
+            'transcription' => env('OPENAI_TRANSCRIPTION_MODEL', 'gpt-transcribe'),
+        ],
 
-        // Request paths and model names.
-        'chat_path' => env('OPENAI_CHAT_PATH', '/v1/chat/completions'),
-        'audio_path' => env('OPENAI_AUDIO_PATH', '/v1/audio/transcriptions'),
-        'chat_model' => env('OPENAI_CHAT_MODEL', 'gpt-4o'),
-        'audio_model' => env('OPENAI_STT_MODEL', 'whisper-1'),
+        // The GPT-6 models reason before answering; low keeps the answer fast. They
+        // reject temperature other than 1 and max_tokens.
+        'reasoning_effort' => env('OPENAI_REASONING_EFFORT', 'low'),
     ],
 
 ];

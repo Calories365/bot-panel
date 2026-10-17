@@ -40,7 +40,6 @@
         <server name="DIARY_API_KEY" value="testing-diary-key" force="true"/>
         <server name="DIARY_API_URL" value="" force="true"/>
         <server name="DIARY_HOST" value="" force="true"/>
-        <server name="LOCAL_MODELS" value="false" force="true"/>
         <server name="OPENAI_API_KEY_RU" value="testing" force="true"/>
         <server name="OPENAI_API_KEY_UK" value="testing" force="true"/>
         <server name="OPENAI_API_KEY_EN" value="testing" force="true"/>
