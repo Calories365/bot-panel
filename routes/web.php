@@ -16,7 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::group(['namespace' => 'App\Http\Controllers'], function () {
     //    Route::get('/builder', [BuilderController::class, 'index'])->name('builder.index');
 
-    Route::get('/download/{filename}', [FileController::class, 'download'])->name('file.download');
+    Route::get('/download/{filename}', [FileController::class, 'download'])
+        ->middleware('auth')
+        ->name('file.download');
 
     Route::get('/{any}', function () {
         return view('app');

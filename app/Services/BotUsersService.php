@@ -30,14 +30,20 @@ class BotUsersService
         return $users->pluck('username')->implode("\n");
     }
 
+    /**
+     * Store the export on the private disk; FileController hands it out after login.
+     *
+     * Exports used to go to storage/app/public, which public/storage serves to
+     * anyone; the copies left there are removed on every new export.
+     */
     public function saveToFile($content, $fileName = 'usernames.txt'): string
     {
-        $filePath = 'public/exports/'.$fileName;
-        Storage::put($filePath, $content);
-        $url = Storage::url($filePath);
-        Storage::disk('public')->put($filePath, $content);
+        $filePath = 'exports/'.$fileName;
+        Storage::disk('local')->put($filePath, $content);
 
-        return Storage::disk('public')->url($filePath);
+        Storage::disk('public')->delete(['exports/'.$fileName, 'public/exports/'.$fileName]);
+
+        return $filePath;
     }
 
     public function getBotUserData(Bot $bot): array

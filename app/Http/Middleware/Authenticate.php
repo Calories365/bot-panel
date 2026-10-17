@@ -12,6 +12,8 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        return $request->expectsJson() ? null : route('login');
+        // The route named "login" is the SPA catch-all /{any}; route('login') without
+        // the parameter throws, so a guest got a 500 instead of the login page.
+        return $request->expectsJson() ? null : url('/login');
     }
 }
