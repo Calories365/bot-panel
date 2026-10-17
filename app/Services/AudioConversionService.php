@@ -40,7 +40,18 @@ class AudioConversionService
             [$convertedLocal, $convertedPath] = $this->convertToMp3($localPath, $fullLocalPath);
             if ($convertedPath) {
                 // передается сконвертированое в mp3 аудио
-                return $this->speechToTextService->convertSpeechToText($convertedPath);
+                $text = $this->speechToTextService->convertSpeechToText($convertedPath);
+
+                // A failed analysis comes back as ['error' => ...]; returning it would
+                // break the ?string contract, fail the job and make Telegram's update
+                // run again — charging the free limit once more.
+                if (! is_string($text) || trim($text) === '') {
+                    Log::error('Speech analysis returned no text', ['result' => $text]);
+
+                    return null;
+                }
+
+                return $text;
             } else {
                 Log::error('Audio conversion failed.');
 

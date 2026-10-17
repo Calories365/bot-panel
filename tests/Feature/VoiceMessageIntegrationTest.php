@@ -3,12 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\Bot;
+use App\Models\BotType;
 use App\Models\BotUser;
 use App\Models\Subscription;
 use App\Services\AudioConversionService;
 use App\Services\DiaryApiService;
 use App\Services\TelegramServices\TelegramHandler;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -19,7 +20,9 @@ use Tests\TestCase;
 
 class VoiceMessageIntegrationTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
+
+    private const SECRET = 'webhook-secret';
 
     private array $sent = [];
 
@@ -44,7 +47,9 @@ class VoiceMessageIntegrationTest extends TestCase
     {
         [$bot, $payload] = $this->prepareBotAndPayload();
 
-        $this->postJson(route('bot.webhook.handle', ['bot' => $bot->name]), $payload)
+        $this->postJson(route('bot.webhook.handle', ['bot' => $bot->name]), $payload, [
+            'X-Telegram-Bot-Api-Secret-Token' => self::SECRET,
+        ])
             ->assertOk()
             ->assertExactJson(['status' => 'success']);
 
@@ -69,10 +74,41 @@ class VoiceMessageIntegrationTest extends TestCase
         $this->assertArrayHasKey(24794, Cache::get('user_products_111111'));
     }
 
+    public function test_a_failed_recognition_does_not_use_up_the_free_limit(): void
+    {
+        $this->partialMock(AudioConversionService::class, fn ($m) => $m->shouldReceive('processAudioMessage')->andReturn(null));
+        [$bot, $payload] = $this->prepareBotAndPayload();
+        $subscription = Subscription::factory()->create(['user_id' => 555, 'counter' => 3, 'premium_until' => null]);
+
+        $this->postJson(route('bot.webhook.handle', ['bot' => $bot->name]), $payload, [
+            'X-Telegram-Bot-Api-Secret-Token' => self::SECRET,
+        ])->assertOk();
+
+        $this->assertSame(3, $subscription->fresh()->counter);
+        $this->assertSame(__('calories365-bot.failed_to_recognize_audio_message'), end($this->sent)['text']);
+    }
+
+    public function test_a_recognized_message_uses_one_attempt_of_the_free_limit(): void
+    {
+        [$bot, $payload] = $this->prepareBotAndPayload();
+        $subscription = Subscription::factory()->create(['user_id' => 555, 'counter' => 3, 'premium_until' => null]);
+
+        $this->postJson(route('bot.webhook.handle', ['bot' => $bot->name]), $payload, [
+            'X-Telegram-Bot-Api-Secret-Token' => self::SECRET,
+        ])->assertOk();
+
+        $this->assertSame(4, $subscription->fresh()->counter);
+    }
+
     /* ----------------------------------------------------------------- */
     private function prepareBotAndPayload(): array
     {
-        $bot = Bot::factory()->active()->create(['name' => 'Calories365Test_bot']);
+        BotType::factory()->create(['id' => 6, 'name' => 'Calories']);
+
+        $bot = Bot::factory()->active()->create([
+            'name' => 'Calories365Test_bot',
+            'secret_token' => hash('sha256', self::SECRET),
+        ]);
 
         BotUser::factory()->locale('ru')->create([
             'bot_id' => $bot->id,

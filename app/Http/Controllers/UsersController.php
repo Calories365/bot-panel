@@ -103,9 +103,14 @@ class UsersController extends BaseController
         $subscription = Subscription::firstOrCreate(
             ['user_id' => $calories_id],
         );
-        $subscription->increment('counter');
 
+        // Checked before counting, and premium is not counted — the same rule as
+        // the bot's AudioMessageHandler, so the site and the bot share 11 free uses.
         $canTranscribeAudio = $subscription->canTranscribeAudio();
+
+        if ($canTranscribeAudio && ! $subscription->isPremium()) {
+            $subscription->incrementTranscribeCounter();
+        }
 
         return response()->json([
             'canTranscribeAudio' => $canTranscribeAudio,

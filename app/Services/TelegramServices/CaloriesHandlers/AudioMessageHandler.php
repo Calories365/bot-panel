@@ -41,6 +41,8 @@ class AudioMessageHandler implements MessageHandlerInterface
 
         if (isset($message['voice'])) {
 
+            $subscription = null;
+
             // for academic usage
             if ($bot->name != 'calories365KNU_bot') {
 
@@ -55,14 +57,17 @@ class AudioMessageHandler implements MessageHandlerInterface
 
                     return;
                 }
-
-                if (! $subscription->isPremium()) {
-                    $subscription->incrementTranscribeCounter();
-                }
             }
             // передается аудио и превращается в текст
             $text = $this->audioConversionService->processAudioMessage($telegram, $bot, $message);
             Log::info(print_r($text, true));
+
+            // An attempt is charged only for speech that was recognised: a failure in
+            // Whisper or GPT is ours, not the user's.
+            if ($text && $subscription && ! $subscription->isPremium()) {
+                $subscription->incrementTranscribeCounter();
+            }
+
             if (
                 $text &&
                 ! Str::contains(Str::lower($text), [

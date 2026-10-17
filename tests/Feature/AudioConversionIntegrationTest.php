@@ -4,7 +4,11 @@ namespace Tests\Feature;
 
 use App\Services\AudioConversionService;
 use App\Services\ChatGPTServices\SpeechToTextService;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
+use Telegram\Bot\Api;
+use Telegram\Bot\Objects\File;
 use Tests\TestCase;
 
 /**
@@ -100,6 +104,25 @@ class AudioConversionIntegrationTest extends TestCase
 
         // Cleanup
         Storage::disk('public')->delete($corruptedPath);
+    }
+
+    public function test_a_failed_analysis_returns_no_text_instead_of_throwing(): void
+    {
+        Http::fake([
+            'api.telegram.org/file/*' => Http::response(file_get_contents(base_path('tests/Fixtures/Audio/file.oga'))),
+        ]);
+
+        $speechToText = Mockery::mock(SpeechToTextService::class);
+        $speechToText->shouldReceive('convertSpeechToText')->once()->andReturn(['error' => 'OpenAI is down']);
+
+        $telegram = Mockery::mock(Api::class);
+        $telegram->shouldReceive('getFile')->andReturn(new File(['file_path' => 'voice/file_1.oga']));
+
+        $service = new AudioConversionService($speechToText);
+        $bot = (object) ['token' => 'test-token'];
+        $message = ['voice' => ['file_id' => 'voice-file-id']];
+
+        $this->assertNull($service->processAudioMessage($telegram, $bot, $message));
     }
 
     /**
