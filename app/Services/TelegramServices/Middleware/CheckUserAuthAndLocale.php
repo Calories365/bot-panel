@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Closure;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
+use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\Update;
 
 class CheckUserAuthAndLocale
@@ -25,7 +26,9 @@ class CheckUserAuthAndLocale
         $update = $passable['update'];
 
         $excludedCommands = $passable['excludedCommands'] ?? [];
-        $text = $update->getMessage()?->getText();
+        $message = $update->getMessage();
+        // Updates without a message (my_chat_member) give an empty collection here.
+        $text = $message instanceof Message ? $message->getText() : null;
         $userId = $this->getUserId($update);
         $language = $this->getUserLanguage($update);
 
@@ -46,6 +49,15 @@ class CheckUserAuthAndLocale
             );
         }
         $this->checkAndSetLocale($botUser, $language);
+
+        // The user blocked or unblocked the bot: a service update that only has to be
+        // recorded. Asking for authorisation here would message someone who just
+        // blocked the bot.
+        if ($update->detectType() === 'my_chat_member') {
+            $passable['botUser'] = $botUser;
+
+            return $next($passable);
+        }
 
         if ($this->isExcludedCommand($text, $excludedCommands)) {
             $passable['botUser'] = $botUser;
@@ -70,14 +82,20 @@ class CheckUserAuthAndLocale
 
     private function getUserId(Update $update): ?int
     {
-        return $update->getMessage()?->getChat()?->getId()
-            ?: $update->getCallbackQuery()?->getChat()?->getId();
+        // getChat() covers messages, callback queries and my_chat_member alike.
+        $chatId = $update->getChat()->get('id');
+
+        return $chatId !== null ? (int) $chatId : null;
     }
 
     private function getUserLanguage(Update $update): ?string
     {
-        return $update->getMessage()?->getFrom()?->getLanguageCode()
-            ?: $update->getCallbackQuery()?->getFrom()?->getLanguageCode();
+        $message = $update->getMessage();
+        $from = $message instanceof Message ? $message->getFrom() : null;
+
+        return $from?->getLanguageCode()
+            ?: $update->getCallbackQuery()?->getFrom()?->getLanguageCode()
+            ?: $update->getMyChatMember()?->getFrom()?->getLanguageCode();
     }
 
     private function checkAndSetLocale(?BotUser $botUser, ?string $language): void

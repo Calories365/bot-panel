@@ -2,6 +2,8 @@
 
 namespace App\Services\TelegramServices\BaseHandlers\UpdateHandlers;
 
+use App\Models\BotUser;
+
 class MyChatMemberUpdateHandler implements UpdateHandlerInterface
 {
     public function handle($bot, $telegram, $update, $botUser)
@@ -10,7 +12,8 @@ class MyChatMemberUpdateHandler implements UpdateHandlerInterface
         $newStatus = $myChatMember['new_chat_member']['status'];
         $userId = $myChatMember['from']['id'];
 
-        $userModel = $botUser;
+        // Only the Calories strategy has middleware that resolves the user.
+        $userModel = $botUser ?? BotUser::where('telegram_id', $userId)->first();
 
         if ($userModel) {
             if ($newStatus === 'kicked') {

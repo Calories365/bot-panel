@@ -13,8 +13,8 @@ class LanguageMessageHandler
     public function handle($bot, $telegram, $message)
     {
 
-        $setting = LanguageSetting::first();
-        $enabled = $setting->russian_language_enabled;
+        // No saved setting means Russian is on, as the diary assumes.
+        $enabled = LanguageSetting::first()?->russian_language_enabled ?? true;
         // for academic usage
         if ($bot->name === 'calories365KNU_bot' or ! $enabled) {
             $keyboard = [
