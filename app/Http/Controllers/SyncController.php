@@ -15,16 +15,17 @@ class SyncController extends Controller
     {
         $payload = $request->input('payload', []);
 
-        $dataForInsert = [
-            'email' => $payload['email'] ?? null,
-            'username_calories' => $payload['name'] ?? null,
-            'source' => 'calories_only',
-            'calories_id' => $payload['calories_id'],
-        ];
+        // A Mini App account is already here: TelegramWebAppController::link stores
+        // it before this queued report arrives. Fill in what the diary knows instead
+        // of failing on the unique calories_id.
+        $user = CaloriesUser::firstOrNew(['calories_id' => $payload['calories_id']]);
 
-        $newUser = CaloriesUser::create($dataForInsert);
+        $user->email = $payload['email'] ?? $user->email;
+        $user->username_calories = $payload['name'] ?? $user->username_calories;
+        $user->source = $user->source ?: 'calories_only';
+        $user->save();
 
-        return response()->json(['status' => 'ok', 'created_id' => $newUser->id], 201);
+        return response()->json(['status' => 'ok', 'created_id' => $user->id], $user->wasRecentlyCreated ? 201 : 200);
     }
 
     public function updatePremiumStatus(Request $request): JsonResponse
