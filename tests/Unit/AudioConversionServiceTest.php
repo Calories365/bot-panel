@@ -6,8 +6,17 @@ use App\Services\AudioConversionService;
 use App\Services\ChatGPTServices\SpeechToTextService;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tests\TestCase;
 
+/**
+ * The `alias:` mock declares \FFMpeg\FFMpeg for the whole process, so these tests
+ * run in processes of their own; otherwise the integration test with the real
+ * ffmpeg gets the mock.
+ */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 class AudioConversionServiceTest extends TestCase
 {
     private AudioConversionService $service;

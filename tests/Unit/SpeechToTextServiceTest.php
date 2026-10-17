@@ -3,72 +3,57 @@
 namespace Tests\Unit;
 
 use App\Services\ChatGPTServices\SpeechToTextService;
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Response;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 use Tests\TestFixtures;
 
+/**
+ * The service talks to OpenAI through the Http facade, so Http::fake stands in
+ * for both calls. An earlier version of this test injected a Guzzle client the
+ * service no longer uses — it would have reached the real API.
+ */
 class SpeechToTextServiceTest extends TestCase
 {
-    use DatabaseTransactions, TestFixtures;
-
-    protected SpeechToTextService $speechService;
+    use TestFixtures;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Устанавливаем английскую локаль для тестов
-        app()->setLocale('en');
-
-        $this->speechService = new SpeechToTextService;
+        Http::preventStrayRequests();
+        app()->setLocale('ru');
     }
 
-    /** @test */
-    public function transcribes_audio_successfully(): void
+    public function test_it_transcribes_audio_and_returns_the_product_list(): void
     {
-        // Загружаем фикстуру Whisper успеха
-        $whisperFixture = file_get_contents(base_path('tests/Fixtures/OpenAI/whisper_success_english.json'));
-        $whisperArray = json_decode($whisperFixture, true);
-        $text = $whisperArray['text'];
+        $transcript = $this->loadFixture('OpenAI/whisper_success.json')['text'];
 
-        // Формируем фикстуру GPT-ответа на основе текста
-        $gptFixture = json_encode([
-            'choices' => [
-                [
-                    'message' => [
-                        'content' => $text,
-                    ],
-                ],
-            ],
+        Http::fake([
+            '*/audio/transcriptions' => Http::response(['text' => $transcript]),
+            '*/chat/completions' => Http::response(['choices' => [['message' => ['content' => 'Творог - 225 граммов;']]]]),
         ]);
 
-        // Создаём последовательность мок-ответов: Whisper → GPT
-        $mock = new MockHandler([
-            new Response(200, [], $whisperFixture),
-            new Response(200, [], $gptFixture),
+        $result = (new SpeechToTextService)->convertSpeechToText(base_path('tests/Fixtures/Audio/file.mp3'));
+
+        $this->assertSame('Творог - 225 граммов;', $result);
+
+        Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '/audio/transcriptions')
+            && collect($request->data())->contains(fn ($part) => ($part['name'] ?? null) === 'language' && $part['contents'] === 'ru'));
+        Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '/chat/completions')
+            && str_contains($request['messages'][0]['content'], $transcript));
+    }
+
+    public function test_it_returns_the_error_when_the_analysis_call_fails(): void
+    {
+        Http::fake([
+            '*/audio/transcriptions' => Http::response(['text' => 'Творог 200 грамм']),
+            '*/chat/completions' => Http::response(['error' => 'down'], 500),
         ]);
 
-        $handlerStack = HandlerStack::create($mock);
-        $mockClient = new Client(['handler' => $handlerStack]);
+        $result = (new SpeechToTextService)->convertSpeechToText(base_path('tests/Fixtures/Audio/file.mp3'));
 
-        // Инициализируем сервис и инжектим мок-клиент
-        $service = new SpeechToTextService;
-        $ref = new \ReflectionClass($service);
-        $prop = $ref->getProperty('client');
-        $prop->setAccessible(true);
-        $prop->setValue($service, $mockClient);
-
-        // Реальный mp3 файл для MultipartStream
-        $audioPath = base_path('tests/Fixtures/Audio/file.mp3');
-
-        // Выполняем метод
-        $result = $service->convertSpeechToText($audioPath);
-
-        // Проверяем, что вернулся ожидаемый текст
-        $this->assertEquals($text, $result);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('error', $result);
     }
 }

@@ -5,25 +5,21 @@ namespace Tests\Feature;
 use App\Models\Bot;
 use App\Models\BotType;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Mockery;
-use Telegram\Bot\Api;
 use Tests\TestCase;
 
+/**
+ * None of these requests carries secret_token or web_app_url, so the controller
+ * never builds a Telegram\Bot\Api and nothing has to stand in for it. An
+ * `overload:` mock of Api used to be here; it redeclared the class and broke
+ * every later test in the same process.
+ */
 class BotCrudTest extends TestCase
 {
-    use DatabaseTransactions;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Mockery::mock('overload:'.Api::class)
-            ->shouldReceive('setWebhook')
-            ->andReturnTrue();
-    }
+    use RefreshDatabase;
 
     /** @test */
     public function authorized_user_can_get_bots_list(): void
