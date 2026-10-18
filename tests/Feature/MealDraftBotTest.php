@@ -39,6 +39,9 @@ class MealDraftBotTest extends TestCase
     /** @var array<int, array<string, mixed>> answers to button presses */
     private array $answers = [];
 
+    /** @var array<int, array<string, mixed>> chat menu buttons set */
+    private array $menuButtons = [];
+
     private int $updateId = 1000;
 
     protected function setUp(): void
@@ -105,6 +108,22 @@ class MealDraftBotTest extends TestCase
         $this->assertStringContainsString('Как вести дневник в боте', $this->sent[0]['text']);
         $this->assertStringContainsString('«🥗 Открыть приложение»', $this->sent[0]['text']);
         $this->assertSame('https://diary.test', json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard'][0][0]['web_app']['url']);
+    }
+
+    public function test_start_opens_the_app_from_the_menu_and_an_inline_button_never_from_the_keyboard(): void
+    {
+        $this->bot->update(['web_app_url' => 'https://diary.test']);
+
+        $this->send(['text' => '/start']);
+
+        $keyboards = array_map(fn (array $message) => json_decode((string) ($message['reply_markup'] ?? '{}'), true), $this->sent);
+        $replyButtons = array_merge(...array_map(fn ($markup) => array_merge(...($markup['keyboard'] ?? [[]])), $keyboards));
+        $this->assertNotEmpty($replyButtons);
+        $this->assertSame([], array_filter($replyButtons, fn ($button) => isset($button['web_app'])));
+
+        $inline = array_values(array_filter($keyboards, fn ($markup) => isset($markup['inline_keyboard'][0][0]['web_app'])));
+        $this->assertSame('https://diary.test', $inline[0]['inline_keyboard'][0][0]['web_app']['url']);
+        $this->assertSame('web_app', json_decode($this->menuButtons[0]['menu_button'], true)['type']);
     }
 
     public function test_a_short_edit_does_not_count_for_the_spam_guard(): void
@@ -233,6 +252,9 @@ class MealDraftBotTest extends TestCase
 
         $api->shouldReceive('getFile')->andReturn(new File(['file_path' => 'photos/file_7.jpg']));
         $api->shouldReceive('sendChatAction');
+        $api->shouldReceive('post')->with('setChatMenuButton', Mockery::any())->andReturnUsing(function (string $method, array $p) {
+            $this->menuButtons[] = $p;
+        });
         $api->shouldReceive('deleteMessage')->andReturnUsing(function (array $p) {
             $this->deleted[] = $p['message_id'];
 

@@ -187,17 +187,9 @@ class StartMessageHandler implements MessageHandlerInterface
             'resize_keyboard' => true,
         ]);
 
-        if ($bot->web_app_url) {
-            $keyboard->row([
-                [
-                    'text' => __('calories365-bot.open_mini_app'),
-                    'web_app' => ['url' => $bot->web_app_url],
-                ],
-            ]);
-
-            $this->showMiniAppMenuButton($telegram, $commonData['chatId'], $bot->web_app_url);
-        }
-
+        // No Mini App button in this keyboard: Telegram opens a Mini App from a
+        // keyboard button without the user's data, so it cannot sign in. The menu
+        // button and the inline button below open it with the data.
         $keyboard
             ->row([
                 ['text' => __('calories365-bot.how_to_use')],
@@ -251,6 +243,18 @@ class StartMessageHandler implements MessageHandlerInterface
                 'chat_id' => $commonData['chatId'],
                 'text' => $messageText,
                 'reply_markup' => $keyboard,
+            ]);
+        }
+
+        if ($bot->web_app_url) {
+            $this->showMiniAppMenuButton($telegram, $commonData['chatId'], $bot->web_app_url);
+
+            $telegram->sendMessage([
+                'chat_id' => $commonData['chatId'],
+                'text' => __('calories365-bot.open_mini_app_hint'),
+                'reply_markup' => json_encode(['inline_keyboard' => [[
+                    ['text' => __('calories365-bot.open_mini_app'), 'web_app' => ['url' => $bot->web_app_url]],
+                ]]]),
             ]);
         }
     }

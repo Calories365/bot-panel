@@ -153,4 +153,5 @@ EOT,
     'outdated_message' => 'This message is out of date. Tell about the meal again.',
     'how_to_use' => 'How to use',
     'draft_edit' => 'Edit',
+    'open_mini_app_hint' => 'The diary, statistics and the calorie calculator are in the app. The menu button left of the message field opens it too.',
 ];
