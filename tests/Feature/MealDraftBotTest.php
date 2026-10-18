@@ -119,6 +119,20 @@ class MealDraftBotTest extends TestCase
         $this->assertSame([77], $this->deleted);
     }
 
+    public function test_the_draft_marks_fast_carbohydrates_and_tells_the_glycemic_load(): void
+    {
+        $done = $this->loadFixture('DiaryAPI/draft.json') + ['inputs' => [], 'calculation' => ['status' => 'done', 'understood' => true, 'not_found' => []]];
+        $done['draft']['items'][0]['quality'] = ['fast_carbohydrates' => true, 'ultra_processed' => true];
+        $done['draft']['total'] += ['sugars' => 23.4, 'glycemic_load' => 31.6, 'glycemic_load_level' => 'medium'];
+        $this->diary(fn ($mock) => $mock->shouldReceive('draftCalculate')->andReturn($done));
+
+        $this->press('draft_calculate');
+
+        $draft = $this->sent[0]['text'];
+        $this->assertStringContainsString('1. Творог 5% — 225 г, 306 ккал — быстрые углеводы, ультрапереработанный', $draft);
+        $this->assertStringContainsString('Сахар 23 г · гликемическая нагрузка 32, средняя', $draft);
+    }
+
     public function test_a_calculation_longer_than_the_bot_waits_asks_to_press_again(): void
     {
         config()->set('services.diary_api.calculation_wait_seconds', 0);

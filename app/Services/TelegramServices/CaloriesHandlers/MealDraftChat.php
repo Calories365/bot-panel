@@ -227,11 +227,16 @@ class MealDraftChat
         $lines = ['<b>'.e(__('calories365-bot.draft_title')).'</b>'];
 
         foreach ($draft['items'] ?? [] as $item) {
-            $mark = match (true) {
-                (bool) $item['edited'] => ' — '.__('calories365-bot.draft_edited'),
-                $item['source'] === 'label' => ' — '.__('calories365-bot.draft_label'),
-                default => '',
-            };
+            $marks = array_filter([
+                match (true) {
+                    (bool) $item['edited'] => __('calories365-bot.draft_edited'),
+                    $item['source'] === 'label' => __('calories365-bot.draft_label'),
+                    default => null,
+                },
+                ($item['quality']['fast_carbohydrates'] ?? false) ? __('calories365-bot.draft_fast_carbohydrates') : null,
+                ($item['quality']['ultra_processed'] ?? false) ? __('calories365-bot.draft_ultra_processed') : null,
+            ]);
+            $mark = $marks === [] ? '' : ' — '.implode(', ', $marks);
 
             $lines[] = __('calories365-bot.draft_item', [
                 'number' => $item['number'],
@@ -250,6 +255,15 @@ class MealDraftChat
                     'fats' => round($total['fats']),
                     'carbohydrates' => round($total['carbohydrates']),
                 ]));
+
+            // How fast the carbohydrates of the meal are, when its products tell.
+            if (($total['glycemic_load'] ?? null) !== null) {
+                $lines[] = e(__('calories365-bot.draft_load', [
+                    'sugars' => round((float) $total['sugars']),
+                    'load' => round($total['glycemic_load']),
+                    'level' => __('calories365-bot.draft_load_'.$total['glycemic_load_level']),
+                ]));
+            }
         }
 
         if ($notFound !== []) {
