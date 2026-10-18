@@ -94,9 +94,9 @@ return [
     'welcome_guide' => <<<'EOT'
 How to keep the diary in the bot:
 
-1. Tell what you ate: a voice message, text or a photo of the plate. For example: "buckwheat 200 grams, a cutlet and tea with two spoons of sugar".
-2. A photo of a label with its nutrition table gives the exact values from the package.
-3. The bot shows the meal in one message. Correct it in words: "buckwheat was 250", "remove the tea", "2 150" sets the grams of item 2. Or press "Edit" and correct it in the app.
+1. Tell what you ate: voice messages, text, photos of the plate and of labels, in as many messages as you like. For example: "buckwheat 200 grams, a cutlet and tea with two spoons of sugar".
+2. A photo of a label with its nutrition table gives the exact values from the package. A brand from the package or the one you name stays in the product name.
+3. Press "Calculate": the bot reads all of it together and shows the meal in one message. Correct it in words, "buckwheat was 250", "remove the tea", and press "Recalculate with what is added". "2 150" sets the grams of item 2 at once. Or press "Edit" and correct it in the app.
 4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary.
 
 The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.com?lang=en
@@ -107,9 +107,9 @@ EOT,
     'welcome_guide_KNU' => <<<'EOT'
 How to keep the diary in the bot:
 
-1. Tell what you ate: a voice message, text or a photo of the plate. For example: "buckwheat 200 grams, a cutlet and tea with two spoons of sugar".
-2. A photo of a label with its nutrition table gives the exact values from the package.
-3. The bot shows the meal in one message. Correct it in words: "buckwheat was 250", "remove the tea", "2 150" sets the grams of item 2. Or press "Edit" and correct it in the app.
+1. Tell what you ate: voice messages, text, photos of the plate and of labels, in as many messages as you like. For example: "buckwheat 200 grams, a cutlet and tea with two spoons of sugar".
+2. A photo of a label with its nutrition table gives the exact values from the package. A brand from the package or the one you name stays in the product name.
+3. Press "Calculate": the bot reads all of it together and shows the meal in one message. Correct it in words, "buckwheat was 250", "remove the tea", and press "Recalculate with what is added". "2 150" sets the grams of item 2 at once. Or press "Edit" and correct it in the app.
 4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary.
 
 The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.xyz?lang=en
@@ -142,9 +142,9 @@ EOT,
     'draft_edited' => 'changed',
     'draft_label' => 'from the label',
     'draft_not_found' => 'Not found: :names',
-    'draft_hint' => 'Correct it by voice or text: "buckwheat was 250", "remove 1", "and an apple". Or press "Edit".',
-    'draft_not_understood' => 'No food found in the message. Tell by voice or text what you ate, or send a photo of the dish or of the label.',
-    'draft_not_read' => 'Could not read the message, please try again.',
+    'draft_hint' => 'Correct it by voice or text, "buckwheat was 250", "and an apple", and press "Recalculate with what is added". "2 250" and "remove 1" change it at once. Or press "Edit".',
+    'draft_not_understood' => 'No food found in what you added. Tell by voice or text what you ate, or send a photo of the dish or of the label.',
+    'draft_not_read' => 'Could not calculate. What you added is kept, press "Calculate" again.',
     'draft_failed' => 'The diary does not answer right now, please try later.',
     'draft_cancelled' => 'The meal is cancelled.',
     'draft_gone' => 'This meal is already saved or cancelled.',
@@ -154,4 +154,16 @@ EOT,
     'how_to_use' => 'How to use',
     'draft_edit' => 'Edit',
     'open_mini_app_hint' => 'The diary, statistics and the calorie calculator are in the app. The menu button left of the message field opens it too.',
+    'draft_inputs' => 'Added:',
+    'draft_inputs_more' => 'Added, not calculated yet:',
+    'draft_input_voice' => 'Voice message',
+    'draft_input_photo' => 'Photo',
+    'draft_input_text' => 'Text',
+    'draft_inputs_hint' => 'Send another voice message, a photo of the food or of a label, text, or press "Calculate": all of it is read together.',
+    'draft_calculate' => 'Calculate',
+    'draft_recalculate' => 'Recalculate with what is added',
+    'draft_calculating' => 'Calculating, it usually takes up to a minute',
+    'draft_nothing_to_calculate' => 'Nothing to calculate: send a voice message, a photo or text about what you ate.',
+    'draft_still_calculating' => 'This takes longer than usual. Press "Calculate" again in a minute.',
+    'draft_too_many' => 'One calculation takes up to 8 photos and 12 messages. Press "Calculate", then send the rest.',
 ];

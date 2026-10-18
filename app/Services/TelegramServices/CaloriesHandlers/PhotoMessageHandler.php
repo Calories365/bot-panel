@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * A photo of a dish or of a label, with its caption: it goes to the meal draft
- * (MealDraftChat). The file goes to the diary itself, never its Telegram link,
- * which holds the bot token.
+ * A photo of a dish or of a label, with its caption: it waits in the diary for
+ * the calculation of the meal draft (MealDraftChat). The file goes to the diary
+ * itself, never its Telegram link, which holds the bot token. Keeping it calls
+ * no model, so it does not count for the spam guard; the calculation does.
  */
 class PhotoMessageHandler implements MessageHandlerInterface
 {
@@ -31,7 +32,7 @@ class PhotoMessageHandler implements MessageHandlerInterface
         // Telegram sends a photo in several sizes, the largest last.
         $size = collect($message['photo'] ?? [])->last();
 
-        if ($size === null || ! $this->mealDraftChat->allowed($telegram, $botUser, $chatId)) {
+        if ($size === null) {
             return;
         }
 
@@ -43,7 +44,7 @@ class PhotoMessageHandler implements MessageHandlerInterface
             return;
         }
 
-        $this->mealDraftChat->input($bot, $telegram, $botUser, $chatId, $commonData['userId'], $message['caption'] ?? null, $photo);
+        $this->mealDraftChat->collect($bot, $telegram, $botUser, $chatId, $commonData['userId'], 'photo', $message['caption'] ?? null, $photo);
     }
 
     /**

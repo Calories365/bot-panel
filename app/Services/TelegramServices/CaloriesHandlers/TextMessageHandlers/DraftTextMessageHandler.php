@@ -6,8 +6,11 @@ use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInt
 use App\Services\TelegramServices\CaloriesHandlers\MealDraftChat;
 
 /**
- * Any text that is not a command or a menu button: a meal or a correction of
- * the meal draft, "съел яблоко", "2 250", "убери хлеб" (MealDraftChat).
+ * Any text that is not a command or a menu button: about a meal or a
+ * correction of the meal draft, "съел яблоко", "убери хлеб", which waits for the
+ * calculation, or a short edit, "2 250", which changes the draft at once
+ * (MealDraftChat). Neither calls the model now, so neither counts for the spam
+ * guard; the calculation does.
  */
 class DraftTextMessageHandler implements MessageHandlerInterface
 {
@@ -15,7 +18,7 @@ class DraftTextMessageHandler implements MessageHandlerInterface
 
     /**
      * A short edit of the draft, "2 250" or "убрать 3", which the diary applies
-     * without its model: it does not count for the spam guard.
+     * without its model.
      */
     private const SHORT_EDIT = '/^\s*(?:\d{1,2}\s*[-—:.]?\s*\d{1,4}\s*(?:г|гр|грам\p{L}*|g)?\.?|(?:-|убра\p{L}*|убери|удал\p{L}*|прибра\p{L}*|прибери|видал\p{L}*|remove|delete)\s*\d{1,2})\s*$/iu';
 
@@ -35,10 +38,14 @@ class DraftTextMessageHandler implements MessageHandlerInterface
             return;
         }
 
-        if (! preg_match(self::SHORT_EDIT, $text) && ! $this->mealDraftChat->allowed($telegram, $botUser, $chatId)) {
+        $userId = $message->getFrom()->getId();
+
+        if (preg_match(self::SHORT_EDIT, $text)) {
+            $this->mealDraftChat->input($bot, $telegram, $botUser, $chatId, $userId, $text);
+
             return;
         }
 
-        $this->mealDraftChat->input($bot, $telegram, $botUser, $chatId, $message->getFrom()->getId(), mb_substr($text, 0, 2000));
+        $this->mealDraftChat->collect($bot, $telegram, $botUser, $chatId, $userId, 'text', mb_substr($text, 0, 2000));
     }
 }

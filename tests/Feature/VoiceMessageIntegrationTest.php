@@ -41,7 +41,7 @@ class VoiceMessageIntegrationTest extends TestCase
     }
 
     /* ----------------------------------------------------------------- */
-    public function test_a_voice_message_shows_the_meal_draft_with_its_buttons(): void
+    public function test_a_voice_message_waits_for_the_calculation_with_its_words(): void
     {
         [$bot, $payload] = $this->prepareBotAndPayload();
 
@@ -57,14 +57,11 @@ class VoiceMessageIntegrationTest extends TestCase
 
         $draft = $this->sent[0]['text'];
         $this->assertStringContainsString('<b>Приём пищи</b>', $draft);
-        $this->assertStringContainsString('1. Творог 5% — 225 г, 306 ккал', $draft);
-        $this->assertStringContainsString('2. Кефир &lt;Олимп&gt; 1% — 250 г, 98 ккал — по этикетке', $draft);
-        $this->assertStringContainsString('<b>Итого: 404 ккал</b> · Б 47 · Ж 14 · У 17', $draft);
+        $this->assertStringContainsString('<b>Добавлено:</b>', $draft);
+        $this->assertStringContainsString('• Голосовое: «Творог 225 грамм и стакан кефира»', $draft);
 
         $kb = json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard'];
-        $saves = array_column($kb[0], 'callback_data');
-        sort($saves);
-        $this->assertSame(['draft_save_dinner', 'draft_save_morning', 'draft_save_supper'], $saves);
+        $this->assertSame(['draft_calculate'], array_column($kb[0], 'callback_data'));
         $this->assertSame(['draft_cancel'], array_column($kb[1], 'callback_data'));
 
         $this->assertTrue(Cache::has('meal_draft_message_111111'));
@@ -167,14 +164,15 @@ class VoiceMessageIntegrationTest extends TestCase
     /* ----------------------- Diary API ------------------------------- */
     private function mockDiaryApi(): void
     {
-        $json = json_decode(
-            file_get_contents(base_path('tests/Fixtures/DiaryAPI/draft.json')),
-            true, 512, JSON_THROW_ON_ERROR
-        );
-
-        $this->partialMock(DiaryApiService::class, fn ($m) => $m->shouldReceive('draftInput')
-            ->with('Творог 225 грамм и стакан кефира', null, 555, 'ru')
-            ->andReturn($json));
+        $this->partialMock(DiaryApiService::class, fn ($m) => $m->shouldReceive('draftCollect')
+            ->with('voice', 'Творог 225 грамм и стакан кефира', null, 555, 'ru')
+            ->andReturn([
+                'draft' => null,
+                'inputs' => [['id' => 1, 'kind' => 'voice', 'text' => 'Творог 225 грамм и стакан кефира']],
+                'calculation' => null,
+                'understood' => true,
+                'not_found' => [],
+            ]));
     }
 
     /* -------------------- HTTP ------------------------------- */

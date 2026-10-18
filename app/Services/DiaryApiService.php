@@ -197,6 +197,93 @@ class DiaryApiService
     }
 
     /**
+     * Keep a voice message (its words, kind voice), a text or a photo with its
+     * caption for the calculation of the user's meal draft; a short edit changes
+     * the draft at once. Answers {draft, inputs, calculation, understood,
+     * not_found}, or ['error' => …, 'status' => …, 'message' => …]: message
+     * too_many_inputs when the calculation takes no more.
+     *
+     * @param  array{contents: string, name: string}|null  $photo
+     * @return array<string, mixed>
+     */
+    public function draftCollect(string $kind, ?string $text, ?array $photo, $caloriesId, string $locale): array
+    {
+        try {
+            $request = Http::timeout(45)->withHeaders($this->getHeaders($caloriesId, $locale, null, multipart: true));
+
+            if ($photo !== null) {
+                $request = $request->attach('photo', $photo['contents'], $photo['name']);
+            }
+
+            $fields = array_filter(['kind' => $photo === null ? $kind : null, 'text' => $text], static fn ($value) => $value !== null && $value !== '');
+            $response = $request->asMultipart()->post($this->apiUrl.'/caloriesEndPoint/draft/inputs', $fields);
+            $response->throw();
+
+            return $response->json();
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            Log::error('Error keeping an input for the meal draft: '.$e->getMessage());
+
+            return ['error' => $e->getMessage(), 'status' => $e->response->status(), 'message' => $e->response->json('message')];
+        } catch (\Throwable $e) {
+            Log::error('Error keeping an input for the meal draft: '.$e->getMessage());
+
+            return ['error' => $e->getMessage(), 'status' => 0, 'message' => null];
+        }
+    }
+
+    /**
+     * Start the calculation of the inputs waiting; the diary runs it in its
+     * queue and answers at once with {draft, inputs, calculation}, or
+     * ['error' => …, 'status' => …, 'message' => …]: message
+     * nothing_to_calculate when no input waits.
+     *
+     * @return array<string, mixed>
+     */
+    public function draftCalculate($caloriesId, string $locale): array
+    {
+        try {
+            $response = Http::timeout(45)
+                ->withHeaders($this->getHeaders($caloriesId, $locale))
+                ->post($this->apiUrl.'/caloriesEndPoint/draft/calculate');
+
+            $response->throw();
+
+            return $response->json();
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            Log::error('Error starting the meal draft calculation: '.$e->getMessage());
+
+            return ['error' => $e->getMessage(), 'status' => $e->response->status(), 'message' => $e->response->json('message')];
+        } catch (\Throwable $e) {
+            Log::error('Error starting the meal draft calculation: '.$e->getMessage());
+
+            return ['error' => $e->getMessage(), 'status' => 0, 'message' => null];
+        }
+    }
+
+    /**
+     * The user's meal draft, the inputs waiting and the state of the
+     * calculation: {draft, inputs, calculation}, or ['error' => …].
+     *
+     * @return array<string, mixed>
+     */
+    public function draftShow($caloriesId, string $locale): array
+    {
+        try {
+            $response = Http::timeout(15)
+                ->withHeaders($this->getHeaders($caloriesId, $locale))
+                ->get($this->apiUrl.'/caloriesEndPoint/draft');
+
+            $response->throw();
+
+            return $response->json();
+        } catch (\Throwable $e) {
+            Log::error('Error reading the meal draft: '.$e->getMessage());
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Save the user's meal draft as a meal of the day; answers {total}, or
      * ['error' => …, 'status' => …]: status 404 when there is no draft any more.
      *

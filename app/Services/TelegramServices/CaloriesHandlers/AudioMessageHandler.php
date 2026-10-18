@@ -7,7 +7,9 @@ use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInt
 use App\Traits\BasicDataExtractor;
 
 /**
- * A voice message: its words go to the meal draft (MealDraftChat).
+ * A voice message: its words wait in the diary for the calculation of the meal
+ * draft (MealDraftChat). Transcribing it calls a model and counts for the spam
+ * guard.
  */
 class AudioMessageHandler implements MessageHandlerInterface
 {
@@ -43,6 +45,6 @@ class AudioMessageHandler implements MessageHandlerInterface
             return;
         }
 
-        $this->mealDraftChat->input($bot, $telegram, $botUser, $chatId, $commonData['userId'], $text);
+        $this->mealDraftChat->collect($bot, $telegram, $botUser, $chatId, $commonData['userId'], 'voice', $text);
     }
 }

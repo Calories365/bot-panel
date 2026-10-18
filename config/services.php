@@ -36,6 +36,10 @@ return [
         'host' => env('DIARY_HOST', 'calories365.org'),
         'token' => env('DIARY_API_TOKEN', null),
         'key' => env('DIARY_API_KEY', null),
+        // The diary calculates a meal draft in its queue; the bot asks this often
+        // whether it is done, and stops waiting after the limit.
+        'calculation_poll_seconds' => 2,
+        'calculation_wait_seconds' => 120,
     ],
 
     // Voice input has no paid limit; this only stops a flood of recordings from one

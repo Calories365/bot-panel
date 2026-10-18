@@ -7,8 +7,9 @@ use App\Services\TelegramServices\CaloriesHandlers\MealDraftChat;
 use App\Utilities\Utilities;
 
 /**
- * The buttons of the meal draft message: draft_save_{morning|dinner|supper}
- * saves the meal to the diary, draft_cancel drops it.
+ * The buttons of the meal draft message: draft_calculate calculates the draft
+ * from what waits, draft_save_{morning|dinner|supper} saves the meal to the
+ * diary, draft_cancel drops it with what waits.
  */
 class DraftCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
@@ -31,6 +32,18 @@ class DraftCallbackQueryHandler implements CallbackQueryHandlerInterface
         $parts = explode('_', (string) $callbackQuery->getData());
         $chatId = $callbackQuery->getMessage()->getChat()->getId();
         $userId = $callbackQuery->getFrom()->getId();
+
+        if (($parts[1] ?? null) === 'calculate') {
+            // Telegram keeps a button spinning until the answer, and the
+            // calculation takes longer than it waits.
+            $telegram->answerCallbackQuery(['callback_query_id' => $callbackQuery->getId(), 'text' => __('calories365-bot.draft_calculating')]);
+
+            if ($this->mealDraftChat->allowed($telegram, $botUser, $chatId)) {
+                $this->mealDraftChat->calculate($bot, $telegram, $botUser, $chatId, $userId);
+            }
+
+            return;
+        }
 
         if (($parts[1] ?? null) === 'save' && in_array($parts[2] ?? null, self::PARTS_OF_DAY, true)) {
             $this->save($telegram, $botUser, $chatId, $userId, $parts[2]);
