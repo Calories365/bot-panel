@@ -54,20 +54,12 @@ return [
             'en' => env('OPENAI_API_KEY_EN'),
         ],
 
-        // New variable names on purpose: OPENAI_CHAT_MODEL and OPENAI_STT_MODEL in
-        // existing .env files still say gpt-4o and whisper-1, which OpenAI switches
-        // off in January and February 2027.
+        // The panel only transcribes speech; what it says the diary reads in the meal
+        // draft. A new variable name on purpose: OPENAI_STT_MODEL in existing .env files
+        // still says whisper-1, which OpenAI switches off in February 2027.
         'models' => [
-            // What the user ate, from speech: accuracy matters more than price.
-            'meal_analysis' => env('OPENAI_MEAL_ANALYSIS_MODEL', 'gpt-6.1-sol'),
-            // Nutrition facts of a single product: short and frequent.
-            'product' => env('OPENAI_PRODUCT_MODEL', 'gpt-6-luna'),
             'transcription' => env('OPENAI_TRANSCRIPTION_MODEL', 'gpt-transcribe'),
         ],
-
-        // The GPT-6 models reason before answering; low keeps the answer fast. They
-        // reject temperature other than 1 and max_tokens.
-        'reasoning_effort' => env('OPENAI_REASONING_EFFORT', 'low'),
     ],
 
 ];

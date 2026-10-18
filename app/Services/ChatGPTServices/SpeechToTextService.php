@@ -6,10 +6,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Speech to a list of products, and nutrition facts of a product, through OpenAI.
- *
- * Models come from config('services.openai.models'): transcription for speech,
- * meal_analysis for the list of products, product for nutrition facts.
+ * Speech to text through OpenAI, config('services.openai.models.transcription').
+ * What the words say about food the diary reads, in the meal draft.
  */
 class SpeechToTextService
 {
@@ -26,20 +24,6 @@ class SpeechToTextService
     private function url(string $path): string
     {
         return rtrim((string) config('services.openai.base_url'), '/').$path;
-    }
-
-    /**
-     * Transcribe the recording and turn the text into "Name - N grams;" lines.
-     *
-     * @return string|array{error: string}|false false when the transcript has no text
-     *
-     * @throws \Illuminate\Http\Client\RequestException when transcription fails
-     */
-    public function convertSpeechToText(string $filePath)
-    {
-        $text = $this->transcribe($filePath);
-
-        return $text !== false ? $this->analyzeFoodIntake($text) : false;
     }
 
     /**
@@ -73,60 +57,5 @@ class SpeechToTextService
         $text = trim((string) ($data['text'] ?? ''));
 
         return $text !== '' ? $text : false;
-    }
-
-    /**
-     * @return string|array{error: string}
-     */
-    public function analyzeFoodIntake(string $text)
-    {
-        $prompt = __('calories365-bot.prompt_analyze_food_intake', [
-            'text' => $text,
-        ]);
-
-        return $this->complete(config('services.openai.models.meal_analysis'), $prompt);
-    }
-
-    /**
-     * @return string|array{error: string}
-     */
-    public function generateNewProductData(string $text)
-    {
-        $prompt = __('calories365-bot.prompt_generate_new_product_data', [
-            'text' => $text,
-        ]);
-
-        return $this->complete(config('services.openai.models.product'), $prompt);
-    }
-
-    /**
-     * One chat completion; the reply text, or ['error' => ...] when the call failed.
-     *
-     * @return string|array{error: string}
-     */
-    private function complete(string $model, string $prompt)
-    {
-        try {
-            $result = Http::timeout(45)
-                ->withToken($this->getApiKey())
-                ->post($this->url('/v1/chat/completions'), [
-                    'model' => $model,
-                    'reasoning_effort' => config('services.openai.reasoning_effort'),
-                    'messages' => [['role' => 'user', 'content' => $prompt]],
-                ])
-                ->throw()
-                ->json();
-
-            $content = $result['choices'][0]['message']['content']
-                ?? __('calories365-bot.data_not_extracted');
-
-            Log::info('OpenAI answer', ['model' => $model, 'content' => $content]);
-
-            return $content;
-        } catch (\Throwable $e) {
-            Log::error('OpenAI request failed', ['model' => $model, 'error' => $e->getMessage()]);
-
-            return ['error' => $e->getMessage()];
-        }
     }
 }

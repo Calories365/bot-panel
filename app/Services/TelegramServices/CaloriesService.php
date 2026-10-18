@@ -19,7 +19,6 @@ use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FontMessa
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\LanguageMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMessageHandler;
-use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\TestMessageHandler;
 use App\Utilities\Utilities;
 
 class CaloriesService extends BaseService
@@ -67,7 +66,6 @@ class CaloriesService extends BaseService
         $h['default'] = fn () => app(DraftTextMessageHandler::class);
         $h['/stats'] = fn () => app(StatsMessageHandler::class);
         $h['/start'] = fn () => app(StartMessageHandler::class);
-        $h['/test'] = fn () => app(TestMessageHandler::class);
         $h['/language'] = fn () => app(LanguageMessageHandler::class);
         $h['font'] = fn () => app(FontMessageHandler::class);
         $h['feedback'] = fn () => app(FeedbackMessageHandler::class);

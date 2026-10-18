@@ -4,14 +4,15 @@ namespace Tests\Unit;
 
 use App\Services\ChatGPTServices\SpeechToTextService;
 use Illuminate\Http\Client\Request;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 use Tests\TestFixtures;
 
 /**
  * The service talks to OpenAI through the Http facade, so Http::fake stands in
- * for both calls. An earlier version of this test injected a Guzzle client the
- * service no longer uses — it would have reached the real API.
+ * for the call. The panel only transcribes speech; the diary reads what it says
+ * in the meal draft.
  */
 class SpeechToTextServiceTest extends TestCase
 {
@@ -25,38 +26,36 @@ class SpeechToTextServiceTest extends TestCase
         app()->setLocale('ru');
     }
 
-    public function test_it_transcribes_audio_and_returns_the_product_list(): void
+    public function test_it_transcribes_audio_with_gpt_transcribe(): void
     {
         $transcript = $this->loadFixture('OpenAI/whisper_success.json')['text'];
 
-        Http::fake([
-            '*/audio/transcriptions' => Http::response(['text' => $transcript]),
-            '*/chat/completions' => Http::response(['choices' => [['message' => ['content' => 'Творог - 225 граммов;']]]]),
-        ]);
+        Http::fake(['*/audio/transcriptions' => Http::response(['text' => $transcript])]);
 
-        $result = (new SpeechToTextService)->convertSpeechToText(base_path('tests/Fixtures/Audio/file.mp3'));
+        $this->assertSame(trim($transcript), (new SpeechToTextService)->transcribe(base_path('tests/Fixtures/Audio/file.mp3')));
 
-        $this->assertSame('Творог - 225 граммов;', $result);
-
-        // gpt-transcribe takes "languages[]"; gpt-4o and whisper-1 are switched off in 2027.
+        // gpt-transcribe takes "languages[]"; whisper-1 is switched off in 2027.
         Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '/audio/transcriptions')
             && $this->part($request, 'model') === 'gpt-transcribe'
             && $this->part($request, 'languages[]') === 'ru'
             && $this->part($request, 'language') === null);
-        Http::assertSent(fn (Request $request) => str_ends_with($request->url(), '/chat/completions')
-            && $request['model'] === 'gpt-6.1-sol'
-            && $request['reasoning_effort'] === 'low'
-            && ! isset($request['temperature'], $request['max_tokens'])
-            && str_contains($request['messages'][0]['content'], $transcript));
+        Http::assertSentCount(1);
     }
 
-    public function test_nutrition_facts_of_a_product_use_the_efficient_model(): void
+    public function test_a_recording_without_words_gives_false(): void
     {
-        Http::fake(['*/chat/completions' => Http::response(['choices' => [['message' => ['content' => 'Калории - 120;']]]])]);
+        Http::fake(['*/audio/transcriptions' => Http::response(['text' => '  '])]);
 
-        $this->assertSame('Калории - 120;', (new SpeechToTextService)->generateNewProductData('Творог'));
+        $this->assertFalse((new SpeechToTextService)->transcribe(base_path('tests/Fixtures/Audio/file.mp3')));
+    }
 
-        Http::assertSent(fn (Request $request) => $request['model'] === 'gpt-6-luna');
+    public function test_a_failed_transcription_is_thrown(): void
+    {
+        Http::fake(['*/audio/transcriptions' => Http::response(['error' => 'down'], 500)]);
+
+        $this->expectException(RequestException::class);
+
+        (new SpeechToTextService)->transcribe(base_path('tests/Fixtures/Audio/file.mp3'));
     }
 
     private function part(Request $request, string $name): ?string
@@ -64,18 +63,5 @@ class SpeechToTextServiceTest extends TestCase
         $part = collect($request->data())->firstWhere('name', $name);
 
         return $part['contents'] ?? null;
-    }
-
-    public function test_it_returns_the_error_when_the_analysis_call_fails(): void
-    {
-        Http::fake([
-            '*/audio/transcriptions' => Http::response(['text' => 'Творог 200 грамм']),
-            '*/chat/completions' => Http::response(['error' => 'down'], 500),
-        ]);
-
-        $result = (new SpeechToTextService)->convertSpeechToText(base_path('tests/Fixtures/Audio/file.mp3'));
-
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('error', $result);
     }
 }
