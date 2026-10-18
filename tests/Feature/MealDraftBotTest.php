@@ -84,6 +84,29 @@ class MealDraftBotTest extends TestCase
         $this->assertNotSame(77, Cache::get('meal_draft_message_111111'));
     }
 
+    public function test_the_edit_button_opens_the_draft_in_the_mini_app(): void
+    {
+        $this->bot->update(['web_app_url' => 'https://diary.test']);
+        $this->diary(fn ($mock) => $mock->shouldReceive('draftInput')->andReturn($this->loadFixture('DiaryAPI/draft.json')));
+
+        $this->send(['text' => 'гречка']);
+
+        $actions = json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard'][1];
+        $this->assertSame(['text' => 'Изменить', 'web_app' => ['url' => 'https://diary.test/voice']], $actions[0]);
+        $this->assertSame('draft_cancel', $actions[1]['callback_data']);
+    }
+
+    public function test_the_how_to_use_button_sends_the_guide_with_the_app_button(): void
+    {
+        $this->bot->update(['web_app_url' => 'https://diary.test']);
+
+        $this->send(['text' => 'Как пользоваться']);
+
+        $this->assertStringContainsString('Как вести дневник в боте', $this->sent[0]['text']);
+        $this->assertStringContainsString('«🥗 Открыть приложение»', $this->sent[0]['text']);
+        $this->assertSame('https://diary.test', json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard'][0][0]['web_app']['url']);
+    }
+
     public function test_a_short_edit_does_not_count_for_the_spam_guard(): void
     {
         config()->set('services.voice.max_per_hour', 1);

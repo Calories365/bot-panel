@@ -16,6 +16,7 @@ use App\Services\TelegramServices\CaloriesHandlers\PhotoMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\DraftTextMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FeedbackMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FontMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\HelpMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\LanguageMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMessageHandler;
@@ -65,6 +66,7 @@ class CaloriesService extends BaseService
 
         $h['default'] = fn () => app(DraftTextMessageHandler::class);
         $h['/stats'] = fn () => app(StatsMessageHandler::class);
+        $h['/help'] = fn () => app(HelpMessageHandler::class);
         $h['/start'] = fn () => app(StartMessageHandler::class);
         $h['/language'] = fn () => app(LanguageMessageHandler::class);
         $h['font'] = fn () => app(FontMessageHandler::class);
@@ -73,6 +75,7 @@ class CaloriesService extends BaseService
         Utilities::applySynonyms($h, [
             '/start' => ['Меню', 'Menu'],
             '/stats' => ['Statistics', 'Статистика'],
+            '/help' => ['Как пользоваться', 'Як користуватися', 'How to use'],
             '/language' => ['Choose language', 'Выбор языка', 'Вибір мови'],
             'feedback' => ['Feedback', 'Обратная связь', 'Зворотний зв\'язок'],
             'font' => ['Font', 'font', 'Шрифт', 'шрифт', 'Большой шрифт', 'Великий шрифт', 'Large font', 'Big font'],

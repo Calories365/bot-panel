@@ -39,6 +39,6 @@ class DraftTextMessageHandler implements MessageHandlerInterface
             return;
         }
 
-        $this->mealDraftChat->input($telegram, $botUser, $chatId, $message->getFrom()->getId(), mb_substr($text, 0, 2000));
+        $this->mealDraftChat->input($bot, $telegram, $botUser, $chatId, $message->getFrom()->getId(), mb_substr($text, 0, 2000));
     }
 }

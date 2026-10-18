@@ -156,15 +156,32 @@ class StartMessageHandler implements MessageHandlerInterface
         ]);
     }
 
+    /**
+     * The menu button of this chat opens the Mini App, whatever the bot's default
+     * menu button is: a user who sends /start always gets the way into the diary.
+     */
+    protected function showMiniAppMenuButton($telegram, int $chatId, string $url): void
+    {
+        try {
+            $telegram->post('setChatMenuButton', [
+                'chat_id' => $chatId,
+                'menu_button' => json_encode([
+                    'type' => 'web_app',
+                    'text' => __('calories365-bot.open_mini_app'),
+                    'web_app' => ['url' => $url],
+                ]),
+            ]);
+        } catch (\Throwable $e) {
+            Log::info('Could not set the menu button of the chat: '.$e->getMessage());
+        }
+    }
+
     protected function sendWelcome($bot, $telegram, $message, array $commonData): void
     {
         $imagePath = $bot->message_image;
 
-        if ($bot->name === 'calories365KNU_bot') {
-            $messageText = __('calories365-bot.welcome_guide_KNU');
-        } else {
-            $messageText = __('calories365-bot.welcome_guide');
-        }
+        $guide = $bot->name === 'calories365KNU_bot' ? 'welcome_guide_KNU' : 'welcome_guide';
+        $messageText = __('calories365-bot.'.$guide, ['open' => __('calories365-bot.open_mini_app')]);
 
         $keyboard = Keyboard::make([
             'resize_keyboard' => true,
@@ -177,12 +194,17 @@ class StartMessageHandler implements MessageHandlerInterface
                     'web_app' => ['url' => $bot->web_app_url],
                 ],
             ]);
+
+            $this->showMiniAppMenuButton($telegram, $commonData['chatId'], $bot->web_app_url);
         }
 
         $keyboard
             ->row([
-                ['text' => __('calories365-bot.menu')],
+                ['text' => __('calories365-bot.how_to_use')],
                 ['text' => __('calories365-bot.statistics')],
+            ])
+            ->row([
+                ['text' => __('calories365-bot.menu')],
             ])
             ->row([
                 ['text' => __('calories365-bot.choose_language')],

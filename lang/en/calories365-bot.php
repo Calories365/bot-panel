@@ -92,29 +92,29 @@ return [
 
     'data_not_extracted' => 'Failed to extract data.',
     'welcome_guide' => <<<'EOT'
-Vide instruction: https://t.me/calories_365/3
+How to keep the diary in the bot:
 
-Send a voice message to the bot with what you’ve eaten to add an entry to your diary.
+1. Tell what you ate: a voice message, text or a photo of the plate. For example: "buckwheat 200 grams, a cutlet and tea with two spoons of sugar".
+2. A photo of a label with its nutrition table gives the exact values from the package.
+3. The bot shows the meal in one message. Correct it in words: "buckwheat was 250", "remove the tea", "2 150" sets the grams of item 2. Or press "Edit" and correct it in the app.
+4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary.
 
-Saved products will appear in the web application:
-https://calculator.calories365.com?lang=en
+The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.com?lang=en
 
-You can also watch an introduction video about the bot.
-
-Start tracking your calories easily and conveniently!
+The guide is always under the "How to use" button.
 EOT,
 
     'welcome_guide_KNU' => <<<'EOT'
-Vide instruction: https://t.me/calories_365/3
+How to keep the diary in the bot:
 
-Send a voice message to the bot with what you’ve eaten to add an entry to your diary.
+1. Tell what you ate: a voice message, text or a photo of the plate. For example: "buckwheat 200 grams, a cutlet and tea with two spoons of sugar".
+2. A photo of a label with its nutrition table gives the exact values from the package.
+3. The bot shows the meal in one message. Correct it in words: "buckwheat was 250", "remove the tea", "2 150" sets the grams of item 2. Or press "Edit" and correct it in the app.
+4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary.
 
-Saved products will appear in the web application:
-https://calculator.calories365.xyz?lang=en
+The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.xyz?lang=en
 
-You can also watch an introduction video about the bot.
-
-Start tracking your calories easily and conveniently!
+The guide is always under the "How to use" button.
 EOT,
     'open_mini_app' => '🥗 Open the app',
     'menu' => 'Menu',
@@ -142,7 +142,7 @@ EOT,
     'draft_edited' => 'changed',
     'draft_label' => 'from the label',
     'draft_not_found' => 'Not found: :names',
-    'draft_hint' => 'Correct it by voice or text: "2 250" sets the grams of item 2, "remove 1", "and an apple", "item 1 has 120 kcal per 100 g". You can send a photo of the dish or of the label.',
+    'draft_hint' => 'Correct it by voice or text: "buckwheat was 250", "remove 1", "and an apple". Or press "Edit".',
     'draft_not_understood' => 'No food found in the message. Tell by voice or text what you ate, or send a photo of the dish or of the label.',
     'draft_not_read' => 'Could not read the message, please try again.',
     'draft_failed' => 'The diary does not answer right now, please try later.',
@@ -151,4 +151,6 @@ EOT,
     'draft_rate_limited' => 'Too many messages in a row. Please try again in :minutes min.',
     'photo_not_downloaded' => 'Could not load the photo, please send it again.',
     'outdated_message' => 'This message is out of date. Tell about the meal again.',
+    'how_to_use' => 'How to use',
+    'draft_edit' => 'Edit',
 ];

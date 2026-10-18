@@ -55,14 +55,14 @@ class MealDraftChat
      *
      * @param  array{contents: string, name: string}|null  $photo
      */
-    public function input($telegram, $botUser, int $chatId, int $userId, ?string $text, ?array $photo = null): void
+    public function input($bot, $telegram, $botUser, int $chatId, int $userId, ?string $text, ?array $photo = null): void
     {
         $telegram->sendChatAction(['chat_id' => $chatId, 'action' => 'typing']);
 
         try {
             // The photos of an album come as separate updates; one input at a time
             // keeps the item numbers the model sees in line with the draft.
-            Cache::lock("meal_draft_input_{$userId}", 120)->block(100, function () use ($telegram, $botUser, $chatId, $userId, $text, $photo) {
+            Cache::lock("meal_draft_input_{$userId}", 120)->block(100, function () use ($bot, $telegram, $botUser, $chatId, $userId, $text, $photo) {
                 $response = $this->diaryApiService->draftInput($text, $photo, $botUser->calories_id, $botUser->locale);
 
                 if (isset($response['error'])) {
@@ -80,7 +80,7 @@ class MealDraftChat
                     return;
                 }
 
-                $this->show($telegram, $botUser, $chatId, $userId, $response['draft'] ?? null, $response['not_found'] ?? []);
+                $this->show($bot, $telegram, $chatId, $userId, $response['draft'] ?? null, $response['not_found'] ?? []);
             });
         } catch (LockTimeoutException) {
             Log::warning('Meal draft input waited too long for the previous one', ['user' => $userId]);
@@ -95,7 +95,7 @@ class MealDraftChat
      * @param  array<string, mixed>|null  $draft  MealDraft::toPayload of the diary
      * @param  array<int, string>  $notFound  foods the diary found no product for
      */
-    public function show($telegram, $botUser, int $chatId, int $userId, ?array $draft, array $notFound = []): void
+    public function show($bot, $telegram, int $chatId, int $userId, ?array $draft, array $notFound = []): void
     {
         if ($draft === null) {
             $this->forget($telegram, $chatId, $userId);
@@ -109,7 +109,7 @@ class MealDraftChat
             'chat_id' => $chatId,
             'text' => $this->text($draft, $notFound),
             'parse_mode' => 'HTML',
-            'reply_markup' => json_encode(['inline_keyboard' => $this->keyboard()]),
+            'reply_markup' => json_encode(['inline_keyboard' => $this->keyboard($bot->web_app_url ?? null)]),
         ]);
 
         Cache::put("meal_draft_message_{$userId}", $sent->getMessageId(), now()->addHours(6));
@@ -175,11 +175,12 @@ class MealDraftChat
     }
 
     /**
-     * Breakfast, lunch and dinner, the one of the time of day first, and cancel.
+     * Breakfast, lunch and dinner, the one of the time of day first; edit, which
+     * opens the draft on the "Приём пищи" page of the Mini App, and cancel.
      *
-     * @return array<int, array<int, array{text: string, callback_data: string}>>
+     * @return array<int, array<int, array<string, mixed>>>
      */
-    private function keyboard(): array
+    private function keyboard(?string $miniAppUrl): array
     {
         $meals = ['morning' => 'breakfast', 'dinner' => 'lunch', 'supper' => 'dinner'];
         $hour = (int) now()->format('G');
@@ -191,7 +192,12 @@ class MealDraftChat
             $row[] = ['text' => __('calories365-bot.'.$label), 'callback_data' => 'draft_save_'.$partOfDay];
         }
 
-        return [$row, [['text' => __('calories365-bot.cancel'), 'callback_data' => 'draft_cancel']]];
+        $actions = [['text' => __('calories365-bot.cancel'), 'callback_data' => 'draft_cancel']];
+        if ($miniAppUrl) {
+            array_unshift($actions, ['text' => __('calories365-bot.draft_edit'), 'web_app' => ['url' => rtrim($miniAppUrl, '/').'/voice']]);
+        }
+
+        return [$row, $actions];
     }
 
     private function deleteMessage($telegram, int $chatId, int $messageId): void

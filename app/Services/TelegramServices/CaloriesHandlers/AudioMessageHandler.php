@@ -43,6 +43,6 @@ class AudioMessageHandler implements MessageHandlerInterface
             return;
         }
 
-        $this->mealDraftChat->input($telegram, $botUser, $chatId, $commonData['userId'], $text);
+        $this->mealDraftChat->input($bot, $telegram, $botUser, $chatId, $commonData['userId'], $text);
     }
 }

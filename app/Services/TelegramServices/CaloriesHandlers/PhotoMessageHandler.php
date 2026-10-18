@@ -43,7 +43,7 @@ class PhotoMessageHandler implements MessageHandlerInterface
             return;
         }
 
-        $this->mealDraftChat->input($telegram, $botUser, $chatId, $commonData['userId'], $message['caption'] ?? null, $photo);
+        $this->mealDraftChat->input($bot, $telegram, $botUser, $chatId, $commonData['userId'], $message['caption'] ?? null, $photo);
     }
 
     /**
