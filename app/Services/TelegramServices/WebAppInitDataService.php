@@ -76,14 +76,17 @@ class WebAppInitDataService
     }
 
     /**
-     * Check the initData signature against a single bot token.
+     * Check the initData hash against a single bot token.
+     *
+     * The data-check-string holds every field but "hash", the "signature" that
+     * Telegram clients add for third-party validation included.
      *
      * @param  array<string, mixed>  $parsed
      */
     public function signatureMatches(array $parsed, string $token): bool
     {
         $hash = (string) $parsed['hash'];
-        unset($parsed['hash'], $parsed['signature']);
+        unset($parsed['hash']);
 
         ksort($parsed);
 

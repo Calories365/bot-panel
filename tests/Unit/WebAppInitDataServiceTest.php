@@ -24,6 +24,18 @@ class WebAppInitDataServiceTest extends TestCase
         $this->assertTrue($this->service->signatureMatches($parsed, self::TOKEN));
     }
 
+    /**
+     * Telegram clients add an Ed25519 "signature" field, and the hash covers it
+     * like any other field: only "hash" stays out of the data-check-string.
+     */
+    public function test_it_accepts_init_data_with_the_signature_telegram_adds(): void
+    {
+        $parsed = $this->service->parse($this->makeInitData(withSignature: true));
+
+        $this->assertArrayHasKey('signature', $parsed);
+        $this->assertTrue($this->service->signatureMatches($parsed, self::TOKEN));
+    }
+
     public function test_it_rejects_init_data_signed_with_another_token(): void
     {
         $parsed = $this->service->parse($this->makeInitData());
@@ -56,12 +68,16 @@ class WebAppInitDataServiceTest extends TestCase
         $this->assertNull($this->service->extractUser($parsed));
     }
 
-    private function makeInitData(bool $withUser = true): string
+    private function makeInitData(bool $withUser = true, bool $withSignature = false): string
     {
         $fields = [
             'auth_date' => (string) time(),
             'query_id' => 'AAHdF6IQAAAAAN0XohDhrOrc',
         ];
+
+        if ($withSignature) {
+            $fields['signature'] = 'zL-ucjNyREiHDE8aihFwpfR9aggP2xiAo3NSpfe-p7IbCisNlDKlo7Kb6G4D0Ao2mBrSgEk4maLSdv6MLIlADQ';
+        }
 
         if ($withUser) {
             $fields['user'] = json_encode([
