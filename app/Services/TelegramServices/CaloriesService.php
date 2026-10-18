@@ -5,20 +5,15 @@ namespace App\Services\TelegramServices;
 use App\Services\TelegramServices\CaloriesHandlers\AudioMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\BigFontCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CancelCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\DeleteCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\DeleteMealCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingCancelCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSaveCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\EditingProcessCallbackQuery\EditingSkipCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\DraftCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\LanguageCallbackHandlers\SetEnglishLanguageCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\LanguageCallbackHandlers\SetRussianLanguageCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\LanguageCallbackHandlers\SetUkrainianLanguageCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SaveCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\SearchCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\OutdatedCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\StatsCallbackQueryHandler;
-use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\EditMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\PhotoMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\DraftTextMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FeedbackMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FontMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\LanguageMessageHandler;
@@ -60,6 +55,7 @@ class CaloriesService extends BaseService
         $handlers = parent::getMessageHandlers();
 
         $handlers['voice'] = fn () => app(AudioMessageHandler::class);
+        $handlers['photo'] = fn () => app(PhotoMessageHandler::class);
 
         return $handlers;
     }
@@ -68,7 +64,7 @@ class CaloriesService extends BaseService
     {
         $h = parent::getTextMessageHandlers();
 
-        $h['default'] = fn () => app(EditMessageHandler::class);
+        $h['default'] = fn () => app(DraftTextMessageHandler::class);
         $h['/stats'] = fn () => app(StatsMessageHandler::class);
         $h['/start'] = fn () => app(StartMessageHandler::class);
         $h['/test'] = fn () => app(TestMessageHandler::class);
@@ -91,17 +87,13 @@ class CaloriesService extends BaseService
     {
         $h = parent::getCallbackQueryHandlers();
 
-        $h['cancel'] = fn () => app(CancelCallbackQueryHandler::class);
-        $h['save'] = fn () => app(SaveCallbackQueryHandler::class);
-        $h['edit'] = fn () => app(EditCallbackQueryHandler::class);
-        $h['destroy'] = fn () => app(DeleteCallbackQueryHandler::class);
-
-        $h['editing_save'] = fn () => app(EditingSaveCallbackQueryHandler::class);
-        $h['editing_cancel'] = fn () => app(EditingCancelCallbackQueryHandler::class);
-        $h['editing_skip'] = fn () => app(EditingSkipCallbackQueryHandler::class);
-
-        $h['search'] = fn () => app(SearchCallbackQueryHandler::class);
+        $h['draft'] = fn () => app(DraftCallbackQueryHandler::class);
         $h['delete_meal'] = fn () => app(DeleteMealCallbackQueryHandler::class);
+
+        // Buttons of the per-product messages sent before the meal draft.
+        foreach (['save', 'cancel', 'edit', 'destroy', 'search', 'editing_save', 'editing_cancel', 'editing_skip'] as $outdated) {
+            $h[$outdated] = fn () => app(OutdatedCallbackQueryHandler::class);
+        }
 
         $h['English'] = fn () => app(SetEnglishLanguageCallbackQueryHandler::class);
         $h['Russian'] = fn () => app(SetRussianLanguageCallbackQueryHandler::class);

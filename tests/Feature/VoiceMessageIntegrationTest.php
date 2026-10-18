@@ -41,9 +41,7 @@ class VoiceMessageIntegrationTest extends TestCase
     }
 
     /* ----------------------------------------------------------------- */
-    /** @test */
-    /** @test */
-    public function voice_webhook_returns_success(): void
+    public function test_a_voice_message_shows_the_meal_draft_with_its_buttons(): void
     {
         [$bot, $payload] = $this->prepareBotAndPayload();
 
@@ -53,25 +51,23 @@ class VoiceMessageIntegrationTest extends TestCase
             ->assertOk()
             ->assertExactJson(['status' => 'success']);
 
-        $this->assertCount(2, $this->sent);
-        $this->assertEquals([111111, 111111], array_column($this->sent, 'chat_id'));
+        $this->assertCount(1, $this->sent);
+        $this->assertSame(111111, $this->sent[0]['chat_id']);
+        $this->assertSame('HTML', $this->sent[0]['parse_mode']);
 
-        $card = $this->sent[0]['text'];
+        $draft = $this->sent[0]['text'];
+        $this->assertStringContainsString('<b>Приём пищи</b>', $draft);
+        $this->assertStringContainsString('1. Творог 5% — 225 г, 306 ккал', $draft);
+        $this->assertStringContainsString('2. Кефир &lt;Олимп&gt; 1% — 250 г, 98 ккал — по этикетке', $draft);
+        $this->assertStringContainsString('<b>Итого: 404 ккал</b> · Б 47 · Ж 14 · У 17', $draft);
 
-        $this->assertStringContainsString('Вы сказали: Творог', $card);
-        $this->assertStringContainsString('| Параметр | 100г | 225г |', $card);
-        $this->assertStringContainsString('| Калории  | 136  | 306', $card);
-        $this->assertStringContainsString('| Белки', $card);
+        $kb = json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard'];
+        $saves = array_column($kb[0], 'callback_data');
+        sort($saves);
+        $this->assertSame(['draft_save_dinner', 'draft_save_morning', 'draft_save_supper'], $saves);
+        $this->assertSame(['draft_cancel'], array_column($kb[1], 'callback_data'));
 
-        $kb = json_decode($this->sent[1]['reply_markup'], true);
-        $flat = array_map(fn ($row) => array_column($row, 'callback_data'), $kb['inline_keyboard']);
-        $this->assertEquals(
-            [['save_morning', 'save_dinner'], ['save_supper', 'cancel']],
-            $flat
-        );
-
-        $this->assertTrue(Cache::has('user_products_111111'));
-        $this->assertArrayHasKey(24794, Cache::get('user_products_111111'));
+        $this->assertTrue(Cache::has('meal_draft_message_111111'));
     }
 
     public function test_a_user_who_spent_the_old_free_limit_still_gets_an_answer(): void
@@ -138,6 +134,8 @@ class VoiceMessageIntegrationTest extends TestCase
 
         $api->shouldReceive('getFile')
             ->andReturn((object) ['file_path' => 'voice/file_11.oga']);
+        $api->shouldReceive('sendChatAction');
+        $api->shouldReceive('deleteMessage');
 
         $api->shouldReceive('sendMessage')
             ->andReturnUsing(function (array $p) {
@@ -163,19 +161,20 @@ class VoiceMessageIntegrationTest extends TestCase
     /* ------------------- AudioConversionService ---------------------- */
     private function mockAudioConversionService(): void
     {
-        $this->partialMock(AudioConversionService::class, fn ($m) => $m->shouldReceive('processAudioMessage')->andReturn('Творог - 225 грамм'));
+        $this->partialMock(AudioConversionService::class, fn ($m) => $m->shouldReceive('processAudioMessage')->andReturn('Творог 225 грамм и стакан кефира'));
     }
 
     /* ----------------------- Diary API ------------------------------- */
     private function mockDiaryApi(): void
     {
         $json = json_decode(
-            file_get_contents(base_path('tests/Fixtures/DiaryAPI/products_found.json')),
+            file_get_contents(base_path('tests/Fixtures/DiaryAPI/draft.json')),
             true, 512, JSON_THROW_ON_ERROR
         );
 
-        $this->partialMock(DiaryApiService::class,
-            fn ($m) => $m->shouldReceive('sendText')->andReturn($json));
+        $this->partialMock(DiaryApiService::class, fn ($m) => $m->shouldReceive('draftInput')
+            ->with('Творог 225 грамм и стакан кефира', null, 555, 'ru')
+            ->andReturn($json));
     }
 
     /* -------------------- HTTP ------------------------------- */

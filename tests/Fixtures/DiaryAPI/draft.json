@@ -1,0 +1,31 @@
+{
+    "draft": {
+        "items": [
+            {
+                "number": 1,
+                "id": 41,
+                "name": "Творог 5%",
+                "grams": 225,
+                "product_id": 24794,
+                "source": "database",
+                "edited": false,
+                "per_100g": {"calories": 136, "proteins": 17, "fats": 5, "carbohydrates": 3, "fibers": 0},
+                "portion": {"calories": 306, "proteins": 38.3, "fats": 11.3, "carbohydrates": 6.8, "fibers": 0}
+            },
+            {
+                "number": 2,
+                "id": 42,
+                "name": "Кефир <Олимп> 1%",
+                "grams": 250,
+                "product_id": 16786,
+                "source": "label",
+                "edited": false,
+                "per_100g": {"calories": 39, "proteins": 3.4, "fats": 1, "carbohydrates": 4.1, "fibers": 0},
+                "portion": {"calories": 97.5, "proteins": 8.5, "fats": 2.5, "carbohydrates": 10.3, "fibers": 0}
+            }
+        ],
+        "total": {"calories": 403.5, "proteins": 46.8, "fats": 13.8, "carbohydrates": 17.1, "fibers": 0}
+    },
+    "understood": true,
+    "not_found": []
+}

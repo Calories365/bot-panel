@@ -106,14 +106,14 @@ class AudioConversionIntegrationTest extends TestCase
         Storage::disk('public')->delete($corruptedPath);
     }
 
-    public function test_a_failed_analysis_returns_no_text_instead_of_throwing(): void
+    public function test_a_failed_transcription_returns_no_text_instead_of_throwing(): void
     {
         Http::fake([
             'api.telegram.org/file/*' => Http::response(file_get_contents(base_path('tests/Fixtures/Audio/file.oga'))),
         ]);
 
         $speechToText = Mockery::mock(SpeechToTextService::class);
-        $speechToText->shouldReceive('convertSpeechToText')->once()->andReturn(['error' => 'OpenAI is down']);
+        $speechToText->shouldReceive('transcribe')->once()->andThrow(new \RuntimeException('OpenAI is down'));
 
         $telegram = Mockery::mock(Api::class);
         $telegram->shouldReceive('getFile')->andReturn(new File(['file_path' => 'voice/file_1.oga']));

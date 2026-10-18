@@ -25,7 +25,8 @@ class AudioConversionService
     }
 
     /**
-     * Main method to process an audio message.
+     * The words of a voice message, or null when it could not be downloaded,
+     * converted or transcribed.
      */
     public function processAudioMessage(Api $telegram, $bot, $message): ?string
     {
@@ -39,14 +40,10 @@ class AudioConversionService
             [$localPath, $fullLocalPath] = $this->downloadAudio($downloadLink);
             [$convertedLocal, $convertedPath] = $this->convertToMp3($localPath, $fullLocalPath);
             if ($convertedPath) {
-                // передается сконвертированое в mp3 аудио
-                $text = $this->speechToTextService->convertSpeechToText($convertedPath);
+                $text = $this->speechToTextService->transcribe($convertedPath);
 
-                // A failed analysis comes back as ['error' => ...]; returning it would
-                // break the ?string contract, fail the job and make Telegram's update
-                // run again — charging the free limit once more.
-                if (! is_string($text) || trim($text) === '') {
-                    Log::error('Speech analysis returned no text', ['result' => $text]);
+                if ($text === false) {
+                    Log::error('Speech transcription returned no text');
 
                     return null;
                 }

@@ -37,6 +37,19 @@ class SpeechToTextService
      */
     public function convertSpeechToText(string $filePath)
     {
+        $text = $this->transcribe($filePath);
+
+        return $text !== false ? $this->analyzeFoodIntake($text) : false;
+    }
+
+    /**
+     * The words of the recording; false when it has none. The diary's meal
+     * draft reads what they say about food.
+     *
+     * @throws \Illuminate\Http\Client\RequestException when transcription fails
+     */
+    public function transcribe(string $filePath): string|false
+    {
         $languageCode = match (app()->getLocale()) {
             'ua' => 'uk',
             'ru' => 'ru',
@@ -57,9 +70,9 @@ class SpeechToTextService
 
         Log::info('Transcribed speech', ['text' => $data['text'] ?? null]);
 
-        return isset($data['text'])
-            ? $this->analyzeFoodIntake($data['text'])
-            : false;
+        $text = trim((string) ($data['text'] ?? ''));
+
+        return $text !== '' ? $text : false;
     }
 
     /**

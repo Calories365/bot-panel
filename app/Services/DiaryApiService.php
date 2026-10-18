@@ -29,14 +29,18 @@ class DiaryApiService
      * @param  int|null  $caloriesId
      * @param  string|null  $locale
      */
-    private function getHeaders($caloriesId = null, $locale = null, $admin = null): array
+    private function getHeaders($caloriesId = null, $locale = null, $admin = null, bool $multipart = false): array
     {
         $headers = [
-            'Content-Type' => 'application/json',
             'Accept' => 'application/json',
             'Host' => $this->host,
             'X-Api-Key' => $this->diaryApiKey,
         ];
+
+        // A multipart body sets its own Content-Type with the boundary.
+        if (! $multipart) {
+            $headers['Content-Type'] = 'application/json';
+        }
 
         if (! empty($caloriesId)) {
             $headers['X-Calories-Id'] = $caloriesId;
@@ -229,6 +233,92 @@ class DiaryApiService
             return json_decode($response->getBody()->getContents(), true);
         } catch (GuzzleException $e) {
             Log::error('Error retrieving all users info: '.$e->getMessage());
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Apply a text or a photo to the user's meal draft in the diary.
+     *
+     * The diary reads it with its meal model, which takes several seconds for a
+     * photo. Answers {draft, understood, not_found}, or ['error' => …, 'status' => …]:
+     * status 503 when the diary could not read the input.
+     *
+     * @param  array{contents: string, name: string}|null  $photo
+     * @return array<string, mixed>
+     */
+    public function draftInput(?string $text, ?array $photo, $caloriesId, string $locale): array
+    {
+        try {
+            $request = Http::timeout(90)->withHeaders($this->getHeaders($caloriesId, $locale, null, multipart: true));
+
+            if ($photo !== null) {
+                $request = $request->attach('photo', $photo['contents'], $photo['name']);
+            }
+
+            $response = $request->asMultipart()->post($this->apiUrl.'/caloriesEndPoint/draft/input', $text !== null && $text !== '' ? ['text' => $text] : []);
+            $response->throw();
+
+            return $response->json();
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            Log::error('Error sending input to the meal draft: '.$e->getMessage());
+
+            return ['error' => $e->getMessage(), 'status' => $e->response->status()];
+        } catch (\Throwable $e) {
+            Log::error('Error sending input to the meal draft: '.$e->getMessage());
+
+            return ['error' => $e->getMessage(), 'status' => 0];
+        }
+    }
+
+    /**
+     * Save the user's meal draft as a meal of the day; answers {total}, or
+     * ['error' => …, 'status' => …]: status 404 when there is no draft any more.
+     *
+     * @return array<string, mixed>
+     */
+    public function draftSave(string $partOfDay, string $date, $caloriesId, string $locale): array
+    {
+        try {
+            $response = Http::timeout(45)
+                ->withHeaders($this->getHeaders($caloriesId, $locale))
+                ->post($this->apiUrl.'/caloriesEndPoint/draft/save', [
+                    'part_of_day' => $partOfDay,
+                    'consumed_at' => $date,
+                ]);
+
+            $response->throw();
+
+            return $response->json();
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            Log::error('Error saving the meal draft: '.$e->getMessage());
+
+            return ['error' => $e->getMessage(), 'status' => $e->response->status()];
+        } catch (\Throwable $e) {
+            Log::error('Error saving the meal draft: '.$e->getMessage());
+
+            return ['error' => $e->getMessage(), 'status' => 0];
+        }
+    }
+
+    /**
+     * Drop the user's meal draft.
+     *
+     * @return array<string, mixed>
+     */
+    public function draftCancel($caloriesId, string $locale): array
+    {
+        try {
+            $response = Http::timeout(45)
+                ->withHeaders($this->getHeaders($caloriesId, $locale))
+                ->delete($this->apiUrl.'/caloriesEndPoint/draft');
+
+            $response->throw();
+
+            return $response->json();
+        } catch (\Throwable $e) {
+            Log::error('Error cancelling the meal draft: '.$e->getMessage());
 
             return ['error' => $e->getMessage()];
         }
