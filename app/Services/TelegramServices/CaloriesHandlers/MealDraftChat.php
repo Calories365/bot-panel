@@ -93,6 +93,7 @@ class MealDraftChat
                 return;
             }
 
+            $this->tellRecorded($telegram, $chatId, $response['recorded'] ?? null);
             $this->show($bot, $telegram, $chatId, $userId, $response['draft'] ?? null, $response['inputs'] ?? [], $response['not_found'] ?? []);
         });
     }
@@ -148,6 +149,9 @@ class MealDraftChat
             default => null,
         };
 
+        // A weight or an activity alone is understood, though no food is.
+        $this->tellRecorded($telegram, $chatId, $calculation['recorded'] ?? null);
+
         if ($notice !== null) {
             $telegram->sendMessage(['chat_id' => $chatId, 'text' => __('calories365-bot.'.$notice)]);
         }
@@ -198,6 +202,32 @@ class MealDraftChat
 
         if ($previous) {
             $this->deleteMessage($telegram, $chatId, (int) $previous);
+        }
+    }
+
+    /**
+     * Say what weight and activities went to the diary of the day.
+     *
+     * @param  array{weight?: float|null, activities?: array<int, array<string, mixed>>}|null  $recorded
+     */
+    private function tellRecorded($telegram, int $chatId, ?array $recorded): void
+    {
+        $lines = [];
+
+        if (! empty($recorded['weight'])) {
+            $lines[] = __('calories365-bot.recorded_weight', ['weight' => $recorded['weight']]);
+        }
+
+        foreach ($recorded['activities'] ?? [] as $activity) {
+            $lines[] = __('calories365-bot.recorded_activity', [
+                'title' => $activity['title'],
+                'minutes' => $activity['minutes'],
+                'calories' => $activity['calories'],
+            ]);
+        }
+
+        if ($lines !== []) {
+            $telegram->sendMessage(['chat_id' => $chatId, 'text' => implode("\n", $lines)]);
         }
     }
 

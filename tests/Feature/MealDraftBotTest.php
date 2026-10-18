@@ -133,6 +133,27 @@ class MealDraftBotTest extends TestCase
         $this->assertStringContainsString('Сахар 23 г · гликемическая нагрузка 32, средняя', $draft);
     }
 
+    public function test_a_weight_and_an_activity_the_diary_kept_are_told(): void
+    {
+        $this->diary(function ($mock) {
+            $mock->shouldReceive('draftCollect')->once()->with('text', 'вешу 82,4', null, 555, 'ru')
+                ->andReturn($this->waiting([]) + ['recorded' => ['weight' => 82.4, 'activities' => []]]);
+            $mock->shouldReceive('draftCalculate')->andReturn($this->waiting([], null, [
+                'status' => 'done',
+                'understood' => true,
+                'not_found' => [],
+                'recorded' => ['weight' => null, 'activities' => [['id' => 1, 'title' => 'Бег 5 км', 'minutes' => 30, 'calories' => 365]]],
+            ]));
+        });
+
+        $this->send(['text' => 'вешу 82,4']);
+        $this->press('draft_calculate');
+
+        $this->assertSame('Записал вес 82.4 кг.', $this->sent[0]['text']);
+        $this->assertSame('Записал: Бег 5 км, 30 мин, ≈365 ккал.', $this->sent[1]['text']);
+        $this->assertCount(2, $this->sent);
+    }
+
     public function test_a_calculation_longer_than_the_bot_waits_asks_to_press_again(): void
     {
         config()->set('services.diary_api.calculation_wait_seconds', 0);
