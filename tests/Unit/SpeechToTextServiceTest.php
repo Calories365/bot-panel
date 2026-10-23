@@ -42,6 +42,16 @@ class SpeechToTextServiceTest extends TestCase
         Http::assertSentCount(1);
     }
 
+    public function test_without_the_language_hint_the_model_detects_the_language(): void
+    {
+        Http::fake(['*/audio/transcriptions' => Http::response(['text' => 'Hello'])]);
+
+        $this->assertSame('Hello', (new SpeechToTextService)->transcribe(base_path('tests/Fixtures/Audio/file.mp3'), false));
+
+        Http::assertSent(fn (Request $request) => $this->part($request, 'model') === 'gpt-transcribe'
+            && $this->part($request, 'languages[]') === null);
+    }
+
     public function test_a_recording_without_words_gives_false(): void
     {
         Http::fake(['*/audio/transcriptions' => Http::response(['text' => '  '])]);

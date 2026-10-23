@@ -28,24 +28,29 @@ class SpeechToTextService
 
     /**
      * The words of the recording; false when it has none. The diary's meal
-     * draft reads what they say about food.
+     * draft reads what they say about food. Without the language hint the
+     * model detects the language itself: the transcription bot hears any
+     * language, whatever the interface of Telegram is.
      *
      * @throws \Illuminate\Http\Client\RequestException when transcription fails
      */
-    public function transcribe(string $filePath): string|false
+    public function transcribe(string $filePath, bool $withLanguageHint = true): string|false
     {
-        $languageCode = match (app()->getLocale()) {
-            'ua' => 'uk',
-            'ru' => 'ru',
-            'en' => 'en',
-            default => 'uk',
-        };
-
-        $response = Http::timeout(45)
+        $request = Http::timeout(45)
             ->attach('file', fopen($filePath, 'r'), basename($filePath))
-            ->attach('model', config('services.openai.models.transcription'))
+            ->attach('model', config('services.openai.models.transcription'));
+
+        if ($withLanguageHint) {
             // gpt-transcribe takes a list of expected languages instead of "language".
-            ->attach('languages[]', $languageCode)
+            $request->attach('languages[]', match (app()->getLocale()) {
+                'ua' => 'uk',
+                'ru' => 'ru',
+                'en' => 'en',
+                default => 'uk',
+            });
+        }
+
+        $response = $request
             ->withToken($this->getApiKey())
             ->post($this->url('/v1/audio/transcriptions'))
             ->throw();

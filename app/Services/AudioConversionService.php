@@ -26,9 +26,10 @@ class AudioConversionService
 
     /**
      * The words of a voice message, or null when it could not be downloaded,
-     * converted or transcribed.
+     * converted or transcribed. Without the language hint the model detects
+     * the language itself.
      */
-    public function processAudioMessage(Api $telegram, $bot, $message): ?string
+    public function processAudioMessage(Api $telegram, $bot, $message, bool $withLanguageHint = true): ?string
     {
         $localPath = null;
         $fullLocalPath = null;
@@ -40,7 +41,7 @@ class AudioConversionService
             [$localPath, $fullLocalPath] = $this->downloadAudio($downloadLink);
             [$convertedLocal, $convertedPath] = $this->convertToMp3($localPath, $fullLocalPath);
             if ($convertedPath) {
-                $text = $this->speechToTextService->transcribe($convertedPath);
+                $text = $this->speechToTextService->transcribe($convertedPath, $withLanguageHint);
 
                 if ($text === false) {
                     Log::error('Speech transcription returned no text');

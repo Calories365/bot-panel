@@ -30,6 +30,7 @@ class TelegramHandler
             'Request2' => static fn () => $app->make(Request2Service::class),
             'Calories' => static fn () => $app->make(CaloriesService::class),
             'TikTok' => static fn () => $app->make(TikTokService::class),
+            'Transcription' => static fn () => $app->make(TranscriptionService::class),
         ];
 
         $this->apiFactory = $apiFactory
