@@ -48,6 +48,13 @@ return [
         'max_per_hour' => env('VOICE_RATE_LIMIT_PER_HOUR', 30),
     ],
 
+    // The transcription bot lets in only those who sent its password once.
+    // The token creates the bot on migration where the bot is not there yet.
+    'transcription_bot' => [
+        'password_hash' => env('TRANSCRIPTION_BOT_PASSWORD_HASH', '$2y$12$O7V80ajbBhSGYaqdrOmrd.EjPIJaJgv.aWpezQdK4NMZioeWtXtga'),
+        'token' => env('TRANSCRIPTION_BOT_TOKEN'),
+    ],
+
     'openai' => [
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com'),
 
