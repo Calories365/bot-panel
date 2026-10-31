@@ -157,6 +157,24 @@ class MealDraftBotTest extends TestCase
         $this->assertSame(__('calories365-bot.draft_unsupported'), $this->sent[0]['text']);
     }
 
+    public function test_the_statistics_menu_opens_the_insulin_chart_in_the_mini_app(): void
+    {
+        $this->bot->update(['web_app_url' => 'https://app.example/']);
+        Cache::forget('bot:'.$this->bot->name);
+
+        $this->send(['text' => 'Статистика']);
+
+        $rows = json_decode((string) json_encode($this->sent[0]['reply_markup']), true)['inline_keyboard'];
+        $this->assertSame('https://app.example/insulin', end($rows)[0]['web_app']['url']);
+    }
+
+    public function test_the_statistics_menu_has_no_chart_without_a_mini_app(): void
+    {
+        $this->send(['text' => 'Статистика']);
+
+        $this->assertStringNotContainsString('web_app', (string) json_encode($this->sent[0]['reply_markup']));
+    }
+
     public function test_the_statistics_of_a_meal_tell_how_processed_each_product_is(): void
     {
         $this->diary(fn ($mock) => $mock->shouldReceive('showUserStats')->once()->andReturn([

@@ -20,30 +20,38 @@ class StatsMessageHandler implements MessageHandlerInterface
 
         $chatId = $message->getChat()->getId();
 
-        $inlineKeyboard = Keyboard::make([
-            'inline_keyboard' => [
+        $rows = [
+            [
                 [
-                    [
-                        'text' => __('calories365-bot.breakfast'),
-                        'callback_data' => 'Breakfast',
-                    ],
-                    [
-                        'text' => __('calories365-bot.lunch'),
-                        'callback_data' => 'Dinner',
-                    ],
-                    [
-                        'text' => __('calories365-bot.dinner'),
-                        'callback_data' => 'Supper',
-                    ],
+                    'text' => __('calories365-bot.breakfast'),
+                    'callback_data' => 'Breakfast',
                 ],
                 [
-                    [
-                        'text' => __('calories365-bot.whole_day'),
-                        'callback_data' => 'AllDay',
-                    ],
+                    'text' => __('calories365-bot.lunch'),
+                    'callback_data' => 'Dinner',
+                ],
+                [
+                    'text' => __('calories365-bot.dinner'),
+                    'callback_data' => 'Supper',
                 ],
             ],
-        ]);
+            [
+                [
+                    'text' => __('calories365-bot.whole_day'),
+                    'callback_data' => 'AllDay',
+                ],
+            ],
+        ];
+
+        // The curve is a chart: it lives in the Mini App, a bot without one has no such button.
+        if ($bot->web_app_url ?? null) {
+            $rows[] = [[
+                'text' => __('calories365-bot.insulin_chart'),
+                'web_app' => ['url' => rtrim($bot->web_app_url, '/').'/insulin'],
+            ]];
+        }
+
+        $inlineKeyboard = Keyboard::make(['inline_keyboard' => $rows]);
 
         $telegram->sendMessage([
             'chat_id' => $chatId,

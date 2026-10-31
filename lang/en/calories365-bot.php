@@ -99,7 +99,7 @@ How to keep the diary in the bot:
 3. Press "Calculate": the bot reads all of it together and shows the meal in one message. Correct it in words, "buckwheat was 250", "remove the tea", and press "Recalculate with what is added". "2 150" sets the grams of item 2 at once. Or press "Edit" and correct it in the app.
 4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary. Nothing is recorded without it.
 5. Weight and workouts the same way: "I weigh 82.4", "ran 5 km in 30 minutes", "an hour at the gym", and the bot saves them to the day.
-6. The "Statistics" button shows what is recorded today and how processed each product is.
+6. The "Statistics" button shows what is recorded today, how processed each product is and the insulin chart of the day.
 
 The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.com?lang=en
 
@@ -114,7 +114,7 @@ How to keep the diary in the bot:
 3. Press "Calculate": the bot reads all of it together and shows the meal in one message. Correct it in words, "buckwheat was 250", "remove the tea", and press "Recalculate with what is added". "2 150" sets the grams of item 2 at once. Or press "Edit" and correct it in the app.
 4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary. Nothing is recorded without it.
 5. Weight and workouts the same way: "I weigh 82.4", "ran 5 km in 30 minutes", "an hour at the gym", and the bot saves them to the day.
-6. The "Statistics" button shows what is recorded today and how processed each product is.
+6. The "Statistics" button shows what is recorded today, how processed each product is and the insulin chart of the day.
 
 The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.xyz?lang=en
 
@@ -178,6 +178,7 @@ EOT,
     'processing_3' => 'processed',
     'processing_4' => 'ultra-processed',
     'stats_day_title' => 'Your data for *:date*:',
+    'insulin_chart' => '📈 Insulin of the day',
     'draft_load' => 'Sugar :sugars g · glycemic load :load, :level',
     'draft_load_low' => 'low',
     'draft_load_medium' => 'medium',
