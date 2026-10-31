@@ -7,9 +7,9 @@ use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInt
 use App\Traits\BasicDataExtractor;
 
 /**
- * A voice message: its words wait in the diary for the calculation of the meal
- * draft (MealDraftChat). Transcribing it calls a model and counts for the spam
- * guard.
+ * A voice message or an audio file: its words wait in the diary for the
+ * calculation of the meal draft (MealDraftChat). Transcribing it calls a model and
+ * counts for the spam guard.
  */
 class AudioMessageHandler implements MessageHandlerInterface
 {
@@ -30,7 +30,7 @@ class AudioMessageHandler implements MessageHandlerInterface
         $commonData = self::extractCommonData($message);
         $chatId = $commonData['chatId'];
 
-        if (! isset($message['voice']) || ! $this->mealDraftChat->allowed($telegram, $botUser, $chatId, 'voice_rate_limited')) {
+        if (! $this->mealDraftChat->allowed($telegram, $botUser, $chatId, 'voice_rate_limited')) {
             return;
         }
 

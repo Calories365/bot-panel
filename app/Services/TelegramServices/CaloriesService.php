@@ -12,6 +12,7 @@ use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\Languag
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\LanguageCallbackHandlers\SetUkrainianLanguageCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\OutdatedCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\StatsCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\DocumentMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\PhotoMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\DraftTextMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FeedbackMessageHandler;
@@ -20,6 +21,7 @@ use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\HelpMessa
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\LanguageMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\UnsupportedMessageHandler;
 use App\Utilities\Utilities;
 
 class CaloriesService extends BaseService
@@ -55,7 +57,13 @@ class CaloriesService extends BaseService
         $handlers = parent::getMessageHandlers();
 
         $handlers['voice'] = fn () => app(AudioMessageHandler::class);
+        $handlers['audio'] = fn () => app(AudioMessageHandler::class);
         $handlers['photo'] = fn () => app(PhotoMessageHandler::class);
+        $handlers['document'] = fn () => app(DocumentMessageHandler::class);
+
+        foreach (['video', 'video_note', 'sticker', 'animation', 'location', 'contact', 'poll', 'dice'] as $type) {
+            $handlers[$type] = fn () => app(UnsupportedMessageHandler::class);
+        }
 
         return $handlers;
     }

@@ -5,12 +5,15 @@ namespace Tests\Feature;
 use App\Models\Bot;
 use App\Models\BotType;
 use App\Models\BotUser;
+use App\Services\AudioConversionService;
 use App\Services\DiaryApiService;
 use App\Services\TelegramServices\TelegramHandler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Process;
 use Mockery;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Telegram\Bot\Api;
 use Telegram\Bot\Objects\File;
 use Telegram\Bot\Objects\Message;
@@ -77,6 +80,156 @@ class MealDraftBotTest extends TestCase
 
         $this->assertStringContainsString('• Фото: «выпил стакан»', $this->sent[0]['text']);
         $this->assertSame('draft_calculate', json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard'][0][0]['callback_data']);
+    }
+
+    public function test_a_photo_sent_as_a_file_waits_like_a_photo(): void
+    {
+        Http::fake(['api.telegram.org/file/botbot-token/photos/file_7.jpg' => Http::response('jpeg-bytes')]);
+        $this->diary(fn ($mock) => $mock->shouldReceive('draftCollect')->once()
+            ->with('photo', 'этикетка', ['contents' => 'jpeg-bytes', 'name' => 'file_7.jpg'], 555, 'ru')
+            ->andReturn($this->waiting([['id' => 1, 'kind' => 'photo', 'text' => 'этикетка']])));
+
+        $this->send(['document' => ['file_id' => 'file', 'file_name' => 'IMG_1.jpg', 'mime_type' => 'image/jpeg'], 'caption' => 'этикетка']);
+
+        $this->assertStringContainsString('• Фото: «этикетка»', $this->sent[0]['text']);
+    }
+
+    public function test_a_photo_over_the_limit_of_the_diary_is_made_smaller(): void
+    {
+        $big = tempnam(sys_get_temp_dir(), 'big-photo-').'.jpg';
+        Process::run(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'testsrc2=size=3000x3000,noise=alls=60:allf=t', '-frames:v', '1', '-q:v', '2', $big])->throw();
+        $this->assertGreaterThan(1024 * 1024, filesize($big));
+
+        Http::fake(['api.telegram.org/file/botbot-token/photos/file_7.jpg' => Http::response((string) file_get_contents($big))]);
+        unlink($big);
+
+        $sent = null;
+        $this->diary(function ($mock) use (&$sent) {
+            $mock->shouldReceive('draftCollect')->once()
+                ->andReturnUsing(function ($kind, $text, $photo) use (&$sent) {
+                    $sent = $photo;
+
+                    return $this->waiting([['id' => 1, 'kind' => 'photo', 'text' => null]]);
+                });
+        });
+
+        $this->send(['photo' => [['file_id' => 'large', 'width' => 3000, 'height' => 3000]]]);
+
+        $this->assertSame('file_7.jpg', $sent['name']);
+        $this->assertLessThanOrEqual(900 * 1024, strlen($sent['contents']));
+        $this->assertSame('image/jpeg', (new \finfo(FILEINFO_MIME_TYPE))->buffer($sent['contents']));
+        $this->assertSame(1600, getimagesizefromstring($sent['contents'])[0]);
+    }
+
+    public function test_an_audio_file_waits_like_a_voice_message(): void
+    {
+        $this->partialMock(AudioConversionService::class, fn ($mock) => $mock->shouldReceive('processAudioMessage')->once()->andReturn('гречка 200 грамм'));
+        $this->diary(fn ($mock) => $mock->shouldReceive('draftCollect')->once()
+            ->with('voice', 'гречка 200 грамм', null, 555, 'ru')
+            ->andReturn($this->waiting([['id' => 1, 'kind' => 'voice', 'text' => 'гречка 200 грамм']])));
+
+        $this->send(['audio' => ['file_id' => 'file', 'duration' => 3, 'mime_type' => 'audio/mpeg']]);
+
+        $this->assertStringContainsString('• Голосовое: «гречка 200 грамм»', $this->sent[0]['text']);
+    }
+
+    /**
+     * @return array<string, array{0: array<string, mixed>}>
+     */
+    public static function messagesTheBotCannotRead(): array
+    {
+        return [
+            'a sticker' => [['sticker' => ['file_id' => 's', 'width' => 512, 'height' => 512]]],
+            'a round video' => [['video_note' => ['file_id' => 'v', 'length' => 240, 'duration' => 3]]],
+            'a pdf file' => [['document' => ['file_id' => 'd', 'mime_type' => 'application/pdf']]],
+            'an unknown command' => [['text' => '/unknown']],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $content
+     */
+    #[DataProvider('messagesTheBotCannotRead')]
+    public function test_what_the_bot_cannot_read_gets_an_answer(array $content): void
+    {
+        $this->send($content);
+
+        $this->assertSame(__('calories365-bot.draft_unsupported'), $this->sent[0]['text']);
+    }
+
+    public function test_the_statistics_of_a_meal_tell_how_processed_each_product_is(): void
+    {
+        $this->diary(fn ($mock) => $mock->shouldReceive('showUserStats')->once()->andReturn([
+            $this->eaten(['id' => 1, 'name' => 'Хлеб', 'nova' => 3]),
+            $this->eaten(['id' => 2, 'name' => 'Банан', 'nova' => 1]),
+            $this->eaten(['id' => 3, 'name' => 'Чипсы', 'nova' => 4]),
+            $this->eaten(['id' => 4, 'name' => 'Новая еда', 'nova' => null]),
+        ]));
+
+        $this->press('Breakfast');
+
+        $this->assertStringStartsWith('Хлеб (100г) — обработанный:', $this->sent[0]['text']);
+        $this->assertStringStartsWith('Банан (100г) — натуральный:', $this->sent[1]['text']);
+        $this->assertStringStartsWith('Чипсы (100г) — ультрапереработанный:', $this->sent[2]['text']);
+        $this->assertStringStartsWith('Новая еда (100г):', $this->sent[3]['text']);
+    }
+
+    public function test_the_statistics_of_the_day_list_the_products_of_each_part(): void
+    {
+        $this->diary(fn ($mock) => $mock->shouldReceive('showUserStats')->once()->andReturn([
+            $this->eaten(['id' => 1, 'name' => 'Хлеб', 'nova' => 3]),
+            $this->eaten(['id' => 2, 'name' => 'Чипсы', 'nova' => 4, 'part_of_day' => 'supper']),
+        ]));
+
+        $this->press('AllDay');
+
+        $text = $this->sent[0]['text'];
+        $this->assertStringContainsString('• Хлеб (100г) — обработанный', $text);
+        $this->assertStringContainsString('• Чипсы (100г) — ультрапереработанный', $text);
+        $this->assertLessThan(strpos($text, 'Чипсы'), strpos($text, 'Хлеб'));
+        $this->assertStringContainsString('Итого за день', $text);
+    }
+
+    public function test_a_very_long_day_keeps_the_totals_within_the_limit_of_telegram(): void
+    {
+        $meals = array_map(fn (int $id) => $this->eaten(['id' => $id, 'name' => str_repeat('Очень длинное название ', 6), 'nova' => 4]), range(1, 40));
+        $this->diary(fn ($mock) => $mock->shouldReceive('showUserStats')->once()->andReturn($meals));
+
+        $this->press('AllDay');
+
+        $this->assertLessThanOrEqual(4096, mb_strlen($this->sent[0]['text']));
+        $this->assertStringContainsString('Итого за день', $this->sent[0]['text']);
+    }
+
+    public function test_a_product_name_cannot_break_the_markdown_of_the_statistics(): void
+    {
+        $this->diary(fn ($mock) => $mock->shouldReceive('showUserStats')->once()->andReturn([
+            $this->eaten(['id' => 1, 'name' => 'Чипсы Lay`s', 'nova' => 4]),
+            $this->eaten(['id' => 2, 'name' => 'Резинка Wrigley*s_x', 'nova' => 4]),
+        ]));
+
+        $this->press('Breakfast');
+
+        $this->assertStringStartsWith('Чипсы Lay\\`s (100г)', $this->sent[0]['text']);
+        $this->assertStringStartsWith('Резинка Wrigley\\*s\\_x (100г)', $this->sent[1]['text']);
+    }
+
+    public function test_the_statistics_say_so_when_the_diary_does_not_answer(): void
+    {
+        $this->diary(fn ($mock) => $mock->shouldReceive('showUserStats')->once()->andReturn(['error' => 'timeout']));
+
+        $this->press('Breakfast');
+
+        $this->assertSame(__('calories365-bot.draft_failed'), $this->sent[0]['text']);
+    }
+
+    /**
+     * @param  array<string, mixed>  $fields
+     * @return array<string, mixed>
+     */
+    private function eaten(array $fields): array
+    {
+        return $fields + ['quantity' => 100, 'part_of_day' => 'morning', 'calories' => 100, 'proteins' => 5, 'fats' => 2, 'carbohydrates' => 10];
     }
 
     public function test_a_text_waits_and_the_old_draft_message_is_replaced(): void

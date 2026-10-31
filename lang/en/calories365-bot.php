@@ -85,7 +85,7 @@ return [
     'search' => 'Search',
     'generate_with_ai' => 'Generate with AI',
     'edit' => 'Edit',
-    'you_must_be_authorized' => 'You must be authorized!',
+    'you_must_be_authorized' => 'To record food, connect your account: open the app with the menu button to the left of the input field, or press "Connect" in your account on the site.',
     'no_entries_remain' => "There's no products left",
     'subscription_required_message' => 'Request limit reached, to save meals without restrictions — purchase premium in the personal account (https://calculator.calories365.com?lang=en)',
     'voice_rate_limited' => 'Too many voice messages in a row. Please try again in :minutes min.',
@@ -97,8 +97,9 @@ How to keep the diary in the bot:
 1. Tell what you ate: voice messages, text, photos of the plate and of labels, in as many messages as you like. For example: "buckwheat 200 grams, a cutlet and tea with two spoons of sugar".
 2. A photo of a label with its nutrition table gives the exact values from the package. A brand from the package or the one you name stays in the product name.
 3. Press "Calculate": the bot reads all of it together and shows the meal in one message. Correct it in words, "buckwheat was 250", "remove the tea", and press "Recalculate with what is added". "2 150" sets the grams of item 2 at once. Or press "Edit" and correct it in the app.
-4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary.
+4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary. Nothing is recorded without it.
 5. Weight and workouts the same way: "I weigh 82.4", "ran 5 km in 30 minutes", "an hour at the gym", and the bot saves them to the day.
+6. The "Statistics" button shows what is recorded today and how processed each product is.
 
 The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.com?lang=en
 
@@ -111,8 +112,9 @@ How to keep the diary in the bot:
 1. Tell what you ate: voice messages, text, photos of the plate and of labels, in as many messages as you like. For example: "buckwheat 200 grams, a cutlet and tea with two spoons of sugar".
 2. A photo of a label with its nutrition table gives the exact values from the package. A brand from the package or the one you name stays in the product name.
 3. Press "Calculate": the bot reads all of it together and shows the meal in one message. Correct it in words, "buckwheat was 250", "remove the tea", and press "Recalculate with what is added". "2 150" sets the grams of item 2 at once. Or press "Edit" and correct it in the app.
-4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary.
+4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary. Nothing is recorded without it.
 5. Weight and workouts the same way: "I weigh 82.4", "ran 5 km in 30 minutes", "an hour at the gym", and the bot saves them to the day.
+6. The "Statistics" button shows what is recorded today and how processed each product is.
 
 The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.xyz?lang=en
 
@@ -170,6 +172,12 @@ EOT,
     'draft_too_many' => 'One calculation takes up to 8 photos and 12 messages. Press "Calculate", then send the rest.',
     'draft_fast_carbohydrates' => 'fast carbohydrates',
     'draft_ultra_processed' => 'ultra-processed',
+    'draft_unsupported' => 'I cannot read this. Send a voice message, text, or a photo of the food or its label, then press "Calculate". More under the "How to use" button.',
+    'processing_1' => 'natural',
+    'processing_2' => 'ingredient',
+    'processing_3' => 'processed',
+    'processing_4' => 'ultra-processed',
+    'stats_day_title' => 'Your data for *:date*:',
     'draft_load' => 'Sugar :sugars g · glycemic load :load, :level',
     'draft_load_low' => 'low',
     'draft_load_medium' => 'medium',

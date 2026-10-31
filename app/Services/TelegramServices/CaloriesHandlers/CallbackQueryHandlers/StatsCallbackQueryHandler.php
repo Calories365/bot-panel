@@ -3,6 +3,7 @@
 namespace App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers;
 
 use App\Services\DiaryApiService;
+use App\Services\TelegramServices\CaloriesHandlers\MealStatsText;
 use App\Utilities\Utilities;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -59,6 +60,12 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
         $date = date('Y-m-d');
         $meals = $this->diaryApiService->showUserStats($date, $partOfDay, $botUser->calories_id, $locale);
 
+        if (isset($meals['error'])) {
+            $telegram->sendMessage(['chat_id' => $chatId, 'text' => __('calories365-bot.draft_failed', [], $locale)]);
+
+            return;
+        }
+
         if (empty($meals)) {
             $this->sendNoEntriesMessage($telegram, $chatId, $partOfDay, $locale);
 
@@ -103,9 +110,10 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
                 [__('calories365-bot.carbohydrates', [], $locale), round($carbohydrates)],
             ];
 
+            $title = MealStatsText::productTitle($meal, $locale);
             $mealMessage = $useBigFont
-                ? Utilities::generateTableType2ForBigFont($meal['name']." ({$meal['quantity']}г)", $productArray)
-                : Utilities::generateTableType2($meal['name']." ({$meal['quantity']}г)", $productArray);
+                ? Utilities::generateTableType2ForBigFont($title, $productArray)
+                : Utilities::generateTableType2($title, $productArray);
 
             $inlineKeyboard = [
                 [
@@ -160,92 +168,7 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
 
     private function formatAndSendAllDay($telegram, $chatId, $meals, $date, $locale, bool $useBigFont)
     {
-
-        $partsOfDay = [
-            'morning' => [
-                'name' => __('calories365-bot.breakfast', [], $locale),
-                'calories' => 0,
-                'proteins' => 0,
-                'fats' => 0,
-                'carbohydrates' => 0,
-            ],
-            'dinner' => [
-                'name' => __('calories365-bot.lunch', [], $locale),
-                'calories' => 0,
-                'proteins' => 0,
-                'fats' => 0,
-                'carbohydrates' => 0,
-            ],
-            'supper' => [
-                'name' => __('calories365-bot.dinner', [], $locale),
-                'calories' => 0,
-                'proteins' => 0,
-                'fats' => 0,
-                'carbohydrates' => 0,
-            ],
-        ];
-
-        $total = [
-            'calories' => 0,
-            'proteins' => 0,
-            'fats' => 0,
-            'carbohydrates' => 0,
-        ];
-
-        foreach ($meals as $meal) {
-
-            $part = $meal['part_of_day'];
-            if (! isset($partsOfDay[$part])) {
-                continue;
-            }
-            $quantityFactor = $meal['quantity'] / 100;
-
-            $calories = $meal['calories'] * $quantityFactor;
-            $proteins = $meal['proteins'] * $quantityFactor;
-            $fats = $meal['fats'] * $quantityFactor;
-            $carbohydrates = $meal['carbohydrates'] * $quantityFactor;
-
-            $partsOfDay[$part]['calories'] += $calories;
-            $partsOfDay[$part]['proteins'] += $proteins;
-            $partsOfDay[$part]['fats'] += $fats;
-            $partsOfDay[$part]['carbohydrates'] += $carbohydrates;
-
-            $total['calories'] += $calories;
-            $total['proteins'] += $proteins;
-            $total['fats'] += $fats;
-            $total['carbohydrates'] += $carbohydrates;
-        }
-
-        $messageText = __('calories365-bot.your_data_for_date', ['date' => $date], $locale)."\n\n";
-        foreach ($partsOfDay as $partKey => $part) {
-            if ($part['calories'] == 0 && $part['proteins'] == 0 && $part['fats'] == 0 && $part['carbohydrates'] == 0) {
-                continue;
-            }
-
-            $productArray = [
-                [__('calories365-bot.calories', [], $locale), round($part['calories'])],
-                [__('calories365-bot.proteins', [], $locale), round($part['proteins'])],
-                [__('calories365-bot.fats', [], $locale), round($part['fats'])],
-                [__('calories365-bot.carbohydrates', [], $locale), round($part['carbohydrates'])],
-            ];
-
-            $messageText .= ($useBigFont
-                ? Utilities::generateTableType2ForBigFont($part['name'], $productArray)
-                : Utilities::generateTableType2($part['name'], $productArray)
-            )."\n\n";
-        }
-
-        $productArray = [
-            [__('calories365-bot.calories', [], $locale), round($total['calories'])],
-            [__('calories365-bot.proteins', [], $locale), round($total['proteins'])],
-            [__('calories365-bot.fats', [], $locale), round($total['fats'])],
-            [__('calories365-bot.carbohydrates', [], $locale), round($total['carbohydrates'])],
-        ];
-
-        $messageText .= ($useBigFont
-            ? Utilities::generateTableType2ForBigFont(__('calories365-bot.total_for_day', [], $locale), $productArray)
-            : Utilities::generateTableType2(__('calories365-bot.total_for_day', [], $locale), $productArray)
-        );
+        $messageText = MealStatsText::allDay($meals, $date, $locale, $useBigFont);
 
         $sent = $telegram->sendMessage([
             'chat_id' => $chatId,

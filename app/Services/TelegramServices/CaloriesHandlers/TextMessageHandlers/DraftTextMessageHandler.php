@@ -34,7 +34,14 @@ class DraftTextMessageHandler implements MessageHandlerInterface
         $text = trim((string) $message->getText());
         $chatId = $message->getChat()->getId();
 
-        if ($text === '' || str_starts_with($text, '/')) {
+        if ($text === '') {
+            return;
+        }
+
+        // A command the bot does not have: silence looks like a broken bot.
+        if (str_starts_with($text, '/')) {
+            $telegram->sendMessage(['chat_id' => $chatId, 'text' => __('calories365-bot.draft_unsupported')]);
+
             return;
         }
 

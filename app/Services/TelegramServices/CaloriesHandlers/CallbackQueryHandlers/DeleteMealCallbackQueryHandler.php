@@ -3,6 +3,7 @@
 namespace App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers;
 
 use App\Services\DiaryApiService;
+use App\Services\TelegramServices\CaloriesHandlers\MealStatsText;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -65,6 +66,11 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                     $cachedLocale = $cacheValue['locale'] ?? $locale;
 
                     $meals = $this->diaryApiService->showUserStats($date, $partOfDay, $calories_id, $cachedLocale);
+
+                    // The diary did not answer: the summary stays as it was.
+                    if (isset($meals['error'])) {
+                        return;
+                    }
 
                     if (empty($meals)) {
 
@@ -142,90 +148,8 @@ class DeleteMealCallbackQueryHandler implements CallbackQueryHandlerInterface
                     ], $locale),
                     $productArray
                 );
-        } else {
-            $partsOfDay = [
-                'morning' => [
-                    'name' => __('calories365-bot.breakfast', [], $locale),
-                    'calories' => 0,
-                    'proteins' => 0,
-                    'fats' => 0,
-                    'carbohydrates' => 0,
-                ],
-                'dinner' => [
-                    'name' => __('calories365-bot.lunch', [], $locale),
-                    'calories' => 0,
-                    'proteins' => 0,
-                    'fats' => 0,
-                    'carbohydrates' => 0,
-                ],
-                'supper' => [
-                    'name' => __('calories365-bot.dinner', [], $locale),
-                    'calories' => 0,
-                    'proteins' => 0,
-                    'fats' => 0,
-                    'carbohydrates' => 0,
-                ],
-            ];
-
-            $total = [
-                'calories' => 0,
-                'proteins' => 0,
-                'fats' => 0,
-                'carbohydrates' => 0,
-            ];
-
-            foreach ($meals as $meal) {
-                $part = $meal['part_of_day'];
-                if (! isset($partsOfDay[$part])) {
-                    continue;
-                }
-                $factor = $meal['quantity'] / 100;
-                $cal = $meal['calories'] * $factor;
-                $prot = $meal['proteins'] * $factor;
-                $fat = $meal['fats'] * $factor;
-                $carb = $meal['carbohydrates'] * $factor;
-
-                $partsOfDay[$part]['calories'] += $cal;
-                $partsOfDay[$part]['proteins'] += $prot;
-                $partsOfDay[$part]['fats'] += $fat;
-                $partsOfDay[$part]['carbohydrates'] += $carb;
-
-                $total['calories'] += $cal;
-                $total['proteins'] += $prot;
-                $total['fats'] += $fat;
-                $total['carbohydrates'] += $carb;
-            }
-
-            $text = __('calories365-bot.your_data_for_date', ['date' => $date], $locale)."\n\n";
-            foreach ($partsOfDay as $p) {
-                if ($p['calories'] == 0 && $p['proteins'] == 0 && $p['fats'] == 0 && $p['carbohydrates'] == 0) {
-                    continue;
-                }
-
-                $table = [
-                    [__('calories365-bot.calories', [], $locale), round($p['calories'])],
-                    [__('calories365-bot.proteins', [], $locale), round($p['proteins'])],
-                    [__('calories365-bot.fats', [], $locale), round($p['fats'])],
-                    [__('calories365-bot.carbohydrates', [], $locale), round($p['carbohydrates'])],
-                ];
-                $text .= ($useBigFont
-                    ? \App\Utilities\Utilities::generateTableType2ForBigFont($p['name'], $table)
-                    : \App\Utilities\Utilities::generateTableType2($p['name'], $table)
-                )."\n\n";
-            }
-
-            $table = [
-                [__('calories365-bot.calories', [], $locale), round($total['calories'])],
-                [__('calories365-bot.proteins', [], $locale), round($total['proteins'])],
-                [__('calories365-bot.fats', [], $locale), round($total['fats'])],
-                [__('calories365-bot.carbohydrates', [], $locale), round($total['carbohydrates'])],
-            ];
-            $text .= ($useBigFont
-                ? \App\Utilities\Utilities::generateTableType2ForBigFont(__('calories365-bot.total_for_day', [], $locale), $table)
-                : \App\Utilities\Utilities::generateTableType2(__('calories365-bot.total_for_day', [], $locale), $table)
-            );
-
-            return $text;
         }
+
+        return MealStatsText::allDay($meals, $date, $locale, $useBigFont);
     }
 }

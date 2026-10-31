@@ -74,8 +74,9 @@ class AudioConversionService
      */
     private function getDownloadLink(Api $telegram, $bot, $message): ?string
     {
-        if (isset($message['voice'])) {
-            $audio = $message['voice'];
+        $audio = $message['voice'] ?? $message['audio'] ?? $message['document'] ?? null;
+
+        if ($audio !== null) {
             $fileId = $audio['file_id'];
             $file = $telegram->getFile(['file_id' => $fileId]);
             $filePath = $file->file_path;
@@ -113,13 +114,18 @@ class AudioConversionService
     }
 
     /**
-     * Convert any supported format (oga, ogg, m4a, mp4) to mp3.
+     * Convert any supported format (oga, ogg, m4a, mp4, wav…) to mp3; an mp3 stays
+     * as it is, since ffmpeg cannot write over its input.
      * Returns an array [relativeConvertedPath, absoluteConvertedPath].
      */
     public function convertToMp3(string $localPath, string $sourceFullPath): array
     {
+        if (str_ends_with(strtolower($localPath), '.mp3')) {
+            return [$localPath, $sourceFullPath];
+        }
+
         $extensionToMp3 = function (string $filename) {
-            return preg_replace('/\.(oga|ogg|m4a|mp4)$/i', '.mp3', $filename);
+            return preg_replace('/\.[^.\/]+$/', '.mp3', $filename);
         };
 
         $convertedLocalPath = $extensionToMp3($localPath);

@@ -67,6 +67,15 @@ class Utilities
         }
     }
 
+    /**
+     * Text from outside, a product name, safe in the legacy Markdown of Telegram:
+     * an unpaired `, * or _ makes it refuse the whole message.
+     */
+    public static function escapeMarkdown(string $text): string
+    {
+        return preg_replace('/([_*`\[])/', '\\\\$1', $text);
+    }
+
     public static function generateTableType2($title, $dataArray)
     {
         $title = $title.": \n\n";
