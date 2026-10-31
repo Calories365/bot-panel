@@ -196,6 +196,7 @@ class StartMessageHandler implements MessageHandlerInterface
                 ['text' => __('calories365-bot.statistics')],
             ])
             ->row([
+                ['text' => __('calories365-bot.insulin_button')],
                 ['text' => __('calories365-bot.menu')],
             ])
             ->row([

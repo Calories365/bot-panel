@@ -32,6 +32,11 @@ class MealDraftBotTest extends TestCase
 
     private const SECRET = 'webhook-secret';
 
+    /**
+     * A PNG of one pixel: the diary draws the chart, the bot only sends it.
+     */
+    private const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC';
+
     private Bot $bot;
 
     /** @var array<int, array<string, mixed>> messages sent, in order */
@@ -42,6 +47,9 @@ class MealDraftBotTest extends TestCase
 
     /** @var array<int, array<string, mixed>> answers to button presses */
     private array $answers = [];
+
+    /** @var array<int, array<string, mixed>> photos sent, in order */
+    private array $photos = [];
 
     /** @var array<int, array<string, mixed>> chat menu buttons set */
     private array $menuButtons = [];
@@ -157,22 +165,141 @@ class MealDraftBotTest extends TestCase
         $this->assertSame(__('calories365-bot.draft_unsupported'), $this->sent[0]['text']);
     }
 
-    public function test_the_statistics_menu_opens_the_insulin_chart_in_the_mini_app(): void
+    public function test_the_statistics_menu_offers_the_insulin_chart_of_today(): void
     {
-        $this->bot->update(['web_app_url' => 'https://app.example/']);
-        Cache::forget('bot:'.$this->bot->name);
-
         $this->send(['text' => 'Статистика']);
 
         $rows = json_decode((string) json_encode($this->sent[0]['reply_markup']), true)['inline_keyboard'];
-        $this->assertSame('https://app.example/insulin', end($rows)[0]['web_app']['url']);
+        $this->assertSame('insulin_day_'.date('Y-m-d'), end($rows)[0]['callback_data']);
     }
 
-    public function test_the_statistics_menu_has_no_chart_without_a_mini_app(): void
+    public function test_the_insulin_button_sends_the_chart_with_what_lifted_and_lowered_it(): void
     {
-        $this->send(['text' => 'Статистика']);
+        $this->bot->update(['web_app_url' => 'https://app.example/']);
+        Cache::forget('bot:'.$this->bot->name);
+        $this->diary(fn ($mock) => $mock->shouldReceive('insulinDay')->once()->with(date('Y-m-d'), 555, 'ru')->andReturn($this->insulinDay()));
 
-        $this->assertStringNotContainsString('web_app', (string) json_encode($this->sent[0]['reply_markup']));
+        $this->send(['text' => '📈 Инсулин']);
+
+        $this->assertSame([], $this->sent);
+        $photo = $this->photos[0];
+        $this->assertSame(self::PNG, base64_encode($photo['photo']->getContents()));
+        $this->assertStringContainsString('<b>Инсулин за 31.10</b>', $photo['caption']);
+        $this->assertStringContainsString('пик в 13:35 — 62, высокий', $photo['caption']);
+        $this->assertStringContainsString('13:00 обед <b>+52</b>: Булочка с повидлом +42, Сахар +9', $photo['caption']);
+        $this->assertStringNotContainsString('Чай', $photo['caption']);
+        $this->assertStringContainsString('13:20 Прогулка, 60 мин — инсулина меньше на 17%', $photo['caption']);
+        $this->assertStringContainsString('Образ жизни: сидячий.', $photo['caption']);
+        $this->assertLessThanOrEqual(1024, mb_strlen(strip_tags($photo['caption'])));
+
+        $rows = json_decode($photo['reply_markup'], true)['inline_keyboard'];
+        $this->assertSame('insulin_day_2026-10-30', $rows[0][0]['callback_data']);
+        $this->assertSame('insulin_lifestyle_2026-10-31', $rows[1][0]['callback_data']);
+        $this->assertSame('https://app.example/insulin', $rows[2][0]['web_app']['url']);
+    }
+
+    public function test_a_product_name_cannot_break_the_html_of_the_insulin_caption(): void
+    {
+        $day = $this->insulinDay();
+        $day['meals'][0]['items'][0]['name'] = 'Пирог & чай < 5 г';
+        $this->diary(fn ($mock) => $mock->shouldReceive('insulinDay')->once()->andReturn($day));
+
+        $this->send(['text' => '/insulin']);
+
+        $this->assertStringContainsString('Пирог &amp; чай &lt; 5 г', $this->photos[0]['caption']);
+    }
+
+    public function test_a_long_day_keeps_its_caption_within_the_limit_of_telegram(): void
+    {
+        $day = $this->insulinDay();
+        $day['activities'] = array_fill(0, 30, ['id' => 1, 'title' => str_repeat('Очень долгая прогулка ', 3), 'minute' => 800, 'minutes' => 60, 'calories' => 105, 'effect' => 5]);
+        $day['meals'] = array_fill(0, 3, $day['meals'][0]);
+        $this->diary(fn ($mock) => $mock->shouldReceive('insulinDay')->once()->andReturn($day));
+
+        $this->send(['text' => '/insulin']);
+
+        $caption = $this->photos[0]['caption'];
+        $this->assertLessThanOrEqual(1024, mb_strlen(strip_tags($caption)));
+        $this->assertStringContainsString('пик в 13:35', $caption);
+        $this->assertStringContainsString('Образ жизни', $caption);
+    }
+
+    public function test_the_way_of_life_is_chosen_and_the_chart_is_drawn_again(): void
+    {
+        $this->diary(function ($mock) {
+            $mock->shouldReceive('insulinDay')->once()->with('2026-10-31', 555, 'ru', false)->andReturn(['lifestyle' => 3] + $this->insulinDay());
+            $mock->shouldReceive('setLifestyle')->once()->with(1, '2026-10-31', 555, 'ru')->andReturn($this->insulinDay());
+            $mock->shouldReceive('insulinDay')->once()->with('2026-10-31', 555, 'ru')->andReturn($this->insulinDay());
+        });
+
+        $this->press('insulin_lifestyle_2026-10-31');
+        $options = json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard'];
+        $this->assertCount(5, $options);
+        $this->assertSame('✓ Умеренно активный', $options[2][0]['text']);
+        $this->assertSame('insulin_set_1_2026-10-31', $options[0][0]['callback_data']);
+
+        $this->press('insulin_set_1_2026-10-31');
+        $this->assertSame(__('calories365-bot.lifestyle_saved', ['lifestyle' => 'Сидячий']), $this->sent[1]['text']);
+        $this->assertCount(1, $this->photos);
+    }
+
+    public function test_a_day_after_today_is_never_asked_for(): void
+    {
+        $this->diary(fn ($mock) => $mock->shouldReceive('insulinDay')->once()->with(date('Y-m-d'), 555, 'ru')->andReturn($this->insulinDay()));
+
+        $this->press('insulin_day_2999-01-01');
+
+        $this->assertCount(1, $this->photos);
+    }
+
+    public function test_the_insulin_chart_says_so_when_the_diary_does_not_answer(): void
+    {
+        $this->diary(fn ($mock) => $mock->shouldReceive('insulinDay')->once()->andReturn(['error' => 'timeout']));
+
+        $this->send(['text' => '/insulin']);
+
+        $this->assertSame([], $this->photos);
+        $this->assertSame(__('calories365-bot.draft_failed'), $this->sent[0]['text']);
+    }
+
+    public function test_the_draft_tells_when_the_meal_was_eaten(): void
+    {
+        $draft = $this->loadFixture('DiaryAPI/draft.json')['draft'] + ['eaten_time' => '09:00'];
+        $this->diary(fn ($mock) => $mock->shouldReceive('draftCollect')->once()
+            ->andReturn($this->waiting([['id' => 1, 'kind' => 'text', 'text' => 'в 9 утра']], $draft)));
+
+        $this->send(['text' => 'это было в 9 утра']);
+
+        $this->assertStringContainsString('Съедено в 09:00', $this->sent[0]['text']);
+    }
+
+    /**
+     * An insulin day as the diary gives it.
+     *
+     * @return array<string, mixed>
+     */
+    private function insulinDay(): array
+    {
+        return [
+            'date' => '2026-10-31',
+            'lifestyle' => 1,
+            'lifestyle_known' => true,
+            'base' => 10,
+            'zones' => ['medium' => 30, 'high' => 60],
+            'now' => ['minute' => 1200, 'level' => 10],
+            'peak' => ['minute' => 815, 'level' => 62],
+            'meals' => [[
+                'part_of_day' => 'dinner', 'minute' => 780, 'time_told' => true, 'rise' => 52,
+                'items' => [
+                    ['id' => 1, 'name' => 'Булочка с повидлом', 'grams' => 80, 'rise' => 42, 'index_known' => true],
+                    ['id' => 2, 'name' => 'Сахар', 'grams' => 10, 'rise' => 9, 'index_known' => true],
+                    ['id' => 3, 'name' => 'Чай', 'grams' => 200, 'rise' => 0, 'index_known' => true],
+                ],
+            ]],
+            'activities' => [['id' => 1, 'title' => 'Прогулка', 'minute' => 800, 'minutes' => 60, 'calories' => 105, 'effect' => 17]],
+            'estimated_foods' => 0,
+            'chart' => self::PNG,
+        ];
     }
 
     public function test_the_statistics_of_a_meal_tell_how_processed_each_product_is(): void
@@ -554,6 +681,11 @@ class MealDraftBotTest extends TestCase
             $this->answers[] = $p;
 
             return true;
+        });
+        $api->shouldReceive('sendPhoto')->andReturnUsing(function (array $p) {
+            $this->photos[] = $p;
+
+            return new Message(['message_id' => random_int(1000, 9000), 'chat' => ['id' => $p['chat_id'], 'type' => 'private'], 'date' => time()]);
         });
         $api->shouldReceive('sendMessage')->andReturnUsing(function (array $p) {
             $this->sent[] = $p;

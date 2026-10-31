@@ -284,6 +284,52 @@ class DiaryApiService
     }
 
     /**
+     * The estimated insulin of the user's day, with its chart as a base64 PNG
+     * unless asked without: {date, points, zones, now, peak, meals, activities,
+     * lifestyle, lifestyle_known, chart}, or ['error' => …].
+     *
+     * @return array<string, mixed>
+     */
+    public function insulinDay(string $date, $caloriesId, string $locale, bool $withChart = true): array
+    {
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders($this->getHeaders($caloriesId, $locale))
+                ->get($this->apiUrl.'/caloriesEndPoint/insulin/'.$date, $withChart ? ['chart' => 1] : []);
+
+            $response->throw();
+
+            return $response->json();
+        } catch (\Throwable $e) {
+            Log::error('Error reading the insulin of the day: '.$e->getMessage());
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Keep the user's way of life, 1 (sitting) to 5 (very active); answers the day.
+     *
+     * @return array<string, mixed>
+     */
+    public function setLifestyle(int $lifestyle, string $date, $caloriesId, string $locale): array
+    {
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders($this->getHeaders($caloriesId, $locale))
+                ->put($this->apiUrl.'/caloriesEndPoint/insulin/lifestyle', ['lifestyle' => $lifestyle, 'date' => $date]);
+
+            $response->throw();
+
+            return $response->json();
+        } catch (\Throwable $e) {
+            Log::error('Error keeping the way of life: '.$e->getMessage());
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Save the user's meal draft as a meal of the day; answers {total}, or
      * ['error' => …, 'status' => …]: status 404 when there is no draft any more.
      *

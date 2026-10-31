@@ -276,6 +276,10 @@ class MealDraftChat
             ]).$mark;
         }
 
+        if (($draft['eaten_time'] ?? null) !== null) {
+            $lines[] = e(__('calories365-bot.draft_eaten_at', ['time' => $draft['eaten_time']]));
+        }
+
         if ($draft !== null) {
             $total = $draft['total'];
             $lines[] = '';

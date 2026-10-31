@@ -43,13 +43,10 @@ class StatsMessageHandler implements MessageHandlerInterface
             ],
         ];
 
-        // The curve is a chart: it lives in the Mini App, a bot without one has no such button.
-        if ($bot->web_app_url ?? null) {
-            $rows[] = [[
-                'text' => __('calories365-bot.insulin_chart'),
-                'web_app' => ['url' => rtrim($bot->web_app_url, '/').'/insulin'],
-            ]];
-        }
+        $rows[] = [[
+            'text' => __('calories365-bot.insulin_chart'),
+            'callback_data' => 'insulin_day_'.date('Y-m-d'),
+        ]];
 
         $inlineKeyboard = Keyboard::make(['inline_keyboard' => $rows]);
 

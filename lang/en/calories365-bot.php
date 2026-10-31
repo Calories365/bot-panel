@@ -99,7 +99,8 @@ How to keep the diary in the bot:
 3. Press "Calculate": the bot reads all of it together and shows the meal in one message. Correct it in words, "buckwheat was 250", "remove the tea", and press "Recalculate with what is added". "2 150" sets the grams of item 2 at once. Or press "Edit" and correct it in the app.
 4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary. Nothing is recorded without it.
 5. Weight and workouts the same way: "I weigh 82.4", "ran 5 km in 30 minutes", "an hour at the gym", and the bot saves them to the day.
-6. The "Statistics" button shows what is recorded today, how processed each product is and the insulin chart of the day.
+6. The "Statistics" button shows what is recorded today and how processed each product is.
+7. The "📈 Insulin" button shows the insulin chart of the day: how food lifts it and movement lowers it. Say when you ate, "at 9 am I had…", and the chart is more exact.
 
 The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.com?lang=en
 
@@ -114,7 +115,8 @@ How to keep the diary in the bot:
 3. Press "Calculate": the bot reads all of it together and shows the meal in one message. Correct it in words, "buckwheat was 250", "remove the tea", and press "Recalculate with what is added". "2 150" sets the grams of item 2 at once. Or press "Edit" and correct it in the app.
 4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary. Nothing is recorded without it.
 5. Weight and workouts the same way: "I weigh 82.4", "ran 5 km in 30 minutes", "an hour at the gym", and the bot saves them to the day.
-6. The "Statistics" button shows what is recorded today, how processed each product is and the insulin chart of the day.
+6. The "Statistics" button shows what is recorded today and how processed each product is.
+7. The "📈 Insulin" button shows the insulin chart of the day: how food lifts it and movement lowers it. Say when you ate, "at 9 am I had…", and the chart is more exact.
 
 The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.xyz?lang=en
 
@@ -179,6 +181,36 @@ EOT,
     'processing_4' => 'ultra-processed',
     'stats_day_title' => 'Your data for *:date*:',
     'insulin_chart' => '📈 Insulin of the day',
+    'insulin_button' => '📈 Insulin',
+    'insulin_title' => 'Insulin of :date',
+    'insulin_note' => 'An estimate from food, movement and way of life, not a measurement.',
+    'insulin_level' => ':level, :zone',
+    'insulin_zone_low' => 'low',
+    'insulin_zone_medium' => 'medium',
+    'insulin_zone_high' => 'high',
+    'insulin_now' => 'Now :level',
+    'insulin_peak' => 'peak at :time — :level',
+    'insulin_meals' => 'What lifted it:',
+    'insulin_part_morning' => 'breakfast',
+    'insulin_part_dinner' => 'lunch',
+    'insulin_part_supper' => 'dinner',
+    'insulin_activity' => ':time :title, :minutes min',
+    'insulin_effect' => ':percent% less insulin',
+    'insulin_moves' => 'Movement:',
+    'insulin_no_meals' => 'No food recorded on this day.',
+    'insulin_lifestyle' => 'Way of life: :lifestyle.',
+    'insulin_lifestyle_hint' => 'It comes from the calculator or counts as sitting — choose yours with the "Way of life" button.',
+    'insulin_movement_hint' => 'Add movement in words: "walked for an hour", "went to the shop at 6 pm", "an hour at the gym in the morning" — and press "Calculate".',
+    'insulin_open' => '📊 Details in the app',
+    'lifestyle_button' => '🏃 Way of life',
+    'lifestyle_question' => 'What is your usual way of life? It tells how much insulin the same food takes.',
+    'lifestyle_1' => 'Sitting',
+    'lifestyle_2' => 'Walk a little',
+    'lifestyle_3' => 'Moderately active',
+    'lifestyle_4' => 'Active',
+    'lifestyle_5' => 'Very active',
+    'lifestyle_saved' => 'Way of life: :lifestyle. The chart is recalculated.',
+    'draft_eaten_at' => 'Eaten at :time',
     'draft_load' => 'Sugar :sugars g · glycemic load :load, :level',
     'draft_load_low' => 'low',
     'draft_load_medium' => 'medium',
