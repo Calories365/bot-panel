@@ -338,3 +338,4 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (49,'2025_09_30_100
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (51,'2025_11_24_205424_add_secret_token_hash_to_bots_table',22);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (55,'2026_08_24_100000_add_web_app_url_to_bots_table',25);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (57,'2026_10_23_120000_add_the_transcription_bot_type',26);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (62,'2026_11_01_120000_add_the_onec_helper_bot_type',30);

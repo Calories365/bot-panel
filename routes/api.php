@@ -5,11 +5,14 @@ use App\Http\Controllers\BotController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\NgrokController;
+use App\Http\Controllers\OnecHelperController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\TelegramWebAppController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
+use App\Http\Middleware\CheckOnecHelperToken;
 use App\Http\Middleware\CheckTelegramSecretToken;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -100,3 +103,17 @@ Route::group(['middleware' => 'check.api.key', 'namespace' => 'App\Http\Controll
     Route::post('/telegram/web-app/link', [TelegramWebAppController::class, 'link'])
         ->name('telegram.web-app.link');
 });
+
+// The worker on the 1C server polls for the questions of the 1C helper bot all
+// day. Not under the api limit: it counts by IP, and with no proxy trusted in
+// TrustProxies every request through the tunnel and the proxy has the same one.
+Route::prefix('onec-helper')
+    ->middleware(CheckOnecHelperToken::class)
+    ->withoutMiddleware(ThrottleRequests::class.':api')
+    ->group(function () {
+        Route::post('/jobs/claim', [OnecHelperController::class, 'claim'])->name('onec-helper.jobs.claim');
+        Route::get('/files/{file}', [OnecHelperController::class, 'file'])->whereNumber('file')->name('onec-helper.files.show');
+        Route::post('/jobs/{job}/heartbeat', [OnecHelperController::class, 'heartbeat'])->whereNumber('job')->name('onec-helper.jobs.heartbeat');
+        Route::post('/jobs/{job}/result', [OnecHelperController::class, 'result'])->whereNumber('job')->name('onec-helper.jobs.result');
+        Route::post('/jobs/{job}/fail', [OnecHelperController::class, 'fail'])->whereNumber('job')->name('onec-helper.jobs.fail');
+    });

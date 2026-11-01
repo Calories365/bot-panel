@@ -31,6 +31,7 @@ class TelegramHandler
             'Calories' => static fn () => $app->make(CaloriesService::class),
             'TikTok' => static fn () => $app->make(TikTokService::class),
             'Transcription' => static fn () => $app->make(TranscriptionService::class),
+            'OnecHelper' => static fn () => $app->make(OnecHelperService::class),
         ];
 
         $this->apiFactory = $apiFactory
