@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\OnecBatch;
 use App\Models\OnecJob;
 use App\Models\OnecMessage;
 use App\Models\OnecQuestion;
@@ -353,28 +352,8 @@ class OnecHelperApiTest extends OnecHelperTestCase
         $this->assertStringEndsWith('рядок', $lines[0]);
     }
 
-    /**
-     * A question closed by its button, with its job in the queue.
-     */
-    private function closedQuestion(string $text): OnecJob
-    {
-        static $messageId = 1000;
-
-        $this->sendText(++$messageId, $text);
-        $batch = OnecBatch::where('status', OnecBatch::STATUS_COLLECTING)->latest('id')->firstOrFail();
-        $this->press('onec_close_'.$batch->id, $batch->service_message_id);
-
-        return OnecJob::where('batch_id', $batch->id)->sole();
-    }
-
     private function heartbeat(OnecJob|int $job, array $body): \Illuminate\Testing\TestResponse
     {
         return $this->withToken(self::TOKEN)->postJson(route('onec-helper.jobs.heartbeat', ['job' => $job instanceof OnecJob ? $job->id : $job]), $body);
-    }
-
-    private function supervise(int $minutesLater): void
-    {
-        $this->travel($minutesLater)->minutes();
-        $this->artisan('onec-helper:supervise')->assertSuccessful();
     }
 }

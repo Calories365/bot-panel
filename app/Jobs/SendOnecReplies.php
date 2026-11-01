@@ -26,10 +26,20 @@ class SendOnecReplies implements ShouldQueue
     public array $backoff = [10, 30, 120, 600];
 
     /**
-     * @param  list<string|null>  $texts
+     * Inline buttons under the last text. A property with its own default:
+     * a job queued before it existed unserializes with an empty keyboard.
+     *
+     * @var list<list<array<string, string>>>
      */
-    public function __construct(public int $batchId, public array $texts)
+    public array $keyboard = [];
+
+    /**
+     * @param  list<string|null>  $texts
+     * @param  list<list<array<string, string>>>  $keyboard
+     */
+    public function __construct(public int $batchId, public array $texts, array $keyboard = [])
     {
+        $this->keyboard = $keyboard;
         $this->onQueue('telegram');
     }
 
@@ -41,6 +51,6 @@ class SendOnecReplies implements ShouldQueue
             return;
         }
 
-        $replies->send($apis->make($batch->question->bot), $batch, $this->texts);
+        $replies->send($apis->make($batch->question->bot), $batch, $this->texts, $this->keyboard);
     }
 }

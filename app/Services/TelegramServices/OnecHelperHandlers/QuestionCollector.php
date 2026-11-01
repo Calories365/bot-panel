@@ -203,6 +203,14 @@ class QuestionCollector
         $this->edit($telegram, $batch, $this->acceptedText($batch, $note));
     }
 
+    /**
+     * Show the batch in the queue again, as after its closing.
+     */
+    public function showQueued(Api $telegram, OnecBatch $batch): void
+    {
+        $this->edit($telegram, $batch, $this->acceptedText($batch));
+    }
+
     public function collectingText(OnecBatch $batch): string
     {
         [$messages, $screens] = $this->counts($batch);

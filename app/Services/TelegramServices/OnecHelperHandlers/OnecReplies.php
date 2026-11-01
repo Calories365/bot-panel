@@ -22,22 +22,28 @@ class OnecReplies
 
     /**
      * @param  list<string|null>  $texts  an empty one is not sent
+     * @param  list<list<array<string, string>>>  $keyboard  inline buttons under the last message sent
      */
-    public function send(Api $telegram, OnecBatch $batch, array $texts): void
+    public function send(Api $telegram, OnecBatch $batch, array $texts, array $keyboard = []): void
     {
+        $parts = [];
         foreach ($texts as $text) {
-            foreach (self::split((string) $text) as $part) {
-                $sent = $telegram->sendMessage([
-                    'chat_id' => $batch->question->chat_id,
-                    'text' => $part,
-                    'reply_parameters' => json_encode([
-                        'message_id' => $batch->service_message_id,
-                        'allow_sending_without_reply' => true,
-                    ]),
-                ]);
+            array_push($parts, ...self::split((string) $text));
+        }
 
-                $this->remember($batch, (int) $sent->getMessageId());
-            }
+        foreach ($parts as $index => $part) {
+            $withKeyboard = $keyboard !== [] && $index === array_key_last($parts);
+
+            $sent = $telegram->sendMessage([
+                'chat_id' => $batch->question->chat_id,
+                'text' => $part,
+                'reply_parameters' => json_encode([
+                    'message_id' => $batch->service_message_id,
+                    'allow_sending_without_reply' => true,
+                ]),
+            ] + ($withKeyboard ? ['reply_markup' => json_encode(['inline_keyboard' => $keyboard])] : []));
+
+            $this->remember($batch, (int) $sent->getMessageId());
         }
     }
 

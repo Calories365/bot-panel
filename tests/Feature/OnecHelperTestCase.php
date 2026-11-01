@@ -46,6 +46,9 @@ abstract class OnecHelperTestCase extends TestCase
     /** @var list<array<string, mixed>> */
     protected array $answered = [];
 
+    /** @var list<array<string, mixed>> */
+    protected array $markupEdits = [];
+
     protected int $nextBotMessageId = 9000;
 
     private int $nextUpdateId = 1;
@@ -212,6 +215,31 @@ abstract class OnecHelperTestCase extends TestCase
         return $this->withToken(self::TOKEN)->postJson(route('onec-helper.jobs.result', ['job' => $job instanceof OnecJob ? $job->id : $job]), $body);
     }
 
+    protected function postFail(OnecJob|int $job, string $error): TestResponse
+    {
+        return $this->withToken(self::TOKEN)->postJson(route('onec-helper.jobs.fail', ['job' => $job instanceof OnecJob ? $job->id : $job]), ['error' => $error]);
+    }
+
+    /**
+     * A question closed by its button, with its job in the queue.
+     */
+    protected function closedQuestion(string $text): OnecJob
+    {
+        static $messageId = 1000;
+
+        $this->sendText(++$messageId, $text);
+        $batch = OnecBatch::where('status', OnecBatch::STATUS_COLLECTING)->latest('id')->firstOrFail();
+        $this->press('onec_close_'.$batch->id, $batch->service_message_id);
+
+        return OnecJob::where('batch_id', $batch->id)->sole();
+    }
+
+    protected function supervise(int $minutesLater): void
+    {
+        $this->travel($minutesLater)->minutes();
+        $this->artisan('onec-helper:supervise')->assertSuccessful();
+    }
+
     private function bindTelegramApiMock(): void
     {
         $api = Mockery::mock(Api::class);
@@ -235,6 +263,16 @@ abstract class OnecHelperTestCase extends TestCase
                 'chat' => ['id' => $params['chat_id'], 'type' => 'private'],
                 'date' => time(),
                 'text' => $params['text'],
+            ]);
+        });
+
+        $api->shouldReceive('editMessageReplyMarkup')->andReturnUsing(function (array $params) {
+            $this->markupEdits[] = $params;
+
+            return new Message([
+                'message_id' => $params['message_id'],
+                'chat' => ['id' => $params['chat_id'], 'type' => 'private'],
+                'date' => time(),
             ]);
         });
 

@@ -10,6 +10,7 @@ use App\Models\OnecQuestion;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Telegram\Bot\Api;
 
 /**
  * The jobs of the 1C helper bot as the worker on the 1C server sees them
@@ -182,9 +183,10 @@ class OnecJobBoard
     }
 
     /**
-     * Mark the job failed and tell the owner. The follow-ups waiting for a
-     * question that never got a session fail with it. False when the job is
-     * already finished.
+     * Mark the job failed and tell the owner, with the button "Повторить".
+     * The follow-ups waiting for a question that never got a session fail
+     * with it, each with a button of its own. False when the job is already
+     * finished.
      */
     public function fail(OnecJob $job, string $error): bool
     {
@@ -202,7 +204,9 @@ class OnecJobBoard
 
         SendOnecReplies::dispatch($job->batch_id, [
             OnecTexts::get('failed', ['error' => mb_substr($error, 0, 300)]),
-        ]);
+        ], [[
+            ['text' => OnecTexts::get('retry'), 'callback_data' => 'onec_retry_'.$job->id],
+        ]]);
 
         $question = $job->question->fresh();
 
@@ -213,6 +217,43 @@ class OnecJobBoard
                 ->get()
                 ->each(fn (OnecJob $followup) => $this->fail($followup, OnecTexts::get('question_not_analyzed')));
         }
+
+        return true;
+    }
+
+    /**
+     * The owner asks to analyse a failed job again, once the worker on the
+     * 1C server can: the job goes back to the queue as a new one, and its
+     * service message shows it queued. Only the latest job of its batch is
+     * taken again; the follow-ups that failed with their question stay
+     * failed. False, and nothing changed, for any other job.
+     */
+    public function retry(Api $telegram, OnecJob $job): bool
+    {
+        $isLatest = ! OnecJob::where('batch_id', $job->batch_id)->where('id', '>', $job->id)->exists();
+
+        if (! $isLatest) {
+            return false;
+        }
+
+        $retried = OnecJob::whereKey($job->id)
+            ->where('status', OnecJob::STATUS_FAILED)
+            ->update([
+                'status' => OnecJob::STATUS_QUEUED,
+                'error' => null,
+                'claimed_at' => null,
+                'heartbeat_at' => null,
+                'finished_at' => null,
+                'attempts' => 0,
+                'queued_alert_sent_at' => null,
+                'queued_at' => now(),
+            ]);
+
+        if ($retried === 0) {
+            return false;
+        }
+
+        $this->collector->showQueued($telegram, $job->batch);
 
         return true;
     }
