@@ -51,6 +51,9 @@ class MealDraftBotTest extends TestCase
     /** @var array<int, array<string, mixed>> photos sent, in order */
     private array $photos = [];
 
+    /** @var array<int, array<string, mixed>> messages edited, in order */
+    private array $edited = [];
+
     /** @var array<int, array<string, mixed>> chat menu buttons set */
     private array $menuButtons = [];
 
@@ -173,29 +176,40 @@ class MealDraftBotTest extends TestCase
         $this->assertSame('insulin_day_'.date('Y-m-d'), end($rows)[0]['callback_data']);
     }
 
-    public function test_the_insulin_button_sends_the_chart_with_what_lifted_and_lowered_it(): void
+    public function test_the_insulin_button_sends_sugar_and_insulin_with_what_lifted_and_lowered_them(): void
     {
         $this->bot->update(['web_app_url' => 'https://app.example/']);
         Cache::forget('bot:'.$this->bot->name);
         $this->diary(fn ($mock) => $mock->shouldReceive('insulinDay')->once()->with(date('Y-m-d'), 555, 'ru')->andReturn($this->insulinDay()));
 
+        // The button of a keyboard sent before the chart showed sugar.
         $this->send(['text' => '📈 Инсулин']);
 
-        $this->assertSame([], $this->sent);
-        $photo = $this->photos[0];
-        $this->assertSame(self::PNG, base64_encode($photo['photo']->getContents()));
-        $this->assertStringContainsString('<b>Инсулин за 31.10</b>', $photo['caption']);
-        $this->assertStringContainsString('пик в 13:35 — 62, высокий', $photo['caption']);
-        $this->assertStringContainsString('13:00 обед <b>+52</b>: Булочка с повидлом +42, Сахар +9', $photo['caption']);
-        $this->assertStringNotContainsString('Чай', $photo['caption']);
-        $this->assertStringContainsString('13:20 Прогулка, 60 мин — инсулина меньше на 17%', $photo['caption']);
-        $this->assertStringContainsString('Образ жизни: сидячий.', $photo['caption']);
-        $this->assertLessThanOrEqual(1024, mb_strlen(strip_tags($photo['caption'])));
+        $caption = $this->photos[0]['caption'];
+        $this->assertSame(self::PNG, base64_encode($this->photos[0]['photo']->getContents()));
+        $this->assertStringContainsString('<b>Сахар и инсулин за 31.10</b>', $caption);
+        $this->assertStringContainsString('Сахар: сейчас 5,1, пик 7,6 в 13:35.', $caption);
+        $this->assertStringContainsString('Инсулин: сейчас 10, низкий, пик 62, высокий в 13:35.', $caption);
+        $this->assertStringContainsString('<b>13:00 обед</b> — сахар до 7,6, инсулин +52 (движение после еды −21%): Булочка с повидлом +1,8, Сахар +0,6', $caption);
+        $this->assertStringNotContainsString('Чай', $caption);
+        $this->assertStringContainsString('🚶 13:20 Прогулка, 1 ч — за день сахар −12%, инсулин −17%', $caption);
+        $this->assertStringContainsString('Образ жизни: сидячий.', $caption);
+        $this->assertLessThanOrEqual(1024, mb_strlen(strip_tags($caption)));
 
-        $rows = json_decode($photo['reply_markup'], true)['inline_keyboard'];
+        $rows = json_decode($this->photos[0]['reply_markup'], true)['inline_keyboard'];
         $this->assertSame('insulin_day_2026-10-30', $rows[0][0]['callback_data']);
-        $this->assertSame('insulin_lifestyle_2026-10-31', $rows[1][0]['callback_data']);
+        $this->assertSame('move_ask', $rows[1][0]['callback_data']);
+        $this->assertSame('insulin_lifestyle_2026-10-31', $rows[1][1]['callback_data']);
         $this->assertSame('https://app.example/insulin', $rows[2][0]['web_app']['url']);
+
+        $summary = $this->sent[0]['text'];
+        $this->assertStringContainsString('<b>Итоги дня</b>', $summary);
+        $this->assertStringContainsString('Белок 60 г — 0,8 г/кг, норма от 66 г', $summary);
+        $this->assertStringContainsString('Клетчатка 9 из 25 г (у продуктов: 2 — ещё неизвестна)', $summary);
+        $this->assertStringContainsString('Гликемическая нагрузка 126 — высокая', $summary);
+        $this->assertStringContainsString('Ультрапереработанное 23% калорий', $summary);
+        $this->assertStringContainsString('Движение 60 мин, после еды 60 мин · сон 6 ч', $summary);
+        $this->assertStringContainsString("<b>Что можно изменить</b>\n• Сон 6 ч.", $summary);
     }
 
     public function test_a_product_name_cannot_break_the_html_of_the_insulin_caption(): void
@@ -212,7 +226,7 @@ class MealDraftBotTest extends TestCase
     public function test_a_long_day_keeps_its_caption_within_the_limit_of_telegram(): void
     {
         $day = $this->insulinDay();
-        $day['activities'] = array_fill(0, 30, ['id' => 1, 'title' => str_repeat('Очень долгая прогулка ', 3), 'minute' => 800, 'minutes' => 60, 'calories' => 105, 'effect' => 5]);
+        $day['activities'] = array_fill(0, 30, ['id' => 1, 'type' => null, 'emoji' => null, 'title' => str_repeat('Очень долгая прогулка ', 3), 'minute' => 800, 'minutes' => 60, 'calories' => 105, 'sleep' => false, 'effect' => 5, 'glucose_effect' => 4]);
         $day['meals'] = array_fill(0, 3, $day['meals'][0]);
         $this->diary(fn ($mock) => $mock->shouldReceive('insulinDay')->once()->andReturn($day));
 
@@ -220,7 +234,7 @@ class MealDraftBotTest extends TestCase
 
         $caption = $this->photos[0]['caption'];
         $this->assertLessThanOrEqual(1024, mb_strlen(strip_tags($caption)));
-        $this->assertStringContainsString('пик в 13:35', $caption);
+        $this->assertStringContainsString('пик 7,6 в 13:35', $caption);
         $this->assertStringContainsString('Образ жизни', $caption);
     }
 
@@ -286,17 +300,26 @@ class MealDraftBotTest extends TestCase
             'lifestyle_known' => true,
             'base' => 10,
             'zones' => ['medium' => 30, 'high' => 60],
-            'now' => ['minute' => 1200, 'level' => 10],
+            'glucose' => ['base' => 5.0, 'high' => 7.8, 'very_high' => 10.0, 'peak' => ['minute' => 815, 'level' => 7.6]],
+            'now' => ['minute' => 1200, 'level' => 10, 'glucose' => 5.1],
             'peak' => ['minute' => 815, 'level' => 62],
             'meals' => [[
                 'part_of_day' => 'dinner', 'minute' => 780, 'time_told' => true, 'rise' => 52,
+                'glucose_peak' => 7.6, 'glucose_rise' => 2.6, 'dip' => null, 'glycemic_load' => 48, 'proteins' => 6, 'fibers' => 1,
+                'factors' => [['key' => 'walk', 'percent' => -21, 'label' => 'движение после еды −21%']],
                 'items' => [
-                    ['id' => 1, 'name' => 'Булочка с повидлом', 'grams' => 80, 'rise' => 42, 'index_known' => true],
-                    ['id' => 2, 'name' => 'Сахар', 'grams' => 10, 'rise' => 9, 'index_known' => true],
-                    ['id' => 3, 'name' => 'Чай', 'grams' => 200, 'rise' => 0, 'index_known' => true],
+                    ['id' => 1, 'name' => 'Булочка с повидлом', 'grams' => 80, 'glucose' => 1.8, 'rise' => 42, 'index_known' => true],
+                    ['id' => 2, 'name' => 'Сахар', 'grams' => 10, 'glucose' => 0.6, 'rise' => 9, 'index_known' => true],
+                    ['id' => 3, 'name' => 'Чай', 'grams' => 200, 'glucose' => 0, 'rise' => 0, 'index_known' => true],
                 ],
             ]],
-            'activities' => [['id' => 1, 'title' => 'Прогулка', 'minute' => 800, 'minutes' => 60, 'calories' => 105, 'effect' => 17]],
+            'activities' => [['id' => 1, 'type' => 'walk', 'emoji' => '🚶', 'title' => 'Прогулка', 'minute' => 800, 'minutes' => 60, 'calories' => 105, 'sleep' => false, 'effect' => 17, 'glucose_effect' => 12]],
+            'summary' => [
+                'proteins' => 60, 'fibers' => 9, 'sugars' => 30, 'glycemic_load' => 126, 'glycemic_load_level' => 'high',
+                'proteins_per_kg' => 0.75, 'proteins_target' => 66, 'fibers_target' => 25, 'fibers_unknown' => 2,
+                'ultra_processed_share' => 23, 'glucose_high_minutes' => 0, 'moved_minutes' => 60, 'moved_after_meals_minutes' => 60, 'sleep_hours' => 6,
+            ],
+            'tips' => ['Сон 6 ч. После короткой ночи та же еда поднимает сахар выше.'],
             'estimated_foods' => 0,
             'chart' => self::PNG,
         ];
@@ -440,7 +463,7 @@ class MealDraftBotTest extends TestCase
                 'status' => 'done',
                 'understood' => true,
                 'not_found' => [],
-                'recorded' => ['weight' => null, 'activities' => [['id' => 1, 'title' => 'Бег 5 км', 'minutes' => 30, 'calories' => 365]]],
+                'recorded' => ['weight' => null, 'activities' => [['id' => 1, 'title' => 'Бег 5 км', 'minutes' => 30, 'calories' => 365, 'time' => '07:00']], 'meal_time' => ['part_of_day' => 'dinner', 'time' => '14:00']],
             ]));
         });
 
@@ -448,7 +471,7 @@ class MealDraftBotTest extends TestCase
         $this->press('draft_calculate');
 
         $this->assertSame('Записал вес 82.4 кг.', $this->sent[0]['text']);
-        $this->assertSame('Записал: Бег 5 км, 30 мин, ≈365 ккал.', $this->sent[1]['text']);
+        $this->assertSame("Записал: Бег 5 км, 30 мин, ≈365 ккал. (с 07:00)\nВремя: обед в 14:00.", $this->sent[1]['text']);
         $this->assertCount(2, $this->sent);
     }
 
@@ -606,6 +629,102 @@ class MealDraftBotTest extends TestCase
         $this->assertSame(__('calories365-bot.outdated_message'), $this->answers[0]['text']);
     }
 
+    public function test_the_movement_button_offers_the_kinds_and_keeps_one_ended_now(): void
+    {
+        $this->diary(function ($mock) {
+            $mock->shouldReceive('activityTypes')->with('ru', 555)->andReturn($this->kinds());
+            $mock->shouldReceive('addActivity')->once()->with('walk', 30, date('Y-m-d'), 555, 'ru')
+                ->andReturn(['activity' => ['id' => 7, 'type' => 'walk', 'title' => 'Прогулка', 'minutes' => 30, 'calories' => 63, 'time' => '18:30', 'date' => date('Y-m-d')]]);
+            $mock->shouldNotReceive('draftCollect');
+        });
+
+        $this->send(['text' => '🏃 Движение']);
+        $kinds = json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard'];
+        $this->assertSame(['🚶 Прогулка', 'move_type_walk'], [$kinds[0][0]['text'], $kinds[0][0]['callback_data']]);
+        $this->assertSame('move_type_walk_brisk', $kinds[0][1]['callback_data']);
+
+        $this->press('move_type_walk');
+        $minutes = collect(json_decode($this->sent[1]['reply_markup'], true)['inline_keyboard'])->flatten(1);
+        $this->assertContains('move_add_walk_30', $minutes->pluck('callback_data'));
+        $this->assertContains('2 ч', $minutes->pluck('text'));
+
+        $this->press('move_add_walk_30');
+        $this->assertSame('Записал: Прогулка, 30 мин (18:30–19:00), ≈63 ккал.', $this->sent[2]['text']);
+        $buttons = json_decode($this->sent[2]['reply_markup'], true)['inline_keyboard'];
+        $this->assertSame('move_del_7', $buttons[0][0]['callback_data']);
+        $this->assertSame('insulin_day_'.date('Y-m-d'), $buttons[1][0]['callback_data']);
+    }
+
+    public function test_a_text_right_after_the_movement_button_is_kept_at_once(): void
+    {
+        $this->diary(function ($mock) {
+            $mock->shouldReceive('activityTypes')->andReturn($this->kinds());
+            $mock->shouldReceive('sayActivity')->once()->with('после обеда час гулял', 555, 'ru')->andReturn(['understood' => true, 'recorded' => [
+                ['id' => 8, 'type' => 'walk', 'title' => 'Прогулка', 'minutes' => 60, 'calories' => 126, 'time' => '13:30', 'date' => date('Y-m-d')],
+            ]]);
+            $mock->shouldNotReceive('draftCollect');
+        });
+
+        $this->send(['text' => '/move']);
+        $this->send(['text' => 'после обеда час гулял']);
+
+        $this->assertSame('Записал: Прогулка, 1 ч (13:30–14:30), ≈126 ккал.', $this->sent[1]['text']);
+    }
+
+    public function test_a_text_after_the_movement_button_that_tells_no_movement_goes_to_the_meal(): void
+    {
+        $this->diary(function ($mock) {
+            $mock->shouldReceive('activityTypes')->andReturn($this->kinds());
+            $mock->shouldReceive('sayActivity')->once()->andReturn(['understood' => false, 'recorded' => []]);
+            $mock->shouldReceive('draftCollect')->once()->with('text', 'гречка 200 грамм', null, 555, 'ru')
+                ->andReturn($this->waiting([['id' => 1, 'kind' => 'text', 'text' => 'гречка 200 грамм']]));
+        });
+
+        $this->send(['text' => '🏃 Движение']);
+        $this->send(['text' => 'гречка 200 грамм']);
+
+        $this->assertStringContainsString('гречка 200 грамм', end($this->sent)['text']);
+    }
+
+    public function test_a_kept_activity_is_removed_by_its_button(): void
+    {
+        $this->diary(fn ($mock) => $mock->shouldReceive('deleteActivity')->once()->with(7, 555, 'ru')->andReturn(true));
+
+        $this->press('move_del_7');
+
+        $this->assertSame(['message_id' => 77, 'text' => 'Удалил.'], ['message_id' => $this->edited[0]['message_id'], 'text' => $this->edited[0]['text']]);
+    }
+
+    public function test_the_statistics_of_the_day_tell_more_than_calories(): void
+    {
+        $this->diary(function ($mock) {
+            $mock->shouldReceive('showUserStats')->once()->andReturn([$this->eaten(['id' => 1, 'name' => 'Хлеб', 'nova' => 3])]);
+            $mock->shouldReceive('insulinDay')->once()->with(date('Y-m-d'), 555, 'ru', false)->andReturn($this->insulinDay());
+        });
+
+        $this->press('AllDay');
+
+        $text = $this->sent[0]['text'];
+        $this->assertStringContainsString('Итого за день', $text);
+        $this->assertStringContainsString('*Итоги дня*', $text);
+        $this->assertStringContainsString('Клетчатка 9 из 25 г', $text);
+        $this->assertStringContainsString('Сахар: пик 7,6 в 13:35, выше 7,8 — 0 мин', $text);
+    }
+
+    /**
+     * The kinds of movement as the diary lists them.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function kinds(): array
+    {
+        return [
+            ['type' => 'walk', 'title' => 'Прогулка', 'emoji' => '🚶', 'met' => 3.0, 'minutes' => 30],
+            ['type' => 'walk_brisk', 'title' => 'Быстрая ходьба', 'emoji' => '👟', 'met' => 4.8, 'minutes' => 30],
+            ['type' => 'sleep', 'title' => 'Сон', 'emoji' => '😴', 'met' => 1.0, 'minutes' => 450],
+        ];
+    }
+
     private function diary(callable $expectations): void
     {
         $this->partialMock(DiaryApiService::class, $expectations);
@@ -681,6 +800,11 @@ class MealDraftBotTest extends TestCase
             $this->answers[] = $p;
 
             return true;
+        });
+        $api->shouldReceive('editMessageText')->andReturnUsing(function (array $p) {
+            $this->edited[] = $p;
+
+            return new Message(['message_id' => $p['message_id'], 'chat' => ['id' => $p['chat_id'], 'type' => 'private'], 'date' => time(), 'text' => $p['text']]);
         });
         $api->shouldReceive('sendPhoto')->andReturnUsing(function (array $p) {
             $this->photos[] = $p;

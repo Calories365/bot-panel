@@ -206,9 +206,10 @@ class MealDraftChat
     }
 
     /**
-     * Say what weight and activities went to the diary of the day.
+     * Say what weight and activities went to the diary of the day, and the time
+     * a saved meal was moved to.
      *
-     * @param  array{weight?: float|null, activities?: array<int, array<string, mixed>>}|null  $recorded
+     * @param  array{weight?: float|null, activities?: array<int, array<string, mixed>>, meal_time?: array{part_of_day: string, time: string}}|null  $recorded
      */
     private function tellRecorded($telegram, int $chatId, ?array $recorded): void
     {
@@ -223,6 +224,13 @@ class MealDraftChat
                 'title' => $activity['title'],
                 'minutes' => $activity['minutes'],
                 'calories' => $activity['calories'],
+            ]).(! empty($activity['time']) ? ' '.__('calories365-bot.recorded_activity_time', ['time' => $activity['time']]) : '');
+        }
+
+        if (! empty($recorded['meal_time'])) {
+            $lines[] = __('calories365-bot.recorded_meal_time', [
+                'meal' => __('calories365-bot.insulin_part_'.$recorded['meal_time']['part_of_day']),
+                'time' => $recorded['meal_time']['time'],
             ]);
         }
 

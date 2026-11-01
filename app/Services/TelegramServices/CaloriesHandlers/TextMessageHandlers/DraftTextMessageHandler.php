@@ -4,13 +4,15 @@ namespace App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers;
 
 use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInterface;
 use App\Services\TelegramServices\CaloriesHandlers\MealDraftChat;
+use App\Services\TelegramServices\CaloriesHandlers\MovementChat;
 
 /**
  * Any text that is not a command or a menu button: about a meal or a
  * correction of the meal draft, "съел яблоко", "убери хлеб", which waits for the
  * calculation, or a short edit, "2 250", which changes the draft at once
  * (MealDraftChat). Neither calls the model now, so neither counts for the spam
- * guard; the calculation does.
+ * guard; the calculation does. Right after "🏃 Движение" a text is movement,
+ * read by the model at once (MovementChat), and counts.
  */
 class DraftTextMessageHandler implements MessageHandlerInterface
 {
@@ -24,9 +26,12 @@ class DraftTextMessageHandler implements MessageHandlerInterface
 
     protected MealDraftChat $mealDraftChat;
 
-    public function __construct(MealDraftChat $mealDraftChat)
+    protected MovementChat $movementChat;
+
+    public function __construct(MealDraftChat $mealDraftChat, MovementChat $movementChat)
     {
         $this->mealDraftChat = $mealDraftChat;
+        $this->movementChat = $movementChat;
     }
 
     public function handle($bot, $telegram, $message, $botUser)
@@ -46,6 +51,13 @@ class DraftTextMessageHandler implements MessageHandlerInterface
         }
 
         $userId = $message->getFrom()->getId();
+
+        if (MovementChat::waiting($userId)) {
+            if (! $this->mealDraftChat->allowed($telegram, $botUser, $chatId)
+                || $this->movementChat->say($telegram, $botUser, $chatId, $userId, mb_substr($text, 0, 2000))) {
+                return;
+            }
+        }
 
         if (preg_match(self::SHORT_EDIT, $text)) {
             $this->mealDraftChat->input($bot, $telegram, $botUser, $chatId, $userId, $text);

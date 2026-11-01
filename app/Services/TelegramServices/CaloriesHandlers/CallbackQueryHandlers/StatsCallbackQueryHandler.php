@@ -77,7 +77,7 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
         if ($partOfDay) {
             $this->formatAndSendPartOfDay($telegram, $chatId, $meals, $date, $partOfDay, $locale, $useBigFont);
         } else {
-            $this->formatAndSendAllDay($telegram, $chatId, $meals, $date, $locale, $useBigFont);
+            $this->formatAndSendAllDay($telegram, $chatId, $meals, $date, $locale, $useBigFont, $botUser->calories_id);
         }
     }
 
@@ -166,9 +166,17 @@ class StatsCallbackQueryHandler implements CallbackQueryHandlerInterface
         ], 1800);
     }
 
-    private function formatAndSendAllDay($telegram, $chatId, $meals, $date, $locale, bool $useBigFont)
+    private function formatAndSendAllDay($telegram, $chatId, $meals, $date, $locale, bool $useBigFont, $caloriesId = null)
     {
         $messageText = MealStatsText::allDay($meals, $date, $locale, $useBigFont);
+
+        // Protein, fibre, glycemic load and sugar of the day, when the diary answers.
+        $day = $caloriesId ? $this->diaryApiService->insulinDay($date, $caloriesId, $locale, false) : ['error' => true];
+        if (! isset($day['error']) && isset($day['summary'], $day['glucose'])) {
+            $withDay = $messageText."\n\n".MealStatsText::beyondCalories($day, $locale);
+            // Telegram refuses a message over 4096 characters.
+            $messageText = mb_strlen($withDay) <= 4090 ? $withDay : $messageText;
+        }
 
         $sent = $telegram->sendMessage([
             'chat_id' => $chatId,

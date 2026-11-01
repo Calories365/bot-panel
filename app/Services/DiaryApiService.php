@@ -4,6 +4,7 @@ namespace App\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -304,6 +305,104 @@ class DiaryApiService
             Log::error('Error reading the insulin of the day: '.$e->getMessage());
 
             return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * The kinds of movement to pick, in the user's language: [{type, title,
+     * emoji, met, minutes}], or [] when the diary does not answer. The list
+     * changes only with a release of the diary.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function activityTypes(string $locale, $caloriesId): array
+    {
+        // The diary answers the bot only for a user, though the list is the same for all.
+        $types = Cache::remember('diary_activity_types_'.$locale, now()->addHour(), function () use ($locale, $caloriesId) {
+            try {
+                $response = Http::timeout(15)
+                    ->withHeaders($this->getHeaders($caloriesId, $locale))
+                    ->get($this->apiUrl.'/caloriesEndPoint/activity-types');
+
+                $response->throw();
+
+                return $response->json('types');
+            } catch (\Throwable $e) {
+                Log::error('Error reading the kinds of movement: '.$e->getMessage());
+
+                return null;
+            }
+        });
+
+        if (! is_array($types)) {
+            Cache::forget('diary_activity_types_'.$locale);
+
+            return [];
+        }
+
+        return $types;
+    }
+
+    /**
+     * Keep an activity of a kind, ended now; answers {activity, …}.
+     *
+     * @return array<string, mixed>
+     */
+    public function addActivity(string $type, int $minutes, string $date, $caloriesId, string $locale): array
+    {
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders($this->getHeaders($caloriesId, $locale))
+                ->post($this->apiUrl.'/caloriesEndPoint/body/activities', ['type' => $type, 'minutes' => $minutes, 'date' => $date]);
+
+            $response->throw();
+
+            return $response->json();
+        } catch (\Throwable $e) {
+            Log::error('Error keeping an activity: '.$e->getMessage());
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Keep the activities a text tells, at once; answers {understood, recorded}.
+     *
+     * @return array<string, mixed>
+     */
+    public function sayActivity(string $text, $caloriesId, string $locale): array
+    {
+        try {
+            $response = Http::timeout(60)
+                ->withHeaders($this->getHeaders($caloriesId, $locale))
+                ->post($this->apiUrl.'/caloriesEndPoint/body/activities/say', ['text' => $text]);
+
+            $response->throw();
+
+            return $response->json();
+        } catch (\Throwable $e) {
+            Log::error('Error reading the activities of a message: '.$e->getMessage());
+
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * @return bool whether the diary removed it
+     */
+    public function deleteActivity(int $id, $caloriesId, string $locale): bool
+    {
+        try {
+            Http::timeout(15)
+                ->withHeaders($this->getHeaders($caloriesId, $locale))
+                ->delete($this->apiUrl.'/caloriesEndPoint/body/activities/'.$id)
+                ->throw();
+
+            return true;
+        } catch (\Throwable $e) {
+            Log::error('Error removing an activity: '.$e->getMessage());
+
+            return false;
         }
     }
 

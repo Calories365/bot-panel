@@ -98,9 +98,9 @@ How to keep the diary in the bot:
 2. A photo of a label with its nutrition table gives the exact values from the package. A brand from the package or the one you name stays in the product name.
 3. Press "Calculate": the bot reads all of it together and shows the meal in one message. Correct it in words, "buckwheat was 250", "remove the tea", and press "Recalculate with what is added". "2 150" sets the grams of item 2 at once. Or press "Edit" and correct it in the app.
 4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary. Nothing is recorded without it.
-5. Weight and workouts the same way: "I weigh 82.4", "ran 5 km in 30 minutes", "an hour at the gym", and the bot saves them to the day.
+5. Movement and sleep: the "🏃 Movement" button, pick a kind and how long, or say "walked for an hour", "went shopping after lunch", "slept from 1 to 7" and it is saved at once. Weight: "I weigh 82.4".
 6. The "Statistics" button shows what is recorded today and how processed each product is.
-7. The "📈 Insulin" button shows the insulin chart of the day: how food lifts it and movement lowers it. Say when you ate, "at 9 am I had…", and the chart is more exact.
+7. The "📈 Sugar and insulin" button shows the sugar and insulin of the day: what lifted them, what lowered them, protein, fibre and tips. Say when you ate, "at 9 am I had…", "had lunch at 2 pm", and the chart is more exact.
 
 The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.com?lang=en
 
@@ -114,9 +114,9 @@ How to keep the diary in the bot:
 2. A photo of a label with its nutrition table gives the exact values from the package. A brand from the package or the one you name stays in the product name.
 3. Press "Calculate": the bot reads all of it together and shows the meal in one message. Correct it in words, "buckwheat was 250", "remove the tea", and press "Recalculate with what is added". "2 150" sets the grams of item 2 at once. Or press "Edit" and correct it in the app.
 4. Press "Breakfast", "Lunch" or "Dinner" to save the meal to the diary. Nothing is recorded without it.
-5. Weight and workouts the same way: "I weigh 82.4", "ran 5 km in 30 minutes", "an hour at the gym", and the bot saves them to the day.
+5. Movement and sleep: the "🏃 Movement" button, pick a kind and how long, or say "walked for an hour", "went shopping after lunch", "slept from 1 to 7" and it is saved at once. Weight: "I weigh 82.4".
 6. The "Statistics" button shows what is recorded today and how processed each product is.
-7. The "📈 Insulin" button shows the insulin chart of the day: how food lifts it and movement lowers it. Say when you ate, "at 9 am I had…", and the chart is more exact.
+7. The "📈 Sugar and insulin" button shows the sugar and insulin of the day: what lifted them, what lowered them, protein, fibre and tips. Say when you ate, "at 9 am I had…", "had lunch at 2 pm", and the chart is more exact.
 
 The diary, statistics and the calorie calculator are in the app: the ":open" button below or https://calculator.calories365.xyz?lang=en
 
@@ -180,29 +180,29 @@ EOT,
     'processing_3' => 'processed',
     'processing_4' => 'ultra-processed',
     'stats_day_title' => 'Your data for *:date*:',
-    'insulin_chart' => '📈 Insulin of the day',
-    'insulin_button' => '📈 Insulin',
-    'insulin_title' => 'Insulin of :date',
-    'insulin_note' => 'An estimate from food, movement and way of life, not a measurement.',
+    'insulin_chart' => '📈 Sugar and insulin of the day',
+    'insulin_button' => '📈 Sugar and insulin',
+    'insulin_title' => 'Sugar and insulin of :date',
+    'insulin_note' => 'An estimate for a healthy adult from food, movement and sleep, not a measurement. Sugar in mmol/L above, insulin below.',
     'insulin_level' => ':level, :zone',
     'insulin_zone_low' => 'low',
     'insulin_zone_medium' => 'medium',
     'insulin_zone_high' => 'high',
-    'insulin_now' => 'Now :level',
-    'insulin_peak' => 'peak at :time — :level',
-    'insulin_meals' => 'What lifted it:',
+    'insulin_now' => 'now :level',
+    'insulin_peak' => 'peak :level at :time',
+    'insulin_meals' => 'Food:',
     'insulin_part_morning' => 'breakfast',
     'insulin_part_dinner' => 'lunch',
     'insulin_part_supper' => 'dinner',
-    'insulin_activity' => ':time :title, :minutes min',
-    'insulin_effect' => ':percent% less insulin',
-    'insulin_moves' => 'Movement:',
+    'insulin_activity' => ':time :title, :duration',
+    'insulin_effect' => 'over the day sugar −:glucose%, insulin −:insulin%',
+    'insulin_moves' => 'Movement and sleep:',
     'insulin_no_meals' => 'No food recorded on this day.',
     'insulin_lifestyle' => 'Way of life: :lifestyle.',
     'insulin_lifestyle_hint' => 'It comes from the calculator or counts as sitting — choose yours with the "Way of life" button.',
-    'insulin_movement_hint' => 'Add movement in words: "walked for an hour", "went to the shop at 6 pm", "an hour at the gym in the morning" — and press "Calculate".',
+    'insulin_movement_hint' => 'Movement and sleep — with the "🏃 Movement" button: pick a kind or say "walked for an hour", "slept from 1 to 7".',
     'insulin_open' => '📊 Details in the app',
-    'lifestyle_button' => '🏃 Way of life',
+    'lifestyle_button' => '⚙️ Way of life',
     'lifestyle_question' => 'What is your usual way of life? It tells how much insulin the same food takes.',
     'lifestyle_1' => 'Sitting',
     'lifestyle_2' => 'Walk a little',
@@ -217,4 +217,36 @@ EOT,
     'draft_load_high' => 'high',
     'recorded_weight' => 'Saved the weight :weight kg.',
     'recorded_activity' => 'Saved: :title, :minutes min, ≈:calories kcal.',
+    'insulin_sugar_line' => 'Sugar: :parts.',
+    'insulin_insulin_line' => 'Insulin: :parts.',
+    'insulin_meal' => '— sugar up to :sugar, insulin +:insulin',
+    'insulin_effect_more' => 'over the day sugar +:glucose%, insulin +:insulin%',
+    'insulin_move_button' => '🏃 Log movement',
+    'insulin_summary_title' => 'The day',
+    'insulin_summary_proteins' => 'Protein :grams g',
+    'insulin_summary_proteins_kg' => 'Protein :grams g — :per_kg g/kg, at least :target g',
+    'insulin_summary_fibers' => 'Fibre :grams of :target g',
+    'insulin_summary_fibers_unknown' => ' (not known yet for foods: :count)',
+    'insulin_summary_sugars' => 'Sugars in food :grams g',
+    'insulin_summary_load' => 'Glycemic load :load — :level',
+    'insulin_load_low' => 'low',
+    'insulin_load_medium' => 'medium',
+    'insulin_load_high' => 'high',
+    'insulin_summary_sugar' => 'Sugar: peak :level at :time, above 7.8 for :minutes min',
+    'insulin_summary_ultra' => 'Ultra-processed :percent% of calories',
+    'insulin_summary_moved' => 'Movement :minutes min, after meals :after min',
+    'insulin_summary_sleep' => 'sleep :hours h',
+    'insulin_tips' => 'What to change',
+    'move_button' => '🏃 Movement',
+    'move_question' => 'What did you do? Say it or type it: "walked for an hour", "went shopping after lunch", "slept from 1 to 7" — I log it at once. Or pick:',
+    'move_more' => '… More',
+    'move_how_long' => ':title — how long? Just finished.',
+    'move_how_long_sleep' => ':title — how long did you sleep? Until now, or until 7 am if it is already day.',
+    'move_recorded' => 'Logged: :title, :duration:time, ≈:calories kcal.',
+    'move_remove' => '✕ Remove ":title"',
+    'move_removed' => 'Removed.',
+    'move_minutes' => ':minutes min',
+    'move_hours' => ':hours h',
+    'recorded_activity_time' => '(from :time)',
+    'recorded_meal_time' => 'Time: :meal at :time.',
 ];

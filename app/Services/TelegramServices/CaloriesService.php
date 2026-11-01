@@ -11,6 +11,7 @@ use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\Insulin
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\LanguageCallbackHandlers\SetEnglishLanguageCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\LanguageCallbackHandlers\SetRussianLanguageCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\LanguageCallbackHandlers\SetUkrainianLanguageCallbackQueryHandler;
+use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\MovementCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\OutdatedCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\StatsCallbackQueryHandler;
 use App\Services\TelegramServices\CaloriesHandlers\DocumentMessageHandler;
@@ -21,6 +22,7 @@ use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\FontMessa
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\HelpMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\InsulinMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\LanguageMessageHandler;
+use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\MovementMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StartMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\TextMessageHandlers\StatsMessageHandler;
 use App\Services\TelegramServices\CaloriesHandlers\UnsupportedMessageHandler;
@@ -78,6 +80,7 @@ class CaloriesService extends BaseService
         $h['/stats'] = fn () => app(StatsMessageHandler::class);
         $h['/help'] = fn () => app(HelpMessageHandler::class);
         $h['/insulin'] = fn () => app(InsulinMessageHandler::class);
+        $h['/move'] = fn () => app(MovementMessageHandler::class);
         $h['/start'] = fn () => app(StartMessageHandler::class);
         $h['/language'] = fn () => app(LanguageMessageHandler::class);
         $h['font'] = fn () => app(FontMessageHandler::class);
@@ -87,7 +90,8 @@ class CaloriesService extends BaseService
             '/start' => ['Меню', 'Menu'],
             '/stats' => ['Statistics', 'Статистика'],
             '/help' => ['Как пользоваться', 'Як користуватися', 'How to use'],
-            '/insulin' => ['📈 Инсулин', '📈 Інсулін', '📈 Insulin', 'Инсулин', 'Інсулін', 'Insulin'],
+            '/insulin' => ['📈 Сахар и инсулин', '📈 Цукор та інсулін', '📈 Sugar and insulin', '📈 Инсулин', '📈 Інсулін', '📈 Insulin', 'Инсулин', 'Інсулін', 'Insulin'],
+            '/move' => ['🏃 Движение', '🏃 Рух', '🏃 Movement', 'Движение', 'Рух', 'Movement', 'Сон', 'Sleep'],
             '/language' => ['Choose language', 'Выбор языка', 'Вибір мови'],
             'feedback' => ['Feedback', 'Обратная связь', 'Зворотний зв\'язок'],
             'font' => ['Font', 'font', 'Шрифт', 'шрифт', 'Большой шрифт', 'Великий шрифт', 'Large font', 'Big font'],
@@ -103,6 +107,7 @@ class CaloriesService extends BaseService
         $h['draft'] = fn () => app(DraftCallbackQueryHandler::class);
         $h['delete_meal'] = fn () => app(DeleteMealCallbackQueryHandler::class);
         $h['insulin'] = fn () => app(InsulinCallbackQueryHandler::class);
+        $h['move'] = fn () => app(MovementCallbackQueryHandler::class);
 
         // Buttons of the per-product messages sent before the meal draft.
         foreach (['save', 'cancel', 'edit', 'destroy', 'search', 'editing_save', 'editing_cancel', 'editing_skip'] as $outdated) {

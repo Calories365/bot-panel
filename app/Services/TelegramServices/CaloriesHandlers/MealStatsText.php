@@ -40,6 +40,29 @@ class MealStatsText
     }
 
     /**
+     * What the day added up to beyond calories, from the diary's estimate of
+     * the day (InsulinChat::summaryLines): protein, fibre, glycemic load, sugar,
+     * movement and sleep, each line escaped for Markdown.
+     *
+     * @param  array<string, mixed>  $day  InsulinDay of the diary
+     */
+    public static function beyondCalories(array $day, string $locale): string
+    {
+        $previous = app()->getLocale();
+        app()->setLocale($locale);
+
+        try {
+            $lines = InsulinChat::summaryLines($day['summary'], $day['glucose']);
+            $title = __('calories365-bot.insulin_summary_title');
+        } finally {
+            app()->setLocale($previous);
+        }
+
+        return '*'.Utilities::escapeMarkdown($title).'*'."\n"
+            .implode("\n", array_map(static fn (string $line) => Utilities::escapeMarkdown($line), $lines));
+    }
+
+    /**
      * @param  array<int, array<string, mixed>>  $meals
      */
     private static function dayText(array $meals, string $date, string $locale, bool $useBigFont, bool $withProducts): string

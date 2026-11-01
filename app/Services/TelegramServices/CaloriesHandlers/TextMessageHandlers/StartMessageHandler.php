@@ -197,7 +197,7 @@ class StartMessageHandler implements MessageHandlerInterface
             ])
             ->row([
                 ['text' => __('calories365-bot.insulin_button')],
-                ['text' => __('calories365-bot.menu')],
+                ['text' => __('calories365-bot.move_button')],
             ])
             ->row([
                 ['text' => __('calories365-bot.choose_language')],
@@ -205,6 +205,7 @@ class StartMessageHandler implements MessageHandlerInterface
             ])
             ->row([
                 ['text' => __('calories365-bot.feedback')],
+                ['text' => __('calories365-bot.menu')],
             ]);
 
         if ($imagePath) {
