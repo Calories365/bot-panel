@@ -44,7 +44,7 @@ class OnecHelperRetryTest extends OnecHelperTestCase
         );
     }
 
-    public function test_the_answer_comes_without_buttons(): void
+    public function test_the_answer_comes_without_the_retry_button(): void
     {
         $job = $this->closedQuestion('Питання');
         $this->claim()->assertOk();
@@ -53,7 +53,10 @@ class OnecHelperRetryTest extends OnecHelperTestCase
         $this->postResult($job, ['session_id' => 'session-1', 'for_user' => 'Разбор.', 'for_boss' => 'Для Анни.'])->assertNoContent();
 
         $this->assertCount(2, $this->sent);
-        $this->assertArrayNotHasKey('reply_markup', $this->sent[0]);
+        $this->assertSame(
+            [[['text' => 'Продолжить на сервере', 'callback_data' => 'onec_resume_'.$job->question_id]]],
+            json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard']
+        );
         $this->assertArrayNotHasKey('reply_markup', $this->sent[1]);
     }
 

@@ -12,7 +12,8 @@ use Illuminate\Console\Command;
 /**
  * The button "Повторить" for a failure the bot sent before it had one: the
  * failed job goes back to the queue, and the owner is told in reply to the
- * service message of its question or follow-up.
+ * service message of its question or follow-up, or for a resume to the
+ * message of its button.
  */
 class RetryOnecJob extends Command
 {
@@ -36,7 +37,7 @@ class RetryOnecJob extends Command
             return self::FAILURE;
         }
 
-        SendOnecReplies::dispatch($job->batch_id, [OnecTexts::get('retried')]);
+        SendOnecReplies::about($job, [OnecTexts::get($job->opensOnServer() ? 'retried_on_server' : 'retried')]);
 
         $this->info('The job is in the queue again.');
 

@@ -4,6 +4,7 @@ namespace App\Services\TelegramServices\OnecHelperHandlers;
 
 use App\Models\OnecBatch;
 use App\Models\OnecJob;
+use App\Models\OnecQuestion;
 use App\Services\TelegramServices\CaloriesHandlers\CallbackQueryHandlers\CallbackQueryHandlerInterface;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Api;
@@ -11,9 +12,11 @@ use Telegram\Bot\Objects\CallbackQuery;
 
 /**
  * The buttons of the 1C helper bot: onec_close_{batch} closes the question or
- * follow-up at once, onec_cancel_{batch} cancels it, both under the service
+ * follow-up at once, onec_cancel_{batch} cancels it, onec_window_{batch}
+ * closes a question to open it on the 1C server, all under the service
  * message; onec_retry_{job} under a failure puts the failed job in the queue
- * again.
+ * again; onec_resume_{question} under an answer opens the session of its
+ * analysis on the server.
  */
 class ButtonCallbackQueryHandler implements CallbackQueryHandlerInterface
 {
@@ -35,6 +38,12 @@ class ButtonCallbackQueryHandler implements CallbackQueryHandlerInterface
             return;
         }
 
+        if (($parts[1] ?? null) === 'resume') {
+            $this->resume($bot->id, $telegram, $callbackQuery, $chatId, (int) ($parts[2] ?? 0));
+
+            return;
+        }
+
         // Telegram keeps the button spinning until the answer, and closing
         // waits for the model.
         $telegram->answerCallbackQuery(['callback_query_id' => $callbackQuery->getId()]);
@@ -50,8 +59,35 @@ class ButtonCallbackQueryHandler implements CallbackQueryHandlerInterface
         match ($parts[1] ?? null) {
             'close' => $this->collector->close($telegram, $batch),
             'cancel' => $this->collector->cancel($telegram, $batch),
+            // A follow-up has no such button.
+            'window' => $batch->isFollowup() ? null : $this->collector->close($telegram, $batch, openOnServer: true),
             default => null,
         };
+    }
+
+    /**
+     * The button stays under the answer: the session can be opened again.
+     */
+    private function resume(int $botId, Api $telegram, CallbackQuery $callbackQuery, int $chatId, int $questionId): void
+    {
+        $question = OnecQuestion::whereKey($questionId)->where('bot_id', $botId)->where('chat_id', $chatId)->first();
+
+        if ($question === null) {
+            $telegram->answerCallbackQuery(['callback_query_id' => $callbackQuery->getId()]);
+
+            return;
+        }
+
+        $queued = $this->board->resume($question, (int) $callbackQuery->getMessage()->getMessageId());
+
+        $telegram->answerCallbackQuery([
+            'callback_query_id' => $callbackQuery->getId(),
+            'text' => OnecTexts::get(match (true) {
+                $queued => 'opening_on_server',
+                $question->fresh()->session_id === null => 'no_session',
+                default => 'already_opening',
+            }),
+        ]);
     }
 
     /**

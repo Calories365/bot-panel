@@ -80,10 +80,26 @@ class OnecHelperController extends Controller
         return response()->noContent();
     }
 
+    /**
+     * The answer of an analysis, or for a job "window" or "resume" where the
+     * session it opened on the server is: the fields depend on the kind.
+     */
     public function result(Request $request, int $job): JsonResponse|Response
     {
+        $onecJob = OnecJob::find($job);
+
+        if ($onecJob === null) {
+            return $this->json(['error' => 'Not found'], 404);
+        }
+
         $body = $this->body($request);
-        $validator = Validator::make($body, [
+        $validator = Validator::make($body, $onecJob->opensOnServer() ? [
+            'session_id' => 'required|string|max:255',
+            'attach_id' => 'required|string|max:255',
+            'folder' => 'nullable|string|max:1024',
+            'project_dir' => 'required|string|max:1024',
+            'window' => 'required|boolean:strict',
+        ] : [
             'session_id' => 'required|string|max:255',
             'for_user' => 'required|string',
             // Empty or absent when the agent answered without the separator of the two texts.
@@ -94,13 +110,11 @@ class OnecHelperController extends Controller
             return $this->json(['errors' => $validator->errors()], 422);
         }
 
-        $onecJob = OnecJob::find($job);
+        $saved = $onecJob->opensOnServer()
+            ? $this->board->opened($onecJob, $body['session_id'], $body['attach_id'], $body['folder'] ?? null, $body['project_dir'], $body['window'])
+            : $this->board->result($onecJob, $body['session_id'], $body['for_user'], $body['for_boss'] ?? null);
 
-        if ($onecJob === null) {
-            return $this->json(['error' => 'Not found'], 404);
-        }
-
-        if (! $this->board->result($onecJob, $body['session_id'], $body['for_user'], $body['for_boss'] ?? null)) {
+        if (! $saved) {
             return $this->json(['error' => 'The job already has its result'], 409);
         }
 

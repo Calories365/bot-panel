@@ -17,9 +17,11 @@ use Telegram\Bot\Api;
 /**
  * Gathers the messages of the owner of the 1C helper bot into a question, or
  * into a follow-up to one, under a service message with the counters and the
- * buttons "Разобрать сейчас" and "Отменить". A batch closes by the button or
- * after config('onec_helper.batch_seconds') without a new message, and becomes
- * a job for the worker on the 1C server.
+ * buttons "Разобрать сейчас" and "Отменить"; a question also has "Открыть на
+ * сервере". A batch closes by a button or after config('onec_helper.batch_seconds')
+ * without a new message, and becomes a job for the worker on the 1C server:
+ * to analyse it, or, by "Открыть на сервере", to open it in a session of
+ * Claude on the server.
  *
  * Telegram sends the parts of an album and quick messages at once, and the
  * queue handles them in parallel: the work on the batches of a chat goes under
@@ -96,27 +98,42 @@ class QuestionCollector
     }
 
     /**
-     * Close the batch: a question gets its title and summary from the model,
-     * and the batch goes to the queue of the worker. With $onlyWhenIdle, as
-     * the timer does, only a batch without a new message for the batch time.
+     * Close the batch: it goes to the queue of the worker, and a question
+     * gets its title and summary from the model. $openOnServer, for a
+     * question, makes it a job "window" instead of an analysis. With
+     * $onlyWhenIdle, as the timer does, only a batch without a new message
+     * for the batch time.
      */
-    public function close(Api $telegram, OnecBatch $batch, bool $onlyWhenIdle = false): bool
+    public function close(Api $telegram, OnecBatch $batch, bool $onlyWhenIdle = false, bool $openOnServer = false): bool
     {
         $question = $batch->question;
 
-        $closed = $this->locked($question->bot_id, $question->chat_id, function () use ($batch, $onlyWhenIdle) {
+        $job = $this->locked($question->bot_id, $question->chat_id, function () use ($batch, $onlyWhenIdle, $openOnServer) {
             $batch->refresh();
 
             if ($batch->status !== OnecBatch::STATUS_COLLECTING || ($onlyWhenIdle && ! $this->isIdle($batch))) {
-                return false;
+                return null;
             }
 
             $batch->update(['status' => OnecBatch::STATUS_CLOSED, 'closed_at' => now()]);
 
-            return true;
+            // Created under the lock, so that a reply to the service message
+            // finds what the question became. A job of a question waits for
+            // its title before the worker can take it.
+            return OnecJob::create([
+                'question_id' => $batch->question_id,
+                'batch_id' => $batch->id,
+                'kind' => match (true) {
+                    $batch->isFollowup() => OnecJob::KIND_FOLLOWUP,
+                    $openOnServer => OnecJob::KIND_WINDOW,
+                    default => OnecJob::KIND_QUESTION,
+                },
+                'status' => OnecJob::STATUS_QUEUED,
+                'queued_at' => now(),
+            ]);
         });
 
-        if (! $closed) {
+        if ($job === null) {
             return false;
         }
 
@@ -129,15 +146,7 @@ class QuestionCollector
             $question->update($this->structurer->structure($batch->messages()->get()));
         }
 
-        OnecJob::create([
-            'question_id' => $question->id,
-            'batch_id' => $batch->id,
-            'kind' => $batch->isFollowup() ? OnecJob::KIND_FOLLOWUP : OnecJob::KIND_QUESTION,
-            'status' => OnecJob::STATUS_QUEUED,
-            'queued_at' => now(),
-        ]);
-
-        $this->edit($telegram, $batch, $this->acceptedText($batch));
+        $this->edit($telegram, $batch, $this->acceptedText($batch, $job->kind));
 
         return true;
     }
@@ -196,19 +205,19 @@ class QuestionCollector
     }
 
     /**
-     * Show in the service message what the worker says it does.
+     * Show in the service message of the job what the worker says it does.
      */
-    public function showNote(Api $telegram, OnecBatch $batch, string $note): void
+    public function showNote(Api $telegram, OnecJob $job, string $note): void
     {
-        $this->edit($telegram, $batch, $this->acceptedText($batch, $note));
+        $this->edit($telegram, $job->batch, $this->acceptedText($job->batch, $job->kind, $note));
     }
 
     /**
-     * Show the batch in the queue again, as after its closing.
+     * Show the job in the queue again, as after the closing of its batch.
      */
-    public function showQueued(Api $telegram, OnecBatch $batch): void
+    public function showQueued(Api $telegram, OnecJob $job): void
     {
-        $this->edit($telegram, $batch, $this->acceptedText($batch));
+        $this->edit($telegram, $job->batch, $this->acceptedText($job->batch, $job->kind));
     }
 
     public function collectingText(OnecBatch $batch): string
@@ -220,13 +229,20 @@ class QuestionCollector
         return OnecTexts::get($batch->isFollowup() ? 'collecting_followup' : 'collecting', ['counts' => $counts]);
     }
 
-    public function acceptedText(OnecBatch $batch, ?string $note = null): string
+    /**
+     * @param  string  $jobKind  the kind of the job the batch became
+     */
+    public function acceptedText(OnecBatch $batch, string $jobKind, ?string $note = null): string
     {
         [$messages, $screens] = $this->counts($batch);
 
-        $key = $note === null ? 'accepted' : 'in_work';
+        $key = ($note === null ? 'accepted' : 'in_work').match ($jobKind) {
+            OnecJob::KIND_FOLLOWUP => '_followup',
+            OnecJob::KIND_WINDOW => '_window',
+            default => '',
+        };
 
-        return OnecTexts::get($batch->isFollowup() ? $key.'_followup' : $key, [
+        return OnecTexts::get($key, [
             'title' => (string) $batch->question->title,
             'messages' => OnecTexts::messages($messages),
             'screens' => OnecTexts::screens($screens),
@@ -235,14 +251,23 @@ class QuestionCollector
     }
 
     /**
+     * "Открыть на сервере" has a row of its own: three buttons in one row do
+     * not fit their words on a phone.
+     *
      * @return list<list<array{text: string, callback_data: string}>>
      */
     private function keyboard(OnecBatch $batch): array
     {
-        return [[
+        $rows = [[
             ['text' => OnecTexts::get('analyze_now'), 'callback_data' => 'onec_close_'.$batch->id],
             ['text' => OnecTexts::get('cancel'), 'callback_data' => 'onec_cancel_'.$batch->id],
         ]];
+
+        if (! $batch->isFollowup()) {
+            $rows[] = [['text' => OnecTexts::get('open_on_server'), 'callback_data' => 'onec_window_'.$batch->id]];
+        }
+
+        return $rows;
     }
 
     /**

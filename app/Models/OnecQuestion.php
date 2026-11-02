@@ -74,15 +74,43 @@ class OnecQuestion extends Model
     }
 
     /**
+     * The owner opened the question on the 1C server instead of having it
+     * analysed: it has a job "window" and none "question", and the owner goes
+     * on in the session on the server.
+     */
+    public function isOpenedOnServer(): bool
+    {
+        return $this->jobs()->where('kind', OnecJob::KIND_WINDOW)->exists()
+            && ! $this->jobs()->where('kind', OnecJob::KIND_QUESTION)->exists();
+    }
+
+    /**
+     * The short id for `claude attach` of the session the question was opened
+     * in on the server, once the worker gave it.
+     */
+    public function attachId(): ?string
+    {
+        return $this->jobs()
+            ->where('kind', OnecJob::KIND_WINDOW)
+            ->whereNotNull('attach_id')
+            ->latest('id')
+            ->value('attach_id');
+    }
+
+    /**
      * A follow-up continues the worker's session of the question: it can wait
-     * for a question still in the queue or in work, not for one that failed or
-     * was cancelled. A closed question has no job for the seconds the model
-     * gives it a title.
+     * for a question still in the queue or in work, not for one that failed,
+     * was cancelled or was opened on the server. A closed question without a
+     * job is one whose job is not created yet.
      */
     public function takesFollowups(): bool
     {
         if ($this->session_id !== null) {
             return true;
+        }
+
+        if ($this->isOpenedOnServer()) {
+            return false;
         }
 
         $job = $this->jobs()->where('kind', OnecJob::KIND_QUESTION)->latest('id')->first();

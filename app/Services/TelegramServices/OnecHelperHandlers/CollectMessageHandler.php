@@ -8,7 +8,8 @@ use App\Services\TelegramServices\BaseHandlers\MessageHandlers\MessageHandlerInt
 /**
  * Any message of the owner but a command: a reply to a message of the bot
  * about a question goes to that question as a follow-up, any other message to
- * the question being gathered in the chat.
+ * the question being gathered in the chat. A question opened on the 1C server
+ * takes no follow-up: the owner goes on in its session there.
  */
 class CollectMessageHandler implements MessageHandlerInterface
 {
@@ -35,6 +36,18 @@ class CollectMessageHandler implements MessageHandlerInterface
         if (is_array($replyTo) && ($replyTo['from']['is_bot'] ?? false)) {
             $question = OnecBotMessage::questionOf($bot->id, $chatId, (int) $replyTo['message_id']);
 
+            if ($question !== null && $question->isOpenedOnServer()) {
+                $attachId = $question->attachId();
+
+                if ($attachId === null) {
+                    $this->answer($telegram, $message, 'opened_on_server_without_id');
+                } else {
+                    $this->answer($telegram, $message, 'opened_on_server', ['id' => e($attachId)], 'HTML');
+                }
+
+                return;
+            }
+
             if ($question === null || ! $this->collector->takesReplyTo($question)) {
                 $this->answer($telegram, $message, $question === null ? 'no_question' : 'no_followup');
 
@@ -57,15 +70,18 @@ class CollectMessageHandler implements MessageHandlerInterface
         }
     }
 
-    private function answer($telegram, $message, string $key): void
+    /**
+     * @param  array<string, string>  $replace
+     */
+    private function answer($telegram, $message, string $key, array $replace = [], ?string $parseMode = null): void
     {
         $telegram->sendMessage([
             'chat_id' => $message->getChat()->getId(),
-            'text' => OnecTexts::get($key),
+            'text' => OnecTexts::get($key, $replace),
             'reply_parameters' => json_encode([
                 'message_id' => $message->getMessageId(),
                 'allow_sending_without_reply' => true,
             ]),
-        ]);
+        ] + ($parseMode === null ? [] : ['parse_mode' => $parseMode]));
     }
 }

@@ -4,14 +4,18 @@ namespace App\Services\TelegramServices\OnecHelperHandlers;
 
 use App\Models\OnecBatch;
 use App\Models\OnecBotMessage;
+use App\Models\OnecJob;
+use App\Models\OnecQuestion;
 use Telegram\Bot\Api;
 
 /**
  * What the 1C helper bot sends about a question after it is gathered: the
- * answer, the text for the boss, a failure. Each goes as a reply to the
- * service message of its question or follow-up, without parse_mode: the
- * texts hold any characters. The bot remembers every message it sends, so
- * that a reply to it finds the question.
+ * answer, the text for the boss, a failure, where the session opened on the
+ * server is. Each goes as a reply to the service message of its question or
+ * follow-up, or, for a job without a batch, to the message its button was
+ * under. Without parse_mode unless asked: the texts of the worker hold any
+ * characters. The bot remembers every message it sends, so that a reply to
+ * it finds the question.
  */
 class OnecReplies
 {
@@ -22,9 +26,36 @@ class OnecReplies
 
     /**
      * @param  list<string|null>  $texts  an empty one is not sent
-     * @param  list<list<array<string, string>>>  $keyboard  inline buttons under the last message sent
+     * @param  list<list<array<string, string>>>  $keyboard  inline buttons under the first message sent
+     */
+    public function about(Api $telegram, OnecJob $job, array $texts, array $keyboard = [], ?string $parseMode = null): void
+    {
+        $replyTo = $job->batch->service_message_id ?? $job->reply_to_message_id;
+
+        $this->sendTo($telegram, $job->question, $job->batch_id, $replyTo, $texts, $keyboard, $parseMode);
+    }
+
+    /**
+     * For the replies queued before they were sent about a job.
+     *
+     * @param  list<string|null>  $texts
+     * @param  list<list<array<string, string>>>  $keyboard
      */
     public function send(Api $telegram, OnecBatch $batch, array $texts, array $keyboard = []): void
+    {
+        $this->sendTo($telegram, $batch->question, $batch->id, $batch->service_message_id, $texts, $keyboard);
+    }
+
+    public function remember(OnecBatch $batch, int $messageId): void
+    {
+        $this->rememberFor($batch->question, $batch->id, $messageId);
+    }
+
+    /**
+     * @param  list<string|null>  $texts
+     * @param  list<list<array<string, string>>>  $keyboard
+     */
+    private function sendTo(Api $telegram, OnecQuestion $question, ?int $batchId, ?int $replyTo, array $texts, array $keyboard = [], ?string $parseMode = null): void
     {
         $parts = [];
         foreach ($texts as $text) {
@@ -32,27 +63,26 @@ class OnecReplies
         }
 
         foreach ($parts as $index => $part) {
-            $withKeyboard = $keyboard !== [] && $index === array_key_last($parts);
+            $withKeyboard = $keyboard !== [] && $index === 0;
 
-            $sent = $telegram->sendMessage([
-                'chat_id' => $batch->question->chat_id,
-                'text' => $part,
-                'reply_parameters' => json_encode([
-                    'message_id' => $batch->service_message_id,
+            $sent = $telegram->sendMessage(['chat_id' => $question->chat_id, 'text' => $part]
+                + ($parseMode === null ? [] : ['parse_mode' => $parseMode])
+                + ($replyTo === null ? [] : ['reply_parameters' => json_encode([
+                    'message_id' => $replyTo,
                     'allow_sending_without_reply' => true,
-                ]),
-            ] + ($withKeyboard ? ['reply_markup' => json_encode(['inline_keyboard' => $keyboard])] : []));
+                ])])
+                + ($withKeyboard ? ['reply_markup' => json_encode(['inline_keyboard' => $keyboard])] : []));
 
-            $this->remember($batch, (int) $sent->getMessageId());
+            $this->rememberFor($question, $batchId, (int) $sent->getMessageId());
         }
     }
 
-    public function remember(OnecBatch $batch, int $messageId): void
+    private function rememberFor(OnecQuestion $question, ?int $batchId, int $messageId): void
     {
         OnecBotMessage::create([
-            'question_id' => $batch->question_id,
-            'batch_id' => $batch->id,
-            'chat_id' => $batch->question->chat_id,
+            'question_id' => $question->id,
+            'batch_id' => $batchId,
+            'chat_id' => $question->chat_id,
             'message_id' => $messageId,
         ]);
     }

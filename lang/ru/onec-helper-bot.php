@@ -15,13 +15,28 @@ return [
     'accepted_followup' => 'Принял уточнение к «:title». :messages, :screens. В очереди на разбор.',
     'in_work' => 'Принял: «:title». :messages, :screens. Разбираю: :note',
     'in_work_followup' => 'Принял уточнение к «:title». :messages, :screens. Разбираю: :note',
+    'accepted_window' => 'Принял: «:title». :messages, :screens. Открываю на сервере.',
+    'in_work_window' => 'Принял: «:title». :messages, :screens. Открываю на сервере: :note',
     'cancelled' => 'Вопрос отменён.',
     'cancelled_followup' => 'Уточнение отменено.',
     'analyze_now' => 'Разобрать сейчас',
+    'open_on_server' => 'Открыть на сервере',
     'cancel' => 'Отменить',
 
     'answer_heading' => 'Разбор:',
+    'continue_on_server' => 'Продолжить на сервере',
+    'opening_on_server' => 'Открываю на сервере',
+    'already_opening' => 'Уже открываю',
+    'no_session' => 'Нет сессии разбора',
+
+    // HTML: the commands are monospace, so that a tap copies them.
+    'window_opened' => "Сессия Claude на сервере запущена, окно открыто.\nПодключиться: <code>claude attach :id</code>\nВсе сессии: <code>claude agents</code>",
+    'window_not_opened' => 'Сессия Claude на сервере запущена, окно открыть не удалось. Подключиться: <code>claude attach :id</code>',
+    'opened_on_server' => 'Этот вопрос открыт на сервере, продолжай там: <code>claude attach :id</code>',
+    'opened_on_server_without_id' => 'Этот вопрос открыт на сервере, продолжай там.',
+
     'failed' => 'Не удалось разобрать: :error',
+    'failed_on_server' => 'Не удалось открыть на сервере: :error',
     'not_taken' => 'Сервер 1С не забирает вопросы уже 5 минут: «:title» в очереди.',
     'no_heartbeat' => 'сервер 1С не сообщал о работе 15 минут, попыток: :attempts',
     'question_not_analyzed' => 'вопрос, к которому это уточнение, не разобран',
@@ -29,6 +44,7 @@ return [
     'retrying' => 'Повторяю',
     'already_retried' => 'Уже повторено',
     'retried' => 'Повторяю разбор.',
+    'retried_on_server' => 'Открываю на сервере ещё раз.',
     'untitled' => 'Вопрос без текста',
 
     'start' => 'Пересылайте сюда вопросы по базе 1С: тексты, скриншоты, файлы, голосовые. Я соберу их в один вопрос и поставлю в очередь на разбор. Чтобы уточнить вопрос, ответьте (reply) на любое моё сообщение о нём.',

@@ -34,10 +34,15 @@ class OnecHelperBotTest extends OnecHelperTestCase
         $this->assertSame(self::OWNER, $this->sent[0]['chat_id']);
         $this->assertSame('Собираю вопрос: 1 сообщение…', $this->sent[0]['text']);
         $this->assertSame(100, json_decode($this->sent[0]['reply_parameters'], true)['message_id']);
-        $this->assertSame([[
-            ['text' => 'Разобрать сейчас', 'callback_data' => 'onec_close_'.$batch->id],
-            ['text' => 'Отменить', 'callback_data' => 'onec_cancel_'.$batch->id],
-        ]], json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard']);
+        $this->assertSame([
+            [
+                ['text' => 'Разобрать сейчас', 'callback_data' => 'onec_close_'.$batch->id],
+                ['text' => 'Отменить', 'callback_data' => 'onec_cancel_'.$batch->id],
+            ],
+            [
+                ['text' => 'Открыть на сервере', 'callback_data' => 'onec_window_'.$batch->id],
+            ],
+        ], json_decode($this->sent[0]['reply_markup'], true)['inline_keyboard']);
         $this->assertSame($this->nextBotMessageId, $batch->service_message_id);
     }
 
