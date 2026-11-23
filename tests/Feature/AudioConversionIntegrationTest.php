@@ -26,8 +26,8 @@ class AudioConversionIntegrationTest extends TestCase
         parent::setUp();
 
         // Check if ffmpeg binary exists
-        if (! file_exists('/usr/bin/ffmpeg')) {
-            $this->markTestSkipped('FFMpeg binary not installed at /usr/bin/ffmpeg');
+        if (! file_exists(config('services.ffmpeg.binaries'))) {
+            $this->markTestSkipped('FFMpeg binary not installed at '.config('services.ffmpeg.binaries'));
         }
 
         Storage::fake('public');

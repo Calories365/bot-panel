@@ -73,4 +73,11 @@ return [
         ],
     ],
 
+    // The image installs ffmpeg in /usr/bin. On a Mac Homebrew puts it in
+    // /opt/homebrew/bin, and /usr/bin cannot be written to, so the path is set here.
+    'ffmpeg' => [
+        'binaries' => env('FFMPEG_BINARIES', '/usr/bin/ffmpeg'),
+        'ffprobe' => env('FFPROBE_BINARIES', '/usr/bin/ffprobe'),
+    ],
+
 ];
